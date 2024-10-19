@@ -1,7 +1,9 @@
 import sqlalchemy
 import sqlalchemy.orm
+from dotenv import load_dotenv
 import os
 
+load_dotenv()
 
 class Base(sqlalchemy.orm.DeclarativeBase):
     pass
@@ -12,8 +14,8 @@ class Tasks(
 ):  # EXAMPLE WITH TASKS <-- Build something similiar to this for the other datatypes
     __tablename__ = "Tasks"
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, unique=True)
-    name = sqlalchemy.Column(sqlalchemy.String)
-    content = sqlalchemy.Column(sqlalchemy.String)
+    name = sqlalchemy.Column(sqlalchemy.String(255))
+    content = sqlalchemy.Column(sqlalchemy.String(255))
 
 
 class Database:
@@ -38,8 +40,9 @@ class Database:
         username = os.getenv("MYSQL_USERNAME")
         password = os.getenv("MYSQL_PASSWORD")
         server = os.getenv("MYSQL_SERVER")
+        dbname = os.getenv("MYSQL_DBNAME")
         self.engine = sqlalchemy.create_engine(
-            f"mysql+pymysql://{username}:{password}@{server}/dbname?charset=utf8mb4",
+            f"mysql+pymysql://{username}:{password}@{server}/{dbname}?charset=utf8mb4",
             echo=False,
             pool_recycle=3600,
         )  # THIS CREATES A MYSQL/MARIADB ENGINE
@@ -50,7 +53,7 @@ class Database:
 
 # DEMO
 if __name__ == "__main__":
-    db = Database()
+    db = Database(production=True)
 
     # INSERTION DEMO
     with sqlalchemy.orm.Session(db.get_engine()) as session:
