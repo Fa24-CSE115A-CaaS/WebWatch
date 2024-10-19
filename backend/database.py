@@ -1,6 +1,6 @@
 from sqlmodel import SQLModel, Session, create_engine, select
-from schemas.task import Task
-import os, json
+from schemas.task import TaskCreate, Task
+import os
 
 
 class Database:
@@ -35,8 +35,8 @@ if __name__ == "__main__":
 
     # INSERTION DEMO
     with db.get_session() as session:
-        new_task = Task(name="DEMO TASK", content="FILLER", url="FILLER", enabled_notification_options=json.dumps(["EMAIL"]))
-        Task.model_validate(new_task)
+        input = TaskCreate(name="DEMO TASK", content="FILLER", url="FILLER", enabled_notification_options=['EMAIL'])
+        new_task = Task.model_validate(input)
         session.add(new_task)
         session.commit()
 
