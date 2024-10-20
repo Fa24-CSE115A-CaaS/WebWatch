@@ -1,4 +1,4 @@
-import os, smtplib, ssl
+import os, smtplib, ssl, requests
 
 def send_mail(subject: str, message: str, recipients: list[str]):
     smtp_server = "smtp.gmail.com"
@@ -10,3 +10,7 @@ def send_mail(subject: str, message: str, recipients: list[str]):
     with smtplib.SMTP_SSL(smtp_server, port=465, context=context) as server:
         server.login(sender_email, password)
         server.sendmail(sender_email, recipients, msg)
+        
+        
+def send_discord_msg(webhook_url, message):
+    requests.post(webhook_url, data={"content": message})
