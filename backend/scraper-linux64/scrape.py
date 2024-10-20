@@ -1,4 +1,5 @@
 import sys
+import os
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -66,6 +67,9 @@ def scrape_all_text(url):
         website_name = urllib.parse.urlparse(url).netloc.replace('.', '_')
         timestamp = int(time.time())
         filename = f"scrapes/{website_name}-{timestamp}.txt"
+
+        if not os.path.exists("scrapes"):
+            os.makedirs("scrapes")
 
         # Save the extracted text content to a file
         with open(filename, 'w', encoding='utf-8') as f:
