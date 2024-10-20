@@ -1,7 +1,9 @@
 from sqlmodel import SQLModel, Session, create_engine, select
 from schemas.task import TaskCreate, Task
+from dotenv import load_dotenv
 import os
 
+load_dotenv()
 
 class Database:
     def __init__(self, production: bool = False):  
@@ -22,7 +24,8 @@ class Database:
         username = os.getenv("MYSQL_USERNAME")
         password = os.getenv("MYSQL_PASSWORD")
         server = os.getenv("MYSQL_SERVER")
-        db_url = f"mysql+pymysql://{username}:{password}@{server}/dbname?charset=utf8mb4",
+        dbname = os.getenv("MYSQL_DBNAME")
+        db_url = f"mysql+pymysql://{username}:{password}@{server}/{dbname}?charset=utf8mb4",
         self.engine = create_engine(db_url, echo=False, pool_recycle=3600)
     
     def get_session(self):
@@ -31,7 +34,7 @@ class Database:
 
 # DEMO
 if __name__ == "__main__":
-    db = Database()
+    db = Database(production=True)
 
     # INSERTION DEMO
     with db.get_session() as session:
