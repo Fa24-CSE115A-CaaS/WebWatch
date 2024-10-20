@@ -162,5 +162,5 @@ cython_debug/
 #.idea/
 
 # Scraper directories
-/backend/scraper_linux64/chrome
-/backend/scraper_linux64/scrapes
+/backend/scraper-linux64/chrome
+/backend/scraper-linux64/scrapes

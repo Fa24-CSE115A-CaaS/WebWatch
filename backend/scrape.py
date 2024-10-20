@@ -18,9 +18,9 @@ class WebScraper:
 
         # Set default paths if not provided
         if webdriver_path is None:
-            webdriver_path = os.path.join(base_dir, "scraper_linux64/chrome/chromedriver-linux64/chromedriver")
+            webdriver_path = os.path.join(base_dir, "scraper-linux64/chrome/chromedriver-linux64/chromedriver")
         if chrome_exe_path is None:
-            chrome_exe_path = os.path.join(base_dir, "scraper_linux64/chrome/chrome-linux64/chrome")
+            chrome_exe_path = os.path.join(base_dir, "scraper-linux64/chrome/chrome-linux64/chrome")
 
         self.webdriver_path = webdriver_path
         self.chrome_exe_path = chrome_exe_path
@@ -99,10 +99,10 @@ class WebScraper:
         # Generate filename using website name and timestamp
         website_name = urllib.parse.urlparse(url).netloc.replace('.', '_')
         timestamp = int(time.time())
-        filename = f"scraper_linux64/scrapes/{website_name}-{timestamp}.txt"
+        filename = f"scraper-linux64/scrapes/{website_name}-{timestamp}.txt"
 
-        if not os.path.exists("scraper_linux64/scrapes"):
-            os.makedirs("scraper_linux64/scrapes")
+        if not os.path.exists("scraper-linux64/scrapes"):
+            os.makedirs("scraper-linux64/scrapes")
 
         # Save the extracted text content to a file
         with open(filename, 'w', encoding='utf-8') as f:
