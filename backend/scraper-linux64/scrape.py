@@ -9,8 +9,8 @@ import time
 import urllib.parse
 
 # Configure paths
-webdriver_path = 'chromedriver.exe'  # Path to your chromedriver.exe
-chrome_exe_path = r'chrome-win64.old\\chrome.exe'  # Path to your chrome.exe
+webdriver_path = "chrome/chromedriver-linux64/chromedriver"  # Path to your chromedriver.exe
+chrome_exe_path = "chrome/chrome-linux64/chrome"  # Path to your chrome.exe
 
 # Initialize ChromeOptions
 options = webdriver.ChromeOptions()
@@ -25,6 +25,7 @@ options.add_argument(f"user-agent={natural_user_agent}")
 
 # Add other necessary Chrome options
 options.add_argument("--no-sandbox")
+options.add_argument("--headless")
 options.add_argument("--disable-dev-shm-usage")
 options.add_argument("--disable-gpu")
 options.add_argument("--disable-software-rasterizer")
@@ -64,7 +65,7 @@ def scrape_all_text(url):
         # Generate filename using website name and timestamp
         website_name = urllib.parse.urlparse(url).netloc.replace('.', '_')
         timestamp = int(time.time())
-        filename = f"{website_name}-{timestamp}.txt"
+        filename = f"scrapes/{website_name}-{timestamp}.txt"
 
         # Save the extracted text content to a file
         with open(filename, 'w', encoding='utf-8') as f:
