@@ -1,5 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from dotenv import load_dotenv
+from schemas.task import Task, TaskCreate, TaskGet, TaskUpdate
+from database import Database
 
 load_dotenv()
 
@@ -18,19 +20,32 @@ async def tasks_status(session_token: str, task_id: str | None = None):
     return {"Tasks": []}
 
 
-@app.get("/tasks/create")
-async def tasks_create(session_token: str):
-    # For the initialization of new tasks
-    # Should be followed with tasks_update
-    return {"Task_Id": "PLACEHOLDER", "Status": 0}
+@app.post("/tasks", response_model=TaskGet, status_code=201)
+async def tasks_create(body: TaskCreate, session_token: str):
+    # TODO: Relate User with task
+    db = Database()
+    validated_task = Task.model_validate(body)
+    with db.get_session() as session:
+        session.add(validated_task)
+        session.commit()
+        session.refresh(validated_task)
+    return validated_task
 
 
-@app.get("/tasks/update")
-async def tasks_update(session_token: str, task_id: int, contents: str | None = None):
-    # If contents is empty then delete the task
-    # Parse contents with json for things like when to run, what to watch, etc.
-    return {"Status": 0}
-
+@app.put("/tasks/{task_id}", response_model=TaskGet)
+async def tasks_update(task_id: int, body: TaskUpdate, session_token: str):
+    db = Database()
+    with db.get_session() as session:
+        task = session.get(Task, task_id)
+        if not task:
+            raise HTTPException(status_code=404, detail="Task not found")
+        update_data = body.model_dump(exclude_unset=True)
+        task.sqlmodel_update(update_data)
+        session.add(task)
+        session.commit()
+        session.refresh(task)
+    return task
+        
 
 @app.get("/user/authentication")
 async def user_authentication(hash: str):

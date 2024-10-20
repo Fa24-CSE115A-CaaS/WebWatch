@@ -1,21 +1,20 @@
-from sqlmodel import SQLModel, Field
+from sqlalchemy import Column
+from typing import List, Literal
+from sqlalchemy.types import JSON
 from pydantic import field_validator
-from typing import Literal
-import json
+from sqlmodel import SQLModel, Field
 
 
-NotificationOptions = list[Literal['EMAIL', 'DISCORD', 'SLACK']]
+NotificationOptions = List[Literal['EMAIL', 'DISCORD', 'SLACK']]
 
 class TaskBase(SQLModel):
     name: str = Field(max_length=50)
-    content: str | None
+    content: str | None = None
     url: str
-    discord_url: str | None
+    discord_url: str | None = None
+    enabled_notification_options: NotificationOptions = Field(default=['EMAIL'], sa_column=Column(JSON()))
     
-class TaskCreate(TaskBase):
-    enabled_notification_options: NotificationOptions = []
-    
-    @field_validator('enabled_notification_options', mode='before')
+    @field_validator('enabled_notification_options')
     @classmethod
     def notification_choice_validator(cls, value: NotificationOptions):
         unique = set()
@@ -25,13 +24,17 @@ class TaskCreate(TaskBase):
             unique.add(option)
         return value
     
-    # Transform to serialized json 
-    @field_validator('enabled_notification_options', mode='after')
-    @classmethod
-    def serialize_list(cls, value: NotificationOptions):
-        return json.dumps(value)
-
 class Task(TaskBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    enabled_notification_options: str = "[]"
+    
+class TaskGet(TaskBase):
+    id: int
+    
+class TaskCreate(TaskBase):
+    pass
+    
+class TaskUpdate(TaskBase):
+    name: str | None = Field(default=None, max_length=50)
+    url: str | None = None
+    enabled_notification_options: NotificationOptions | None = Field(default=None, sa_column=Column(JSON()))
         
