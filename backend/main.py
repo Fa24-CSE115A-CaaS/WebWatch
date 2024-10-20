@@ -2,11 +2,6 @@ import time
 import difflib
 from scrape import WebScraper
 
-
-    # CLI Setup
-    # Check # of arguments and if a URL is provided as an argument
-    # Example: python3 main.py https://simonzhao.com
-
 def compare_texts(text1, text2):
     diff = difflib.unified_diff(
         text1.splitlines(), 
@@ -20,6 +15,8 @@ def compare_texts(text1, text2):
 if __name__ == "__main__":
 
     # TODO: Define CLI (use argparse library)
+    # Check # of arguments and if a URL is provided as an argument
+    # Example: python3 main.py https://simonzhao.com
 
     DELAY = 2 # in seconds
 
