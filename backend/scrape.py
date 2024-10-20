@@ -9,6 +9,8 @@ from bs4 import BeautifulSoup
 import time
 import urllib.parse
 
+# TODO: Use logging instead of print statements for better debugging
+
 class WebScraper:
     def __init__(self, webdriver_path=None, chrome_exe_path=None):
         # Determine the base directory of the script
@@ -16,13 +18,21 @@ class WebScraper:
 
         # Set default paths if not provided
         if webdriver_path is None:
-            webdriver_path = os.path.join(base_dir, "chrome/chromedriver-linux64/chromedriver")
+            webdriver_path = os.path.join(base_dir, "scraper_linux64/chrome/chromedriver-linux64/chromedriver")
         if chrome_exe_path is None:
-            chrome_exe_path = os.path.join(base_dir, "chrome/chrome-linux64/chrome")
+            chrome_exe_path = os.path.join(base_dir, "scraper_linux64/chrome/chrome-linux64/chrome")
 
         self.webdriver_path = webdriver_path
         self.chrome_exe_path = chrome_exe_path
+        self.driver = None
+
+    def __enter__(self):
         self.driver = self._initialize_driver()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.driver:
+            self.driver.quit()
 
     def _initialize_driver(self):
         # Initialize ChromeOptions
@@ -77,22 +87,38 @@ class WebScraper:
 
             # Extract all visible text from the page
             page_text = soup.get_text(separator='\n', strip=True)  # Separate text by new lines
+            return page_text
 
-            # Generate filename using website name and timestamp
-            website_name = urllib.parse.urlparse(url).netloc.replace('.', '_')
-            timestamp = int(time.time())
-            filename = f"scraper_linux64/scrapes/{website_name}-{timestamp}.txt"
-
-            if not os.path.exists("scraper_linux64/scrapes"):
-                os.makedirs("scraper_linux64/scrapes")
-
-            # Save the extracted text content to a file
-            with open(filename, 'w', encoding='utf-8') as f:
-                f.write(page_text)
-
-            print(f"Saved all visible text content to: {filename}")
         except Exception as e:
             print(f"An error occurred: {e}")
-        finally:
-            # Close the WebDriver
-            self.driver.quit()
+            return None
+
+    def scrape_to_file(self, url):
+        page_text = self.scrape_all_text(url)
+
+        # Generate filename using website name and timestamp
+        website_name = urllib.parse.urlparse(url).netloc.replace('.', '_')
+        timestamp = int(time.time())
+        filename = f"scraper_linux64/scrapes/{website_name}-{timestamp}.txt"
+
+        if not os.path.exists("scraper_linux64/scrapes"):
+            os.makedirs("scraper_linux64/scrapes")
+
+        # Save the extracted text content to a file
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(page_text)
+
+        print(f"Saved all visible text content to: {filename}")
+
+# Main function to handle URL input or argument
+if __name__ == "__main__":
+    # Check if a URL is provided as an argument
+    # Example: python scrape.py https://simonzhao.com
+    if len(sys.argv) > 1:
+        url = sys.argv[1]
+    else:
+        # If no URL is provided, prompt the user to enter a URL
+        url = input("Please enter the URL: ")
+
+    with WebScraper() as scraper:
+        scraper.scrape_to_file(url)
