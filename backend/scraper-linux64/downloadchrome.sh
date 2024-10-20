@@ -1,6 +1,5 @@
 #!/bin/bash
 
-echo "hello world"
 # Create the chrome directory if it doesn't exist
 mkdir -p chrome
 
