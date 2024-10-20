@@ -9,7 +9,7 @@ import time
 import urllib.parse
 
 # Configure paths
-webdriver_path = 'chromedriver'  # Path to your chromedriver.exe
+webdriver_path = 'chrome\\chromedriver'  # Path to your chromedriver.exe
 chrome_exe_path = r'chrome\\chrome'  # Path to your chrome.exe
 
 # Initialize ChromeOptions
