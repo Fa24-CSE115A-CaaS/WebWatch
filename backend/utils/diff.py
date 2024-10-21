@@ -3,7 +3,6 @@ import glob
 from os import path
 
 def get_latest_file(directory, website_name):
-
     files = glob.glob(f"{directory}/{website_name}-*.txt")
     if not files:
         return None
@@ -11,7 +10,6 @@ def get_latest_file(directory, website_name):
 
 
 def diffFiles(oldVersionFile, newVersionFile):
-    
     try:
         with open(oldVersionFile, 'r') as file1, open(newVersionFile, 'r') as file2:
             oldVersion = file1.readlines()  
@@ -30,7 +28,7 @@ def diffFiles(oldVersionFile, newVersionFile):
             print("No differences found")
             return False
         
-
+    
     except FileNotFoundError as fnf_error:
         print(f"File not found: {fnf_error}")
         return False
@@ -40,3 +38,5 @@ def diffFiles(oldVersionFile, newVersionFile):
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
         return False
+
+
