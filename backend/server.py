@@ -2,6 +2,10 @@ from fastapi import FastAPI, HTTPException
 from dotenv import load_dotenv
 from schemas.task import Task, TaskCreate, TaskGet, TaskUpdate
 from database import Database
+from sqlmodel import select
+from backend.utils.diff import diffFiles
+from utils.notifications import send_mail
+from utils.diff import get_latest_file, diffFiles
 
 load_dotenv()
 
@@ -63,3 +67,33 @@ async def user_register(email: str, hash: str):
 async def user_update(hash: str, contents: str | None = None):
     # For changing passwords, updating emails, deleting accounts, etc.
     return {"Session Token": "PLACEHOLDER", "Status": 0}
+
+
+@app.post("/tasks/[placehold]")  
+async def scrape_and_check(url: str, session_token: str):
+    db = Database()
+    oldFile = None  
+    with db.get_session() as session:
+        # Replace with actual logic to fetch the old content
+        task = session.exec(select(Task).where(Task.url == url)).first()
+
+    
+    scrape(url) # TODO: SCRAPE
+    newFile = get_latest_file('scraper/scrapes', url)
+    if not newFile: 
+        raise HTTPException(status_code=404, detail="No new file found.")
+
+    if diffFiles(oldFile, newFile): 
+        # If changes are detected, send an email notification
+        try:
+            recipient_email = "user@example.com"  # TOdo: GET email from db
+            send_mail(
+                subject="Website Content Updated",
+                message=f"The website '{url}' has been updated.",
+                recipients=[recipient_email]
+            )
+            return {"status": "Changes detected and email sent!"}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
+    else:
+        return {"status": "No changes detected."}
