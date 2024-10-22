@@ -77,6 +77,20 @@ async def tasks_update(
     return task
 
 
+@app.put("/tasks/remove", response_model=TaskGet)
+async def tasks_remove(task_id: int, session_token: str | None = None):
+    with db.get_session() as session:
+        task = session.get(Task, task_id)
+        if not task:
+            raise HTTPException(status_code=404, detail="Task not found")
+        session.delete(task)
+        session.commit()
+
+    await scheduler.remove_task(task)
+
+    return task
+
+
 @app.get("/user/authentication")
 async def user_authentication(hash: str):
     # For the authentication of existing accounts
