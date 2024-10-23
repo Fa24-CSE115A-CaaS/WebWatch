@@ -1,34 +1,26 @@
 import asyncio
 import logging
+from schemas.task import Task, TaskCreate, TaskGet, TaskUpdate
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
 
-class task_obj:
-    def __init__(self, task_id: int, content: str):
-        self.task_id = task_id
-        self.content = content  # CONTENT FORMATTING IS SUBJECTIVE TO CHANGE
-
-    def get_id(self):
-        # Returns the task_id
-        return self.task_id
-
-    def proc_init(self):
-        # Initializes the async function in the new process
-        return asyncio.run(self.run())
-
-    async def run(self):
-        # PLACEHOLDER
-        await asyncio.sleep(1)
-        print(self.task_id)
-
-
-class scheduler_obj:
+class Scheduler:
     def __init__(self):
         self.executor = ProcessPoolExecutor()
         self.loop = asyncio.new_event_loop()
         self.running_tasks = dict()
 
-    async def add_task(self, task: task_obj):
+    async def shutdown(self):
+        for _, task in self.running_tasks:
+            task.cancel()
+
+    async def status(self, task: Task) -> str:
+        if task.get_id() in self.running_tasks:
+            return f"{task.get_id()} is running"
+        else:
+            return f"{task.get_id()} is not running"
+
+    async def add_task(self, task: Task):
         # Spawns task in a new process
         if self.running_tasks.get(task.get_id()):
             logging.warning(f"{task.get_id()} is already running")
@@ -38,16 +30,16 @@ class scheduler_obj:
             )
             logging.info(f"{task.get_id()} is now running")
 
-    async def remove_task(self, task: task_obj):
+    async def remove_task(self, task: Task):
         # Kills task based on id passed
         async_task = self.running_tasks.get(task.get_id())
         if async_task:
-            task.cancel()
+            async_task.cancel()
             logging.info(f"{task.get_id()} is now stopped")
         else:
             logging.warning(f"{task.get_id()} is already stopped")
 
-    async def restart_task(self, task: task_obj):
+    async def restart_task(self, task: Task):
         # Mapping to stopping then starting
         self.remove_task(task)
         self.add_task(task)
@@ -55,7 +47,7 @@ class scheduler_obj:
 
 # # TESTING CODE
 # async def main():
-#     scheduler = scheduler_obj()
+#     scheduler = Scheduler()
 #     res = [scheduler.add_task(task_obj(i, "FILLER")) for i in range(0, 128)]
 
 #     await asyncio.gather(*res)
