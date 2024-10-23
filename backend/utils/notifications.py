@@ -30,6 +30,7 @@ def send_mail(subject: str, message: str, recipients: list[str]):
     with smtplib.SMTP_SSL(smtp_server, port=smtp_port, context=context) as server:
         server.login(username, password)
         server.sendmail(sender_email, recipientsString, msg.as_string())
+        server.quit()
         
         
 def send_discord_msg(webhook_url, message):
