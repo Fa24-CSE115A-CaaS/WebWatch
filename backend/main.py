@@ -20,7 +20,7 @@ def compare_texts(text1, text2):
 
 DELAY = 2  # in seconds
 
-EMAIL_TO = "jordan.nguy@gmail.com"
+EMAIL_TO = "ccandau@ucsc.edu"
 URL = "https://simonzhao.com"
 
 async def main():
@@ -31,7 +31,7 @@ async def main():
 
             await asyncio.sleep(DELAY)
 
-            second = scraper.scrape_all_text("https://drowningwhale.com") # CHANGE TO URL VARIABLE
+            second = scraper.scrape_all_text("https://example.com") # CHANGE TO URL VARIABLE
             print("Second scrape completed.")
 
             if first is None or second is None:
