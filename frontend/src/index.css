@@ -28,3 +28,7 @@
     --text-contrast: #EEEEEE;
   }
 }
+
+body {
+  background-color: var(--background);
+}
