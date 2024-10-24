@@ -1,3 +1,30 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --background: #242424;
+  --primary: #444444;
+  --secondary: #363636;
+  --accent: #C0B5FF;
+  --accent-hover: #9890C7;
+  --border: #5D585F;
+  --error: #E45050;
+  --info: #ABCBE9;
+  --text: #EEEEEE;
+  --text-contrast: #222222;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not(:has(body.dark)) {
+    --background: #F0F0F0;
+    --primary: #F7F7F7;
+    --secondary: #E0E0E0;
+    --accent: #7564D1;
+    --accent-hover: #504492;
+    --border: #CDCDCD;
+    --info: #5697D4;
+    --text: #222222;
+    --text-contrast: #EEEEEE;
+  }
+}
