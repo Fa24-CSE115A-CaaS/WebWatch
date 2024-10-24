@@ -25,7 +25,7 @@ class Database:
         password = os.getenv("MYSQL_PASSWORD")
         server = os.getenv("MYSQL_SERVER")
         dbname = os.getenv("MYSQL_DBNAME")
-        db_url = f"mysql+pymysql://{username}:{password}@{server}/{dbname}?charset=utf8mb4",
+        db_url = f"mysql+pymysql://{username}:{password}@{server}/{dbname}?charset=utf8mb4"
         self.engine = create_engine(db_url, echo=False, pool_recycle=3600)
     
     def get_session(self):
