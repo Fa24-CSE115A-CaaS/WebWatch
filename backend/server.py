@@ -10,7 +10,7 @@ from scheduler import Scheduler
 load_dotenv()
 
 scheduler = Scheduler()
-db = Database()
+db = Database(production=True)
 
 
 @asynccontextmanager

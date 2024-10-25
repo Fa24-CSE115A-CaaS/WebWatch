@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ -d "chrome" ]; then
+  echo "The 'chrome' directory already exists; no need to download."
+  exit 0
+fi
+
 # Create the chrome directory if it doesn't exist
 mkdir -p chrome
 
