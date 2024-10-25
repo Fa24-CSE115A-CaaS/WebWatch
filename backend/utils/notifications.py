@@ -26,8 +26,9 @@ def send_mail(subject: str, message: str, recipients: list[str]):
 
     msg.attach(MIMEText(message, 'plain'))
 
-    context = ssl.create_default_context()
-    with smtplib.SMTP_SSL(smtp_server, port=smtp_port, context=context) as server:
+    with smtplib.SMTP(smtp_server, port=smtp_port) as server:
+        server.ehlo()
+        server.starttls(context=ssl.create_default_context())
         server.login(username, password)
         server.sendmail(sender_email, recipientsString, msg.as_string())
         server.quit()
