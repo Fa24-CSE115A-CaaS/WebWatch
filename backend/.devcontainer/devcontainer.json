@@ -3,5 +3,5 @@
     "build": {
         "dockerfile": "Dockerfile"
     },
-    "postCreateCommand": "./.devcontainer/post-create-commands.sh"
+    "postCreateCommand": "bash ./.devcontainer/post-create-commands.sh"
 }
