@@ -164,3 +164,5 @@ cython_debug/
 # Scraper directories
 /backend/scraper-linux64/chrome
 /backend/scraper-linux64/scrapes
+
+node_modules
