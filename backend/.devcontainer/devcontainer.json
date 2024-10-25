@@ -1,0 +1,7 @@
+{
+    "name": "WebWatch Devcontainer",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "postCreateCommand": "./.devcontainer/post-create-commands.sh"
+}

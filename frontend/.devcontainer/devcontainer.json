@@ -1,0 +1,5 @@
+{
+    "name": "WebWatch Devcontainer",
+    "image": "mcr.microsoft.com/devcontainers/typescript-node:22-bookworm",
+    "postCreateCommand": "npm install && npm run dev"
+}

@@ -1,7 +1,0 @@
-{
-    "name": "WebWatch Devcontainer",
-    "build": {
-        "dockerfile": "Dockerfile",
-		"context": ".."
-    }
-}
