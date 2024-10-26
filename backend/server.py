@@ -95,7 +95,7 @@ async def users_delete(user_id: int):
 
 # Task Endpoints
 
-@app.post("/tasks/create", response_model=TaskGet, status_code=201)
+@app.post("/tasks", response_model=TaskGet, status_code=201)
 async def tasks_create(task_create: TaskCreate):
     # Validate user_id
     with db.get_session() as session:
@@ -117,7 +117,7 @@ async def tasks_list():
         raise HTTPException(status_code=404, detail="No tasks found")
     return tasks
 
-@app.put("/tasks/update/{task_id}", response_model=TaskGet)
+@app.put("/tasks/{task_id}", response_model=TaskGet)
 async def tasks_update(task_id: int, task_update: TaskUpdate):
     # Update task details
     with db.get_session() as session:
@@ -132,7 +132,7 @@ async def tasks_update(task_id: int, task_update: TaskUpdate):
         session.refresh(task)
     return task
 
-@app.delete("/tasks/delete/{task_id}", response_model=TaskGet)
+@app.delete("/tasks/{task_id}", response_model=TaskGet)
 async def tasks_delete(task_id: int):
     # Delete a task
     with db.get_session() as session:
