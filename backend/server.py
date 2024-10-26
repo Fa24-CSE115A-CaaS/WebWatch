@@ -127,6 +127,9 @@ async def tasks_update(task_id: int, task_update: TaskUpdate):
         if not task:
             raise HTTPException(status_code=404, detail="Task not found")
         update_data = task_update.dict(exclude_unset=True)
+        # Exclude user_id from being updated
+        if "user_id" in update_data:
+            del update_data["user_id"]
         for key, value in update_data.items():
             setattr(task, key, value)
         session.add(task)
