@@ -131,6 +131,7 @@ async def tasks_update(task_id: int, task_update: TaskUpdate):
         if not task:
             raise HTTPException(status_code=404, detail="Task not found")
         update_data = task_update.dict(exclude_unset=True)
+        # TODO: Find a better way to exclude user_id... const/static values in Model/Schema??
         # Exclude user_id from being updated
         if "user_id" in update_data:
             del update_data["user_id"]
