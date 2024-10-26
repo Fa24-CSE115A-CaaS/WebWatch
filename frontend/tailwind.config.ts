@@ -4,6 +4,9 @@ export default {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
+      screens: {
+        xxl: "1600px",
+      },
       fontFamily: {
         main: ["Space Grotesk", "Roboto", "sans-serif"],
       },
