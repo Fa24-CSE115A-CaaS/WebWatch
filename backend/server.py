@@ -38,9 +38,27 @@ async def root():
 
 # User Endpoints
 
-@app.post("/users/create", response_model=UserGet, status_code=201)
+# List all users
+@app.get("/users", response_model=List[UserGet])
+async def users_list():
+    with db.get_session() as session:
+        users = session.exec(select(User)).all()
+    if not users:
+        raise HTTPException(status_code=404, detail="No users found")
+    return users
+
+# Get a user by id
+@app.get("/users/{user_id}", response_model=UserGet)
+async def users_get(user_id: int):
+    with db.get_session() as session:
+        user = session.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+# Create a new user
+@app.post("/users", response_model=UserGet, status_code=201)
 async def users_create(user_create: UserCreate):
-    # Create a new user
     with db.get_session() as session:
         user = User(email=user_create.email, password=user_create.password)
         session.add(user)
@@ -48,18 +66,9 @@ async def users_create(user_create: UserCreate):
         session.refresh(user)
     return user
 
-@app.get("/users", response_model=List[UserGet])
-async def users_list():
-    # List all users
-    with db.get_session() as session:
-        users = session.exec(select(User)).all()
-    if not users:
-        raise HTTPException(status_code=404, detail="No users found")
-    return users
-
-@app.put("/users/update/{user_id}", response_model=UserGet)
+# Update user details by id
+@app.put("/users/{user_id}", response_model=UserGet)
 async def users_update(user_id: int, user_update: UserUpdate):
-    # Update user details
     with db.get_session() as session:
         user = session.get(User, user_id)
         if not user:
@@ -72,7 +81,8 @@ async def users_update(user_id: int, user_update: UserUpdate):
         session.refresh(user)
     return user
 
-@app.delete("/users/delete/{user_id}", response_model=UserGet)
+# Delete a user by id
+@app.delete("/users/{user_id}", response_model=UserGet)
 async def users_delete(user_id: int):
     # Delete a user
     with db.get_session() as session:
