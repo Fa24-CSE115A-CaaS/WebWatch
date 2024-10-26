@@ -82,14 +82,18 @@ async def users_update(user_id: int, user_update: UserUpdate):
     return user
 
 # Delete a user by id
-# TODO: Delete all tasks associated with the user
 @app.delete("/users/{user_id}", response_model=UserGet)
 async def users_delete(user_id: int):
-    # Delete a user
     with db.get_session() as session:
         user = session.get(User, user_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
+        
+        # Delete all tasks associated with the user
+        tasks = session.exec(select(Task).where(Task.user_id == user_id)).all()
+        for task in tasks:
+            session.delete(task)
+        
         session.delete(user)
         session.commit()
     return user
