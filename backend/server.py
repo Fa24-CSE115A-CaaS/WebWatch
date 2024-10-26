@@ -5,7 +5,7 @@ from sqlmodel import SQLModel, select
 import asyncio
 from typing import List
 from schemas.task import Task, TaskCreate, TaskGet, TaskUpdate
-from schemas.user import User, UserCreate, UserGet, UserUpdate  # Import schemas
+from schemas.user import User, UserCreate, UserGet, UserUpdate
 from database import Database
 from scheduler import Scheduler
 
@@ -38,6 +38,16 @@ async def root():
 
 # User Endpoints
 
+# Create a new user
+@app.post("/users", response_model=UserGet, status_code=201)
+async def users_create(user_create: UserCreate):
+    with db.get_session() as session:
+        user = User(email=user_create.email, password=user_create.password)
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+    return user
+
 # List all users
 @app.get("/users", response_model=List[UserGet])
 async def users_list():
@@ -56,16 +66,6 @@ async def users_get(user_id: int):
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-# Create a new user
-@app.post("/users", response_model=UserGet, status_code=201)
-async def users_create(user_create: UserCreate):
-    with db.get_session() as session:
-        user = User(email=user_create.email, password=user_create.password)
-        session.add(user)
-        session.commit()
-        session.refresh(user)
-    return user
-
 # Update user details by id
 @app.put("/users/{user_id}", response_model=UserGet)
 async def users_update(user_id: int, user_update: UserUpdate):
@@ -82,6 +82,7 @@ async def users_update(user_id: int, user_update: UserUpdate):
     return user
 
 # Delete a user by id
+# TODO: Delete all tasks associated with the user
 @app.delete("/users/{user_id}", response_model=UserGet)
 async def users_delete(user_id: int):
     # Delete a user
@@ -95,6 +96,7 @@ async def users_delete(user_id: int):
 
 # Task Endpoints
 
+# Create a new task
 @app.post("/tasks", response_model=TaskGet, status_code=201)
 async def tasks_create(task_create: TaskCreate):
     # Validate user_id
@@ -108,18 +110,18 @@ async def tasks_create(task_create: TaskCreate):
         session.refresh(task)
     return task
 
+# List all tasks
 @app.get("/tasks", response_model=List[TaskGet])
 async def tasks_list():
-    # List all tasks
     with db.get_session() as session:
         tasks = session.exec(select(Task)).all()
     if not tasks:
         raise HTTPException(status_code=404, detail="No tasks found")
     return tasks
 
+# Update task details by id
 @app.put("/tasks/{task_id}", response_model=TaskGet)
 async def tasks_update(task_id: int, task_update: TaskUpdate):
-    # Update task details
     with db.get_session() as session:
         task = session.get(Task, task_id)
         if not task:
@@ -132,6 +134,7 @@ async def tasks_update(task_id: int, task_update: TaskUpdate):
         session.refresh(task)
     return task
 
+# Delete task by id
 @app.delete("/tasks/{task_id}", response_model=TaskGet)
 async def tasks_delete(task_id: int):
     # Delete a task
