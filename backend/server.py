@@ -5,21 +5,20 @@ from schemas.task import Task, TaskCreate, TaskGet, TaskUpdate
 from schemas.User import userCreate, userOutput, userRequest
 from schemas.token import Token
 from sqlmodel import select, Session
-import asyncio
 from database import Database
 from scheduler import Scheduler
 from utils.hashing import get_hashed_password, verify_password
-import models
-import os
 from starlette.status import HTTP_404_NOT_FOUND
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from auth import create_access_token, authenticate_user, verify_password, create_refresh_token
 from starlette import status
-import logging
+import models
+import os
+import asyncio
 
-load_dotenv()
 scheduler = Scheduler()
 db = Database(production=True)
+load_dotenv()
 
 # Dependency
 def get_db() -> Session:
@@ -38,9 +37,7 @@ async def lifespan(app: FastAPI):
     # ON SHUTDOWN
     await scheduler.shutdown()
 
-
 app = FastAPI(lifespan=lifespan)
-
 
 @app.get("/")
 async def root():
@@ -102,7 +99,6 @@ async def tasks_remove(task_id: int, session_token: str | None = None):
     await scheduler.remove_task(task)
 
     return task
-
 
 @app.get("/user/authentication")
 async def user_authentication(hash: str):
