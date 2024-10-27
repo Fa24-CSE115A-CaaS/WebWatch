@@ -6,29 +6,39 @@
   --background: #242424;
   --primary: #444444;
   --secondary: #363636;
-  --accent: #C0B5FF;
-  --accent-hover: #9890C7;
-  --border: #5D585F;
-  --error: #E45050;
-  --info: #ABCBE9;
-  --text: #EEEEEE;
+  --accent: #c0b5ff;
+  --accent-hover: #9890c7;
+  --border: #5d585f;
+  --error: #e45050;
+  --info: #abcbe9;
+  --text: #eeeeee;
   --text-contrast: #222222;
 }
 
 @media (prefers-color-scheme: light) {
   :root:not(:has(body.dark)) {
-    --background: #F0F0F0;
-    --primary: #F7F7F7;
-    --secondary: #E0E0E0;
-    --accent: #7564D1;
+    --background: #f0f0f0;
+    --primary: #f7f7f7;
+    --secondary: #e0e0e0;
+    --accent: #7564d1;
     --accent-hover: #504492;
-    --border: #CDCDCD;
-    --info: #5697D4;
+    --border: #cdcdcd;
+    --info: #5697d4;
     --text: #222222;
-    --text-contrast: #EEEEEE;
+    --text-contrast: #eeeeee;
   }
 }
 
 body {
   background-color: var(--background);
+}
+
+.btn {
+  @apply rounded px-4 py-2 font-bold;
+}
+.btn-blue {
+  @apply bg-slate-500 text-white;
+}
+.btn-blue:hover {
+  @apply bg-slate-700;
 }
