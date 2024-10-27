@@ -49,13 +49,13 @@ async def users_create(user_create: UserCreate):
     return user
 
 # List all users
-@app.get("/users", response_model=List[UserGet])
-async def users_list():
-    with db.get_session() as session:
-        users = session.exec(select(User)).all()
-    if not users:
-        raise HTTPException(status_code=404, detail="No users found")
-    return users
+# @app.get("/users", response_model=List[UserGet])
+# async def users_list():
+#     with db.get_session() as session:
+#         users = session.exec(select(User)).all()
+#     if not users:
+#         raise HTTPException(status_code=404, detail="No users found")
+#     return users
 
 # Get a user by id
 @app.get("/users/{user_id}", response_model=UserGet)
