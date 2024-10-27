@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from dotenv import load_dotenv
 from sqlmodel import SQLModel, select
 import asyncio
@@ -13,9 +13,6 @@ load_dotenv()
 
 scheduler = Scheduler()
 db = Database(production=False)
-
-SQLModel.metadata.create_all(db.engine)
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -96,7 +93,7 @@ async def users_delete(user_id: int):
 
         session.delete(user)
         session.commit()
-    return user
+    return Response(status_code=204)
 
 # Task Endpoints
 
@@ -152,4 +149,4 @@ async def tasks_delete(task_id: int):
             raise HTTPException(status_code=404, detail="Task not found")
         session.delete(task)
         session.commit()
-    return task
+    return Response(status_code=204)
