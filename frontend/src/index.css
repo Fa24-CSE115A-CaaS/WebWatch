@@ -34,11 +34,5 @@ body {
 }
 
 .btn {
-  @apply rounded px-4 py-2 font-bold;
-}
-.btn-blue {
-  @apply bg-slate-500 text-white;
-}
-.btn-blue:hover {
-  @apply bg-slate-700;
+  @apply rounded border-border px-4 py-2 font-bold;
 }

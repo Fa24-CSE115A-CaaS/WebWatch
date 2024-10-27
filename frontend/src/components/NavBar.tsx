@@ -6,7 +6,7 @@ const NavBar = () => {
   const handleProfileDropdown = () =>
     set_show_profile_dropdown(!show_profile_dropdown);
   return (
-    <nav className="dark: bg-gray-50 text-white dark:bg-gray-800">
+    <nav className="bg-secondary text-text">
       <div className="px-2 sm:px-6 lg:px-8">
         <div className="item-center relative flex h-16 justify-between">
           <div className="absolute inset-y-0 left-0 flex items-center">
@@ -61,9 +61,8 @@ const NavBar = () => {
       </div>
       {show_profile_dropdown && (
         <div
-          className="absolute right-0 z-10 mr-4 mt-4 w-fit origin-top-right rounded-md bg-white p-2
-            text-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none
-            dark:bg-slate-800"
+          className="text-contrast absolute right-0 z-10 mr-4 mt-4 w-fit origin-top-right rounded-md
+            bg-secondary p-2 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
           role="menu"
           aria-orientation="vertical"
           aria-labelledby="menu-button"
@@ -73,7 +72,8 @@ const NavBar = () => {
           <div className="" role="none">
             <a
               href="/settings"
-              className="btn btn-blue mb-2 block w-full px-4 py-2 text-sm"
+              className="btn mb-2 block w-full bg-accent px-4 py-2 text-sm text-text-contrast
+                hover:bg-accent-hover"
               role="menuitem"
               tabIndex={-1}
               id="menu-item-0"
@@ -81,7 +81,8 @@ const NavBar = () => {
               Manage your WebWatch account
             </a>
             <button
-              className="btn btn-blue mb-2 block w-full px-4 py-2 text-sm"
+              className="btn mb-2 block w-full bg-accent px-4 py-2 text-sm text-text-contrast
+                hover:bg-accent-hover"
               onClick={
                 // TO DO
                 // handleThemeChange
@@ -93,7 +94,8 @@ const NavBar = () => {
             <form method="POST" action="#" role="none">
               <button
                 type="submit"
-                className="btn btn-blue block w-full px-4 py-2 text-sm"
+                className="btn block w-full bg-accent px-4 py-2 text-sm text-text-contrast
+                  hover:bg-accent-hover"
                 role="menuitem"
                 tabIndex={-1}
                 id="menu-item-3"

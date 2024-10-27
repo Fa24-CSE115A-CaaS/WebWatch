@@ -1,8 +1,8 @@
 const Settings = () => {
   return (
-    <div className="w-fill min-h-screen dark:bg-gray-500 dark:text-white">
+    <div className="w-fill min-h-screen text-text dark:bg-primary">
       <div className="flex">
-        <div className="min-h-screen w-fit bg-slate-800 px-14 py-4 text-center">
+        <div className="min-h-screen w-fit bg-secondary px-14 py-4 text-center">
           {/* Column 1 */}
           <div className="mb-4">
             <a>Account</a>
@@ -34,12 +34,10 @@ const Settings = () => {
               <div className="my-auto ml-4">
                 <h2 className="text-xl">Profile Picture</h2>
                 <p>Change your profile picture</p>
-                <button className="mr-4 mt-2 rounded-lg bg-blue-500 p-2 text-white">
+                <button className="mr-4 mt-2 rounded-lg bg-secondary p-2">
                   Upload
                 </button>
-                <button className="mt-2 rounded-lg bg-red-500 p-2 text-white">
-                  Remove
-                </button>
+                <button className="mt-2 rounded-lg bg-error p-2">Remove</button>
               </div>
             </div>
             <form>
@@ -58,16 +56,16 @@ const Settings = () => {
                 type="password"
                 className="w-full rounded-lg border border-gray-300 p-2"
               />
-              <button className="mt-4 rounded-lg bg-blue-500 p-2 text-white">
+              <button className="mt-4 rounded-lg bg-accent p-2 text-text-contrast hover:bg-accent-hover">
                 Submit
               </button>
-              <hr className="mt-4" />
-              <h2 className="mt-4 text-xl">Danger Zone</h2>
-              <br />
-              <button className="rounded-lg bg-red-500 p-2 text-white">
-                Delete my Account
-              </button>
             </form>
+            <hr className="mt-4" />
+            <h2 className="mt-4 text-xl">Danger Zone</h2>
+            <br />
+            <button className="rounded-lg bg-error p-2">
+              Delete my account
+            </button>
           </div>
         </div>
       </div>
