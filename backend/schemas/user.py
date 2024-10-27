@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 class UserBase(SQLModel):
     email: str
-    password: str
+    password_hash: str
 
 class User(UserBase, table=True):
     id: int = Field(primary_key=True)
@@ -19,7 +19,7 @@ class UserCreate(UserBase):
 
 class UserUpdate(BaseModel):
     email: str | None = None
-    password: str | None = None
+    password_hash: str | None = None
 
     class Config:
         orm_mode = True

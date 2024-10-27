@@ -42,7 +42,7 @@ async def root():
 @app.post("/users", response_model=UserGet, status_code=201)
 async def users_create(user_create: UserCreate):
     with db.get_session() as session:
-        user = User(email=user_create.email, password=user_create.password)
+        user = User(email=user_create.email, password_hash=user_create.password_hash)
         session.add(user)
         session.commit()
         session.refresh(user)
@@ -88,12 +88,12 @@ async def users_delete(user_id: int):
         user = session.get(User, user_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        
+
         # Delete all tasks associated with the user
         tasks = session.exec(select(Task).where(Task.user_id == user_id)).all()
         for task in tasks:
             session.delete(task)
-        
+
         session.delete(user)
         session.commit()
     return user
