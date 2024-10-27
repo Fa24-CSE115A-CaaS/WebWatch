@@ -7,33 +7,22 @@ from pydantic import BaseModel
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext  # Fix typo here
+from sqlalchemy import Column, Integer, String, Boolean
+from dotenv import load_dotenv
+from schemas.User import userInDB
+from utils.hashing import get_hashed_password, verify_password
+import os
 
-
-SECRET_KEY = "53f9fe80552077e040867678575ac9129e2adc538e38c4a858eb457833b848e8"
-ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+REFRESH_TOKEN_EXPIRE_MINUTES = 1440  # 1 day
 
-
-app = FastAPI()
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-class TokenData(BaseModel):
-    username: str | None = None
-
-class User(BaseModel):
-    username: str
-    email: str | None = None
-    full_name: str | None = None
-    disabled: bool | None = None 
-
-class UserInDB(User):
-    hashed_password: str
-
-pwd_context = CryptContext(schemes=["bcrypt"], depreact="auto")
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+load_dotenv()
+
+SECRET_KEY = os.getenv("SECRET_KEY")  # Retrieve SECRET_KEY from the environment
+ALGORITHM = "HS256"
+
 
 """ Encrypt plaintext(password) with 
     Owner "Arms are weak, Moms spagetthi = dsfndslafgngnewognosng"
@@ -45,19 +34,15 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
     
 """
 
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
-
-def get_password_hash(password):
-    return pwd_context.hash(password)
-
-def get_user(db, username: str):
-    if username in db:
-        user_data = db[username]
+def get_user(db, email: str):
+    if email in db:
+        user_data = db[email]
         return UserInDB(**user_data)
 
-def authenticate_user(db, username: str, password: str):
-    user = get_user(db, username)
+
+
+def authenticate_user(db, email: str, password: str):
+    user = get_user(db, email)
     if not user:
         return False
     if not verify_password(password, user.hashed_password):
@@ -65,20 +50,28 @@ def authenticate_user(db, username: str, password: str):
     
     return user
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
-    to_encode = data.copy
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire =  datetime.utcnow() = timedelta(minutes=15)
+def create_access_token(data: dict, expires_delta: timedelta = None) -> str:
+    to_encode = data.copy()  # Ensure we are copying the data to a new dictionary
+    expire = datetime.utcnow() + (expires_delta if expires_delta else timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    to_encode.update({"exp": expire})
 
-    to_encode.update({"exp":expire})
+    # Create the token using the secret key and algorithm
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+def create_refresh_token(data: dict, expires_delta: timedelta = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     credential_exception = HTTPException(status_code=status.HTTP_401_CONTINUE, detail="Could not validate credentials", headers={"WWW-Authenticate" : "Bearer"})
-
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -94,20 +87,9 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     
     return user
 
-async def get_current_active_user(current_user: UserInDB = Depends(get_current_user)):
+async def get_current_active_user(current_user: userInDB = Depends(get_current_user)):
     if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive User")
-    
+        raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
-@app.post("/token", reponse_model=Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = authenticate_user(db, form_data.username, form_data.password) # dummy db
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="Incorrect username or password", headers={"WWW-Authenticate" : "Bearer"}) )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token {
-        data=("sub" : user.username
-        )
-    }
+
