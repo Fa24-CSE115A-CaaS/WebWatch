@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  th {
+    @apply px-5 py-3 xxl:px-8;
+  }
+
+  td {
+    @apply p-5 xxl:p-8 border-t-[1px] border-border bg-primary overflow-hidden text-nowrap text-ellipsis xxl:border-t-2;
+  }
+}
+
 :root {
   --background: #242424;
   --primary: #444444;
@@ -13,6 +23,8 @@
   --info: #abcbe9;
   --text: #eeeeee;
   --text-contrast: #222222;
+  
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 @media (prefers-color-scheme: light) {

@@ -7,6 +7,7 @@ import NavBar from "./components/NavBar";
 import Home from "./pages/Home";
 import Guide from "./pages/Guide";
 import Settings from "./pages/Settings";
+import Tasks from "./pages/Tasks";
 
 const router = createBrowserRouter([
   {
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
     path: "/theme-guide",
     Component: Guide,
   },
+  {
+    path: "/tasks",
+    Component: Tasks,
+  }
 ]);
 
 const App = () => {
