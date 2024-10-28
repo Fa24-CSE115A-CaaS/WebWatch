@@ -62,7 +62,7 @@ const NavBar = () => {
       {show_profile_dropdown && (
         <div
           className="text-contrast absolute right-0 z-10 mr-4 mt-4 w-fit origin-top-right rounded-md
-            bg-secondary p-2 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+            bg-secondary p-2 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none text-center"
           role="menu"
           aria-orientation="vertical"
           aria-labelledby="menu-button"
@@ -80,17 +80,13 @@ const NavBar = () => {
             >
               Manage your WebWatch account
             </a>
-            <button
+            <a
               className="btn mb-2 block w-full bg-accent px-4 py-2 text-sm text-text-contrast
                 hover:bg-accent-hover"
-              onClick={
-                // TO DO
-                // handleThemeChange
-                () => console.log("Change Theme")
-              }
+              href="/theme-guide"
             >
               Change Theme
-            </button>
+            </a>
             <form method="POST" action="#" role="none">
               <button
                 type="submit"
