@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FaUserCircle } from 'react-icons/fa'; // Add this import
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('vertical-tab-1');
@@ -57,25 +58,12 @@ const Settings = () => {
           <div className="m-5 px-10">
             {activeTab === 'vertical-tab-1' && (
               <>
-                <h1 className="text-3xl">Account</h1>
-                <p>Change your account information</p>
-                <div className="mt-4 flex">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    className="max-h-40 w-auto rounded-full"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                    />
-                  </svg>
+                <h1 className="text-3xl mb-4">Account</h1>
+                <p className="mb-4">Change your account information</p>
+                <div className="mt-4 flex pb-4">
+                  <FaUserCircle className="max-h-40 w-auto rounded-full text-9xl" />
                   <div className="my-auto ml-4">
-                    <h2 className="text-xl">Profile Picture</h2>
+                    <h2 className="text-xl mb-2">Profile Picture</h2>
                     <button className="mr-4 mt-4 px-8 rounded-lg border-info border-solid border-2 text-info p-1 text-base">
                       Upload
                     </button>
@@ -84,28 +72,28 @@ const Settings = () => {
                     </button>
                   </div>
                 </div>
-                <form>
-                  <label className="text-lg">Email</label>
+                <form className="pb-4">
+                  <label className="text-lg mb-2 block">Email</label>
                   <input
                     type="email"
-                    className="w-full rounded-lg border border-border bg-secondary p-2 outline-none"
+                    className="w-full rounded-lg border border-border bg-secondary p-2 outline-none mb-4"
                   />
-                  <h2 className="text-2xl my-8 mb-4 mt-100">Reset Password</h2>
-                  <label className="text-lg">Password</label>
+                  <h2 className="text-2xl my-8 mb-4">Reset Password</h2>
+                  <label className="text-lg mb-2 block">Password</label>
                   <input
                     type="password"
-                    className="w-full rounded-lg border border-border bg-secondary p-2 outline-none"
+                    className="w-full rounded-lg border border-border bg-secondary p-2 outline-none mb-4"
                   />
-                  <label className="text-lg">Confirm Password</label>
+                  <label className="text-lg mb-2 block">Confirm Password</label>
                   <input
                     type="password"
-                    className="w-full rounded-lg border border-border bg-secondary p-2 outline-none"
+                    className="w-full rounded-lg border border-border bg-secondary p-2 outline-none mb-4"
                   />
-                  <button className="mt-4 rounded-lg bg-accent p-2 px-16 text-text-contrast hover:bg-accent-hover ">
+                  <button className="mt-4 rounded-lg bg-accent p-2 px-16 text-text-contrast hover:bg-accent-hover">
                     Save
                   </button>
                 </form>
-                <h2 className="text-2xl my-8 mb-4 mt-100">Danger Zone</h2>
+                <h2 className="text-2xl my-8 mb-4">Danger Zone</h2>
                 <button className="rounded-lg bg-error px-3 py-2">
                   Delete my account
                 </button>
@@ -113,14 +101,14 @@ const Settings = () => {
             )}
             {activeTab === 'vertical-tab-2' && (
               <>
-                <h1 className="text-3xl">Global Variables</h1>
+                <h1 className="text-3xl mb-4">Global Variables</h1>
                 <p>Manage your global variables here.</p>
                 {/* Add your global variables form or content here */}
               </>
             )}
             {activeTab === 'vertical-tab-3' && (
               <>
-                <h1 className="text-3xl">Account Linking</h1>
+                <h1 className="text-3xl mb-4">Account Linking</h1>
                 <p>Link your account with other services.</p>
                 {/* Add your account linking form or content here */}
               </>
