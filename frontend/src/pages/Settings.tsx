@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FaUserCircle } from 'react-icons/fa'; // Add this import
 
 const Settings = () => {
