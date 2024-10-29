@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, Field
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 class UserBase(SQLModel):
     email: str
@@ -14,11 +14,17 @@ class UserGet(UserBase):
     class Config:
         orm_mode = True
 
-class UserCreate(UserBase):
-    pass
+class UserCreate(BaseModel):
+    email: EmailStr
+    username: str
+    password: str  
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
 
 class UserUpdate(BaseModel):
-    email: str | None = None
+    email: EmailStr | None = None
     password_hash: str | None = None
 
     class Config:
@@ -26,3 +32,7 @@ class UserUpdate(BaseModel):
 
 class UserDelete(BaseModel):
     pass
+
+class UserOutput(BaseModel):
+    email: EmailStr
+    username: str

@@ -1,11 +1,12 @@
+import asyncio
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, HTTPException, Response, status
 from dotenv import load_dotenv
 from sqlmodel import SQLModel, select
-import asyncio
 from typing import List
 from schemas.task import Task, TaskCreate, TaskGet, TaskUpdate
-from schemas.user import User, UserCreate, UserGet, UserUpdate
+from schemas.user import UserBase, UserCreate, UserGet, UserUpdate, UserOutput, UserLogin, User
+from auth import get_hashed_password, verify_password
 from database import Database
 from scheduler import Scheduler
 
@@ -150,3 +151,40 @@ async def tasks_delete(task_id: int):
         session.delete(task)
         session.commit()
     return Response(status_code=204)
+
+### User Endpoints ###
+
+# Registers new user
+@app.post("/user/register", response_model=UserOutput, status_code=201)
+async def create_user(user: UserCreate):
+    hashed_password = get_hashed_password(user.password)
+    new_user = User(email=user.email, password_hash=hashed_password)
+    with db.get_session() as session:
+        session.add(new_user)
+        session.commit()
+        session.refresh(new_user)
+    return UserOutput(email=new_user.email, username=user.username)
+
+# Authenticates existing user
+@app.post('/user/login')
+async def login(request: UserLogin):
+    with db.get_session() as session:
+        user = session.exec(select(User).where(User.email == request.email)).first()
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect email")
+    if not verify_password(request.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect password"
+        )
+    access_token = create_access_token(data={"sub": user.email, "user_id": user.id})
+    return {"access_token": access_token, "token_type": "bearer", "email": user.email}
+
+# Get user details by ID
+@app.get("/users/{user_id}", response_model=UserOutput)
+async def get_user(user_id: int):
+    with db.get_session() as session:
+        user = session.exec(select(User).where(User.id == user_id)).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No User Found")
+    return userOutput(email=user.email)
