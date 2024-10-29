@@ -54,7 +54,7 @@ const Settings = () => {
 
         {/* Column 2 */}
         <div className="w-full rounded-r-xl border-solid border-border border-y-2 border-r-2 bg-primary">
-          <div className="m-5">
+          <div className="m-5 px-10">
             {activeTab === 'vertical-tab-1' && (
               <>
                 <h1 className="text-3xl">Account</h1>
@@ -76,34 +76,36 @@ const Settings = () => {
                   </svg>
                   <div className="my-auto ml-4">
                     <h2 className="text-xl">Profile Picture</h2>
-                    <button className="mr-4 mt-4 px-8 rounded-lg border-info border-solid border-2 text-info p-1">
+                    <button className="mr-4 mt-4 px-8 rounded-lg border-info border-solid border-2 text-info p-1 text-base">
                       Upload
                     </button>
-                    <button className="mt-2 px-8 rounded-lg border-error border-solid border-2 text-error p-1">Remove</button>
+                    <button className="mt-2 px-8 rounded-lg border-error border-solid border-2 text-error p-1 text-base">
+                      Remove
+                    </button>
                   </div>
                 </div>
                 <form>
-                  <label>Email</label>
+                  <label className="text-lg">Email</label>
                   <input
                     type="email"
                     className="w-full rounded-lg border border-border bg-secondary p-2 outline-none"
                   />
-                  <h2 className="text-2xl my-8">Reset Password</h2>
-                  <label>Password</label>
+                  <h2 className="text-2xl my-8 mb-4 mt-100">Reset Password</h2>
+                  <label className="text-lg">Password</label>
                   <input
                     type="password"
                     className="w-full rounded-lg border border-border bg-secondary p-2 outline-none"
                   />
-                  <label>Confirm Password</label>
+                  <label className="text-lg">Confirm Password</label>
                   <input
                     type="password"
                     className="w-full rounded-lg border border-border bg-secondary p-2 outline-none"
                   />
-                  <button className="mt-4 rounded-lg bg-accent p-2 px-16 text-text-contrast hover:bg-accent-hover">
+                  <button className="mt-4 rounded-lg bg-accent p-2 px-16 text-text-contrast hover:bg-accent-hover ">
                     Save
                   </button>
                 </form>
-                <h2 className="text-2xl my-8 mb-4">Danger Zone</h2>
+                <h2 className="text-2xl my-8 mb-4 mt-100">Danger Zone</h2>
                 <button className="rounded-lg bg-error px-3 py-2">
                   Delete my account
                 </button>
