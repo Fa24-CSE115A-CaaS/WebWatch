@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaUserCircle } from 'react-icons/fa'; // Add this import
+import { FaUserCircle } from 'react-icons/fa';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('vertical-tab-1');
@@ -11,12 +11,12 @@ const Settings = () => {
   return (
     <div className="w-1/2 mx-auto mt-8 rounded min-h-screen text-text">
       <div className="flex">
-        <nav className="rounded-l-xl border-solid border-border border-2 min-h-screen w-1/3 min-w-fit bg-secondary text-left">
-          {/* Column 1 - Sidebar*/}
+        {/* Column 1 - Sidebar*/}
+        <nav className="rounded-l-xl border-solid border-border border-2 min-h-screen w-max bg-secondary text-left">
           <div className="rounded-tl-xl" aria-label="Tabs" role="tablist" aria-orientation="vertical">
             <button
               type="button"
-              className={`w-full p-4 text-left ${activeTab === 'vertical-tab-1' ? 'bg-primary' : ''}`}
+              className={`w-full p-4 text-left whitespace-nowrap ${activeTab === 'vertical-tab-1' ? 'bg-primary' : ''}`}
               id="vertical-tab-1"
               aria-selected={activeTab === 'vertical-tab-1'}
               data-hs-tab="#vertical-tab-1"
@@ -28,7 +28,7 @@ const Settings = () => {
             </button>
             <button
               type="button"
-              className={`w-full p-4 text-left ${activeTab === 'vertical-tab-2' ? 'bg-primary' : ''}`}
+              className={`w-full p-4 text-left whitespace-nowrap ${activeTab === 'vertical-tab-2' ? 'bg-primary' : ''}`}
               id="vertical-tab-2"
               aria-selected={activeTab === 'vertical-tab-2'}
               data-hs-tab="#vertical-tab-2"
@@ -40,7 +40,7 @@ const Settings = () => {
             </button>
             <button
               type="button"
-              className={`w-full p-4 text-left ${activeTab === 'vertical-tab-3' ? 'bg-primary' : ''}`}
+              className={`w-full p-4 text-left whitespace-nowrap ${activeTab === 'vertical-tab-3' ? 'bg-primary' : ''}`}
               id="vertical-tab-3"
               aria-selected={activeTab === 'vertical-tab-3'}
               data-hs-tab="#vertical-tab-3"
@@ -55,13 +55,14 @@ const Settings = () => {
 
         {/* Column 2 */}
         <div className="w-full rounded-r-xl border-solid border-border border-y-2 border-r-2 bg-primary">
-          <div className="m-5 px-10">
+          <div className="m-5 px-10 py-6">
+            {/* Main account settings content */} 
             {activeTab === 'vertical-tab-1' && (
               <>
                 <h1 className="text-3xl mb-4">Account</h1>
                 <p className="mb-4">Change your account information</p>
                 <div className="mt-4 flex pb-4">
-                  <FaUserCircle className="max-h-40 w-auto rounded-full text-9xl" />
+                  <FaUserCircle className="max-h-40 w-auto rounded-full text-9xl flex-shrink-0" />
                   <div className="my-auto ml-4">
                     <h2 className="text-xl mb-2">Profile Picture</h2>
                     <button className="mr-4 mt-4 px-8 rounded-lg border-info border-solid border-2 text-info p-1 text-base">
@@ -99,18 +100,18 @@ const Settings = () => {
                 </button>
               </>
             )}
+            {/* Global variable settings */} 
             {activeTab === 'vertical-tab-2' && (
               <>
                 <h1 className="text-3xl mb-4">Global Variables</h1>
                 <p>Manage your global variables here.</p>
-                {/* Add your global variables form or content here */}
               </>
             )}
+            {/* Account linking settings */} 
             {activeTab === 'vertical-tab-3' && (
               <>
                 <h1 className="text-3xl mb-4">Account Linking</h1>
                 <p>Link your account with other services.</p>
-                {/* Add your account linking form or content here */}
               </>
             )}
           </div>

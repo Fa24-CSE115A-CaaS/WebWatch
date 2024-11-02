@@ -1,5 +1,5 @@
 import { useState } from "react";
-import useEffect from "../App";
+//import useEffect from "../App";
 
 const NavBar = () => {
   const [show_profile_dropdown, set_show_profile_dropdown] = useState(false);
