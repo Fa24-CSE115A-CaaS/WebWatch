@@ -4,11 +4,13 @@ from sqlmodel import SQLModel, select, Session
 from schemas.user import UserBase, UserCreate, UserGet, UserUpdate, UserOutput, UserLogin, User
 from auth import get_hashed_password, verify_password, create_access_token
 from datetime import timedelta
+from database import Database
 
 RESET_TOKEN_EXPIRE = timedelta(hours=1)  # Token expires in 1 hour
 
 
 ### USER ENDPOINTS ###
+db = Database(production=False)
 
 router = APIRouter(
     prefix="/user",
