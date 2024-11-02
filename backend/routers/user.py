@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import Response
-from schemas.user import UserBase, UserCreate, UserGet, UserUpdate, UserOutput, UserLogin, User
 from sqlmodel import SQLModel, select, Session
+from schemas.user import UserBase, UserCreate, UserGet, UserUpdate, UserOutput, UserLogin, User
+from auth import get_hashed_password, verify_password, create_access_token
 from datetime import timedelta
 
 RESET_TOKEN_EXPIRE = timedelta(hours=1)  # Token expires in 1 hour
@@ -10,11 +11,11 @@ RESET_TOKEN_EXPIRE = timedelta(hours=1)  # Token expires in 1 hour
 ### USER ENDPOINTS ###
 
 router = APIRouter(
-    prefix="/users",
+    prefix="/user",
 )
 
 # Registers new user
-@app.post("/register", response_model=UserOutput, status_code=201)
+@router.post("/register", response_model=UserOutput, status_code=201)
 async def create_user(user: UserCreate):
     hashed_password = get_hashed_password(user.password)
     print(f"password: {hashed_password} \n")
@@ -26,7 +27,7 @@ async def create_user(user: UserCreate):
     return UserOutput(email=new_user.email, username=user.username)
 
 # Authenticates existing user
-@app.post('/login')
+@router.post('/login')
 async def login(request: UserLogin):
     print(f"password: {request.password}")
     print(f"request email: {request.email}")
@@ -47,8 +48,9 @@ async def login(request: UserLogin):
 
 # Sends a URL to reset User's password
 @router.post("/forget-password")
-async def forget_password(request: UserLogin, db: Session = Depends(get_db)):
-    user = get_user_by_email(db, request.email)
+async def forget_password(request: UserLogin):
+    with db.get_session() as session:
+        user = get_user_by_email(db, request.email)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -58,7 +60,7 @@ async def forget_password(request: UserLogin, db: Session = Depends(get_db)):
     await send_reset_password(recipient=user.email, user=user, url=url, expire=RESET_TOKEN_EXPIRE)
         
 # Get user details by ID
-@app.get("/{user_id}", response_model=UserOutput)
+@router.get("/{user_id}", response_model=UserOutput)
 async def get_user(user_id: int):
     with db.get_session() as session:
         user = session.exec(select(User).where(User.id == user_id)).first()
@@ -68,7 +70,7 @@ async def get_user(user_id: int):
 
 
 # Update user details by id
-@app.put("{user_id}", response_model=UserGet)
+@router.put("{user_id}", response_model=UserGet)
 async def users_update(user_id: int, user_update: UserUpdate):
     with db.get_session() as session:
         user = session.get(User, user_id)
@@ -83,7 +85,7 @@ async def users_update(user_id: int, user_update: UserUpdate):
     return user
 
 # Delete a user by id
-@app.delete("{user_id}", response_model=UserGet)
+@router.delete("{user_id}", response_model=UserGet)
 async def users_delete(user_id: int):
     with db.get_session() as session:
         user = session.get(User, user_id)
@@ -99,6 +101,10 @@ async def users_delete(user_id: int):
         session.commit()
     return Response(status_code=204)
 
-def get_user_by_email(db: Session = Depends(get_db), email: str):
-    user = session.exec(select(User).where(User.email == email)).first()
+@router.get("/email/{email}")
+def get_user_by_email(email: str):
+    with db.get_session() as session:
+        user = session.exec(select(User).where(User.id == user_id)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
     return user

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from schemas.task import Task, TaskCreate, Taskd, TaskUpdate
-from sqlmodel import SQLModel, select, session
+from schemas.task import Task, TaskCreate, TaskUpdate, TaskGet
+from sqlmodel import SQLModel, select, Session
 from typing import List
 
 
@@ -11,7 +11,7 @@ router = APIRouter(
 )
 
 # Create a new task
-@app.post("", response_model=TaskGet, status_code=201)
+@router.post("", response_model=TaskGet, status_code=201)
 async def tasks_create(task_create: TaskCreate):
     # Validate user_id
     with db.get_session() as session:
@@ -25,7 +25,7 @@ async def tasks_create(task_create: TaskCreate):
     return task
 
 # List all tasks
-@app.get("", response_model=List[TaskGet])
+@router.get("", response_model=List[TaskGet])
 async def tasks_list():
     with db.get_session() as session:
         tasks = session.exec(select(Task)).all()
@@ -34,7 +34,7 @@ async def tasks_list():
     return tasks
 
 # Update task details by id
-@app.put("{task_id}", response_model=TaskGet)
+@router.put("{task_id}", response_model=TaskGet)
 async def tasks_update(task_id: int, task_update: TaskUpdate):
     with db.get_session() as session:
         task = session.get(Task, task_id)
@@ -53,7 +53,7 @@ async def tasks_update(task_id: int, task_update: TaskUpdate):
     return task
 
 # Delete task by id
-@app.delete("{task_id}", response_model=TaskGet)
+@router.delete("{task_id}", response_model=TaskGet)
 async def tasks_delete(task_id: int):
     # Delete a task
     with db.get_session() as session:
