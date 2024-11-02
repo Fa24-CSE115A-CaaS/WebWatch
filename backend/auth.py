@@ -3,22 +3,20 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+# from passlib.context import CryptContext
+from argon2 import PasswordHasher
 
 app = FastAPI()
+ph = PasswordHasher()
 
-SECRET_KEY = "53f9fe80552077e040867678575ac9129e2adc538e38c4a858eb457833b848e8"
-ALGORITHM = "HS256"
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-def get_hashed_password(password: str) -> str:
-    return pwd_context.hash(password)
+def get_hashed_password(plain_password):
+    return ph.hash(plain_password)
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+def verify_password(hashed_password, plain_password):
+    return ph.verify(hashed_password, plain_password)
 
 def get_user(db, email: EmailStr):
     if email in db:
@@ -26,13 +24,12 @@ def get_user(db, email: EmailStr):
         return UserInDB(**user_data)
 
 # Checks if User exist, if so verifies password
-def authenticate_user(db, username: str, password: str):
-    user = get_user(db, username)
+def authenticate_user(user):
+    session.exec(select(User).where(User.email == request.email)).first()
     if not user:
         return False
-    if not verify_password(password, user.hashed_password):
+    if not verify_password(user.hashed_password, password):
         return False
-
     return user
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
@@ -46,10 +43,8 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+def get_current_user(token: str = Depends(oauth2_scheme)):
     credential_exception = HTTPException(status_code=status.HTTP_401_CONTINUE, detail="Could not validate credentials", headers={"WWW-Authenticate" : "Bearer"})
-
-
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub") # get user stored in token
@@ -63,3 +58,4 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         raise credential_exception
     
     return user
+

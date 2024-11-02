@@ -4,6 +4,7 @@ import asyncio
 from utils.notifications import send_mail
 from scrape import WebScraper
 
+
 def compare_texts(text1, text2):
     diff = difflib.unified_diff(
         text1.splitlines(), 
@@ -17,6 +18,8 @@ def compare_texts(text1, text2):
 # TODO: Define CLI (use argparse library)
 # Check # of arguments and if a URL is provided as an argument
 # Example: python3 main.py https://simonzhao.com
+
+
 
 DELAY = 2  # in seconds
 

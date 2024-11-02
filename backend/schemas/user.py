@@ -33,6 +33,10 @@ class UserUpdate(BaseModel):
 class UserDelete(BaseModel):
     pass
 
+class UserReset(BaseModel):
+    email: EmailStr
+    password: str
+
 class UserOutput(BaseModel):
     email: EmailStr
     username: str
