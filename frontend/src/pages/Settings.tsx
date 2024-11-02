@@ -8,6 +8,39 @@ const Settings = () => {
     setActiveTab(tabId);
   };
 
+  const handleAccountUpdate = () => {
+    // Set Email to a new value
+    let newEmail = document.getElementsByName('newEmail')[0].textContent;
+    let newPassword = document.getElementsByName('password')[0].textContent;
+    let confirmPassword = document.getElementsByName('confirmPassword')[0].textContent;
+    // Check if the passwords match
+    if (newPassword !== confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+    let uid = localStorage.getItem('uid');
+    // Update the user's email
+    fetch("/api/users/" + uid, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: newEmail,
+        password: newPassword,
+        id: uid,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          alert('Account details updated successfully');
+        } else {
+          alert('Account update failed');
+        }
+      });
+  };
+
   return (
     <div className="w-1/2 mx-auto mt-8 rounded min-h-screen text-text">
       <div className="flex">
@@ -56,7 +89,7 @@ const Settings = () => {
         {/* Column 2 */}
         <div className="w-full rounded-r-xl border-solid border-border border-y-2 border-r-2 bg-primary">
           <div className="m-5 px-10 py-6">
-            {/* Main account settings content */} 
+            {/* Main account settings content */}
             {activeTab === 'vertical-tab-1' && (
               <>
                 <h1 className="text-3xl mb-4">Account</h1>
@@ -76,21 +109,26 @@ const Settings = () => {
                 <form className="pb-4">
                   <label className="text-lg mb-2 block">Email</label>
                   <input
+                    name="newEmail"
                     type="email"
                     className="w-full rounded-lg border border-border bg-secondary p-2 outline-none mb-4"
                   />
                   <h2 className="text-2xl my-8 mb-4">Reset Password</h2>
                   <label className="text-lg mb-2 block">Password</label>
                   <input
+                    name="password"
                     type="password"
                     className="w-full rounded-lg border border-border bg-secondary p-2 outline-none mb-4"
                   />
                   <label className="text-lg mb-2 block">Confirm Password</label>
                   <input
+                    name="confirmPassword"
                     type="password"
                     className="w-full rounded-lg border border-border bg-secondary p-2 outline-none mb-4"
                   />
-                  <button className="mt-4 rounded-lg bg-accent p-2 px-16 text-text-contrast hover:bg-accent-hover">
+                  <button className="mt-4 rounded-lg bg-accent p-2 px-16 text-text-contrast hover:bg-accent-hover" onClick={
+                    () => handleAccountUpdate()
+                  }>
                     Save
                   </button>
                 </form>
@@ -100,14 +138,14 @@ const Settings = () => {
                 </button>
               </>
             )}
-            {/* Global variable settings */} 
+            {/* Global variable settings */}
             {activeTab === 'vertical-tab-2' && (
               <>
                 <h1 className="text-3xl mb-4">Global Variables</h1>
                 <p>Manage your global variables here.</p>
               </>
             )}
-            {/* Account linking settings */} 
+            {/* Account linking settings */}
             {activeTab === 'vertical-tab-3' && (
               <>
                 <h1 className="text-3xl mb-4">Account Linking</h1>
