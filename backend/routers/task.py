@@ -1,12 +1,13 @@
 from fastapi import APIRouter, HTTPException
 from schemas.task import Task, TaskCreate, Taskd, TaskUpdate
 from sqlmodel import SQLModel, select, session
+from typing import List
 
 
 ### TASK ENDPOINTS ###
 
 router = APIRouter(
-    prefix="",
+    prefix="/task",
 )
 
 # Create a new task

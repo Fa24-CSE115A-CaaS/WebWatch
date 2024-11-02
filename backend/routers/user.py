@@ -1,12 +1,17 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from fastapi.responses import Response
 from schemas.user import UserBase, UserCreate, UserGet, UserUpdate, UserOutput, UserLogin, User
-from sqlmodel import SQLModel, select, session
+from sqlmodel import SQLModel, select, Session
+from datetime import timedelta
+
+RESET_TOKEN_EXPIRE = timedelta(hours=1)  # Token expires in 1 hour
+
+
+### USER ENDPOINTS ###
 
 router = APIRouter(
     prefix="/users",
 )
-
-### USER ENDPOINTS ###
 
 # Registers new user
 @app.post("/register", response_model=UserOutput, status_code=201)
@@ -40,18 +45,17 @@ async def login(request: UserLogin):
     access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer", "email": user.email}
 
-# Sends a Url to reset User's password
-@app.post("/forget-password")
-async def forget_password(request: )
-    user = get_user_by_email(db, request.user)
+# Sends a URL to reset User's password
+@router.post("/forget-password")
+async def forget_password(request: UserLogin, db: Session = Depends(get_db)):
+    user = get_user_by_email(db, request.email)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User doesn't exist"
+            detail="User doesn't exist"
         )
     access_token = create_access_token(data={"sub": user.email})
-    await send_reset_password(recipient=user.email, user=user, url=url, expirae=RESET_TOKEN_EXPIRE)
-
+    await send_reset_password(recipient=user.email, user=user, url=url, expire=RESET_TOKEN_EXPIRE)
         
 # Get user details by ID
 @app.get("/{user_id}", response_model=UserOutput)
