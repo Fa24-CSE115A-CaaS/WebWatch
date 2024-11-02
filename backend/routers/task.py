@@ -5,8 +5,12 @@ from sqlmodel import SQLModel, select, session
 
 ### TASK ENDPOINTS ###
 
+router = APIRouter(
+    prefix="",
+)
+
 # Create a new task
-@app.post("/tasks", response_model=TaskGet, status_code=201)
+@app.post("", response_model=TaskGet, status_code=201)
 async def tasks_create(task_create: TaskCreate):
     # Validate user_id
     with db.get_session() as session:
@@ -20,7 +24,7 @@ async def tasks_create(task_create: TaskCreate):
     return task
 
 # List all tasks
-@app.get("/tasks", response_model=List[TaskGet])
+@app.get("", response_model=List[TaskGet])
 async def tasks_list():
     with db.get_session() as session:
         tasks = session.exec(select(Task)).all()
@@ -29,7 +33,7 @@ async def tasks_list():
     return tasks
 
 # Update task details by id
-@app.put("/tasks/{task_id}", response_model=TaskGet)
+@app.put("{task_id}", response_model=TaskGet)
 async def tasks_update(task_id: int, task_update: TaskUpdate):
     with db.get_session() as session:
         task = session.get(Task, task_id)
@@ -48,7 +52,7 @@ async def tasks_update(task_id: int, task_update: TaskUpdate):
     return task
 
 # Delete task by id
-@app.delete("/tasks/{task_id}", response_model=TaskGet)
+@app.delete("{task_id}", response_model=TaskGet)
 async def tasks_delete(task_id: int):
     # Delete a task
     with db.get_session() as session:

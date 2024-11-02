@@ -8,6 +8,7 @@ from scheduler import Scheduler
 from typing import List
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
+from auth import get_hashed_password, verify_password, create_access_token
 
 load_dotenv()
 scheduler = Scheduler()
