@@ -4,8 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import NavBar from "./components/NavBar";
 
 // Pages
-import Register from "./pages/Register";
-import Login from "./pages/Login";
+import Auth from "./pages/Auth";
 import Home from "./pages/Home";
 import Guide from "./pages/Guide";
 import Settings from "./pages/Settings";
@@ -17,12 +16,8 @@ const router = createBrowserRouter([
     Component: Home,
   },
   {
-    path: "/register",
-    Component: Register,
-  },
-  {
-    path: "/login",
-    Component: Login,
+    path: "/auth",
+    Component: Auth,
   },
   {
     path: "/settings",

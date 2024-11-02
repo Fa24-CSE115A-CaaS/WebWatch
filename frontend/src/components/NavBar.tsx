@@ -31,11 +31,8 @@ const NavBar = () => {
             </a>
           </div>
           <div className="absolute inset-y-0 right-0 flex items-center">
-            <a href="/login" className="mr-4">
-              Login
-            </a>
-            <a href="/register" className="mr-4">
-              Register
+            <a href="/auth" className="mr-4">
+              Get Started
             </a>
             <button
               className="relative flex rounded-full bg-gray-50 text-sm focus:outline-none focus:ring-2
