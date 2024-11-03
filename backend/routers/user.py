@@ -1,14 +1,12 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Cookie
 from fastapi.responses import Response
 from sqlmodel import SQLModel, select, Session
-from schemas.user import UserBase, UserCreate, UserGet, UserUpdate, UserOutput, UserLogin, User
-from schemas.token import TokenCreate
+from schemas.user import UserBase, UserRegister, UserGet, UserUpdate, User, UserOutput, UserLogin, JwtTokenSchema, RefreshToken
 from auth import get_hashed_password, verify_password, create_access_token, create_refresh_token
-from datetime import timedelta
 from database import Database
 
-RESET_TOKEN_EXPIRE = timedelta(hours=1)  # Token expires in 1 hour
-
+from datetime import timedelta
+from typing import Annotated
 
 ### USER ENDPOINTS ###
 db = Database(production=False)
@@ -19,7 +17,7 @@ router = APIRouter(
 
 # Registers new user
 @router.post("/register", response_model=UserOutput, status_code=201)
-async def create_user(user: UserCreate):
+async def create_user(user: UserRegister):
     hashed_password = get_hashed_password(user.password)
     new_user = User(email=user.email, password_hash=hashed_password)
     with db.get_session() as session:
@@ -43,29 +41,37 @@ async def login(request: UserLogin):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect password"
         )
-    access_token = create_access_token(data={"sub": user.email})
+    access_token = create_access_token(data={'email'})
     fresh_token = create_refresh_token(data={"sub": user.email})
     return {
         "access_token": access_token,
         "refresh_token": fresh_token,
     }
 
-# Sends a URL to reset User's password
-@router.post("/forget-password")
-async def forget_password(request: UserLogin):
+
+@router.get("/verify")
+async def verify(token: str):
     with db.get_session() as session:
-        user = get_user_by_email(request.email)
+        payload = await decode_access_token(token=token, db=db)
+        user = await models.User.find_by_id(db=db, id=payload[SUB])
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User doesn't exist"
-        )
-    access_token = create_access_token(data={"sub": user.email})
-    #await send_reset_password(recipient=user.email, user=user, url=url, expire=RESET_TOKEN_EXPIRE)
-    pass   
+        raise NotFoundException(detail="User not found")
 
 @router.post("/refresh")
-async def refresh_token(refresh_token: TokenCreate):
+async def refresh(refresh: Annotated[str | None, Cookie()] = None):
+    print(refresh)
+    if not refresh:
+        raise HTTPException(status_code=400, detail="Refresh token required")
+    
+    # Refresh the token and activate the user
+    token_state = refresh_token(token=refresh)
+    
+    await user.save(db=db)
+    
+    return {"msg": "Successfully activated", "token_state": token_state}
+
+@router.post("/refresh")
+async def refresh_token(refresh_token: RefreshToken):
     with db.get_session() as session:
         user = get_user_by_email(db, request.email)
     if not refresh_token or not user:
@@ -119,11 +125,3 @@ async def users_delete(user_id: int):
         session.delete(user)
         session.commit()
     return Response(status_code=204)
-
-@router.get("/email/{email}")
-def get_user_by_email(email: str):
-    with db.get_session() as session:
-        user = session.exec(select(User).where(User.email == email)).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user

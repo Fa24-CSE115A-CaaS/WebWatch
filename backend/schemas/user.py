@@ -1,5 +1,8 @@
 from sqlmodel import SQLModel, Field
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, validator, EmailStr
+from datetime import datetime
+
+
 
 class UserBase(SQLModel):
     email: str
@@ -13,11 +16,6 @@ class UserGet(UserBase):
 
     class Config:
         orm_mode = True
-
-class UserCreate(BaseModel):
-    email: EmailStr
-    username: str
-    password: str  
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -40,3 +38,31 @@ class UserReset(BaseModel):
 class UserOutput(BaseModel):
     email: EmailStr
     username: str
+
+class UserRegister(BaseModel):
+    email:EmailStr
+    username: str
+    password: str
+
+""" class UserRegister(BaseModel):
+    password: str
+    confirm_password: str
+
+    @validator("confirm_password")
+    def verify_password_match(cls, v, values, **kwargs):
+        password = values.get("password")
+        if v != password:
+            raise ValueError("The two passwords did not match.")
+        return v """
+
+class JwtTokenSchema(BaseModel):
+    token: str
+    payload: dict
+    expire: datetime
+
+class TokenPair(BaseModel):
+    access: JwtTokenSchema
+    refresh: JwtTokenSchema
+
+class RefreshToken(BaseModel):
+    refresh: str
