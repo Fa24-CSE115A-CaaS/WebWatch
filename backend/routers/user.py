@@ -2,7 +2,8 @@ from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import Response
 from sqlmodel import SQLModel, select, Session
 from schemas.user import UserBase, UserCreate, UserGet, UserUpdate, UserOutput, UserLogin, User
-from auth import get_hashed_password, verify_password, create_access_token
+from schemas.token import TokenCreate
+from auth import get_hashed_password, verify_password, create_access_token, create_refresh_token
 from datetime import timedelta
 from database import Database
 
@@ -20,7 +21,6 @@ router = APIRouter(
 @router.post("/register", response_model=UserOutput, status_code=201)
 async def create_user(user: UserCreate):
     hashed_password = get_hashed_password(user.password)
-    print(f"password: {hashed_password} \n")
     new_user = User(email=user.email, password_hash=hashed_password)
     with db.get_session() as session:
         session.add(new_user)
@@ -31,8 +31,6 @@ async def create_user(user: UserCreate):
 # Authenticates existing user
 @router.post('/login')
 async def login(request: UserLogin):
-    print(f"password: {request.password}")
-    print(f"request email: {request.email}")
     with db.get_session() as session:
         user = session.exec(select(User).where(User.email == request.email)).first()
     if not user:
@@ -46,26 +44,45 @@ async def login(request: UserLogin):
             detail="Incorrect password"
         )
     access_token = create_access_token(data={"sub": user.email})
-    return {"access_token": access_token, "token_type": "bearer", "email": user.email}
+    fresh_token = create_refresh_token(data={"sub": user.email})
+    return {
+        "access_token": access_token,
+        "refresh_token": fresh_token,
+    }
 
 # Sends a URL to reset User's password
 @router.post("/forget-password")
 async def forget_password(request: UserLogin):
     with db.get_session() as session:
-        user = get_user_by_email(db, request.email)
+        user = get_user_by_email(request.email)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User doesn't exist"
         )
     access_token = create_access_token(data={"sub": user.email})
-    await send_reset_password(recipient=user.email, user=user, url=url, expire=RESET_TOKEN_EXPIRE)
-        
+    #await send_reset_password(recipient=user.email, user=user, url=url, expire=RESET_TOKEN_EXPIRE)
+    pass   
+
+@router.post("/refresh")
+async def refresh_token(refresh_token: TokenCreate):
+    with db.get_session() as session:
+        user = get_user_by_email(db, request.email)
+    if not refresh_token or not user:
+        raise HTTPException(status_code=401, detail="No refresh token")
+    decoded_token = await decode_token(refresh_token, 'id', type='refresh')
+    if not decoded_token:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+    if not user:
+        raise HTTPException(status_code=401, detail="User does not exist")
+    access_token = create_access_token(data={"sub": user.email})
+    return JSONResponse({"token": access_token, "email": user.email}, status_code=200)
+
 # Get user details by ID
 @router.get("/{user_id}", response_model=UserOutput)
-async def get_user(user_id: int):
+async def get_user(user_email: int):
     with db.get_session() as session:
-        user = session.exec(select(User).where(User.id == user_id)).first()
+        user = session.exec(select(User).where(User.email == user_email)).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No User Found")
     return userOutput(email=user.email)
@@ -106,7 +123,7 @@ async def users_delete(user_id: int):
 @router.get("/email/{email}")
 def get_user_by_email(email: str):
     with db.get_session() as session:
-        user = session.exec(select(User).where(User.id == user_id)).first()
+        user = session.exec(select(User).where(User.email == email)).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
