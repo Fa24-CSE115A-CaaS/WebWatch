@@ -1,16 +1,38 @@
 import { useState } from "react";
 // Components
-import CronDropdown from "./CronDropdown/CronDropdown";
+import CronDropdown from "../CronDropdown";
 // Hooks
-import usePopup from "../hooks/usePopup";
+import usePopup from "../../hooks/usePopup";
+import { axios } from "../../config";
 // Icons
-import { FaRegClock } from "react-icons/fa6";
 import { FaRegBell } from "react-icons/fa";
-import { IoSearch } from "react-icons/io5";
+import { IoSearch, IoSettingsOutline } from "react-icons/io5";
+// Types
+import { Task } from "../../types";
+import { FormState } from "./types";
 
 const CreateInput = () => {
   const { open, setOpen, containerRef } = usePopup();
-  const [cronString, setCronString] = useState("");
+  const [formState, setFormState] = useState<FormState>({
+    url: "",
+    name: "",
+    month: "",
+    dayOfWeek: "",
+    errors: {},
+  });
+
+  const onSubmit = async () => {
+    try {
+      const res = await axios.post("/tasks/create", {
+        url: formState.url,
+        name: formState.name,
+      });
+
+      if (res.status === 201) {
+        res.data as Task;
+      }
+    } catch {}
+  };
 
   return (
     <div
@@ -22,6 +44,7 @@ const CreateInput = () => {
       <input
         className="h-full flex-1 border-0 bg-transparent pl-5 text-text outline-none"
         placeholder="Enter a website..."
+        onChange={(e) => setFormState({ ...formState, url: e.target.value })}
       />
       <div
         className="relative flex items-center justify-center px-5 xxl:px-6"
@@ -29,17 +52,22 @@ const CreateInput = () => {
         ref={containerRef}
       >
         <button className="flex items-center justify-center gap-2">
-          <FaRegClock className="h-5 w-5 xxl:h-6 xxl:w-6" />
-          {cronString && <p>{cronString}</p>}
+          <IoSettingsOutline className="h-5 w-5 xxl:h-6 xxl:w-6" />
+          {formState.name && <p>{formState.name}</p>}
         </button>
 
         {open && (
-          <CronDropdown setOpen={setOpen} setCronString={setCronString} />
+          <CronDropdown
+            setOpen={setOpen}
+            formState={formState}
+            setFormState={setFormState}
+          />
         )}
       </div>
       <button
         className="flex h-full items-center justify-center rounded-r-full bg-accent px-5
           text-text-contrast xxl:px-7"
+        onClick={onSubmit}
       >
         <FaRegBell className="h-5 w-5 xxl:h-6 xxl:w-6" />
       </button>

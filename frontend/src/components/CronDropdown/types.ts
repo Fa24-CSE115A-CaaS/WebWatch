@@ -1,14 +1,22 @@
-import { Dispatch, FunctionComponent, SetStateAction } from "react";
+import { Dispatch, SetStateAction } from "react";
 
-interface CronDropdownProps {
+export interface FormState {
+  name: string;
+  dayOfWeek: string;
+  month: string;
+  monthDay?: number;
+  hours?: number;
+  minutes?: number;
+}
+
+export type Errors = { [K in keyof FormState]?: string };
+
+export interface FormState {
+  errors: Errors;
+}
+
+export interface CronDropdownProps<T> {
   setOpen: Dispatch<SetStateAction<boolean>>;
-  setCronString: Dispatch<SetStateAction<string>>;
+  formState: T;
+  setFormState: Dispatch<SetStateAction<T>>;
 }
-
-type ErrorKeys = 'dayOfWeek' | 'month' | 'monthDay' | 'hours' | 'minutes';
-
-export type Errors = { 
-  [K in ErrorKeys]?: string;
-}
-
-export type CronDropdownComponent = FunctionComponent<CronDropdownProps>;

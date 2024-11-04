@@ -1,24 +1,23 @@
-import { useState } from "react";
-
 // Components
 import Input from "../Input";
 import Dropdown from "../Dropdown";
 // Types
-import { CronDropdownComponent, Errors } from "./types";
+import { CronDropdownProps, FormState, Errors } from "./types";
 // Constants
 import { daysOfWeek, months } from "./constants";
 
-const CronDropdown: CronDropdownComponent = ({ setOpen, setCronString }) => {
-  const [month, setMonth] = useState<string>("");
-  const [dayOfWeek, setDayOfWeek] = useState<string>("");
-  const [monthDay, setMonthDay] = useState<number>();
-  const [hours, setHours] = useState<number>();
-  const [minutes, setMinutes] = useState<number>();
-  const [errors, setErrors] = useState<Errors>({});
-
+const CronDropdown = <T extends FormState>({
+  setOpen,
+  formState,
+  setFormState,
+}: CronDropdownProps<T>) => {
   const updateSchedule = () => {
-    const values = [dayOfWeek, month, monthDay, hours, minutes];
+    const { name, monthDay, hours, minutes } = formState;
     const errors: Errors = {};
+
+    if (name.trim().length <= 0) {
+      errors.name = "Please enter a name";
+    }
 
     if (monthDay && (monthDay < 1 || monthDay > 31)) {
       errors.monthDay = "Value between 1-31";
@@ -33,11 +32,10 @@ const CronDropdown: CronDropdownComponent = ({ setOpen, setCronString }) => {
     }
 
     if (Object.keys(errors).length > 0) {
-      setErrors(errors);
+      setFormState({ ...formState, errors: { ...errors } });
       return;
     }
-    console.log(values);
-    setCronString(values.filter((value) => Boolean(value)).join(", "));
+    setFormState({ ...formState, errors: {} });
     setOpen(false);
   };
 
@@ -47,47 +45,62 @@ const CronDropdown: CronDropdownComponent = ({ setOpen, setCronString }) => {
         bg-primary p-5 text-left"
       onClick={(e) => e.stopPropagation()}
     >
+      <Input
+        label="Name"
+        inputAttrs={{
+          onChange: (e) => {
+            formState.name = e.target.value;
+          },
+        }}
+        error={formState.errors.name}
+      />
       <Dropdown
         label="Day of Week:"
         choices={daysOfWeek}
         placeholder="Select a date"
-        value={dayOfWeek}
-        onChange={setDayOfWeek}
+        value={formState.dayOfWeek}
+        onChange={(s) => setFormState({ ...formState, dayOfWeek: s })}
       />
       <Dropdown
         label="Month:"
         choices={months}
         placeholder="Select a month"
-        value={month}
-        onChange={setMonth}
+        value={formState.month}
+        onChange={(s) => setFormState({ ...formState, month: s })}
       />
       <div className="grid grid-cols-2 gap-x-6 gap-y-2">
         <Input
           label="Day of Month"
           inputAttrs={{
-            value: monthDay,
+            value: formState.monthDay,
             type: "number",
-            onChange: (e) => setMonthDay(parseInt(e.target.value)),
+            onChange: (e) =>
+              setFormState({
+                ...formState,
+                monthDay: parseInt(e.target.value),
+              }),
           }}
-          error={errors.monthDay}
+          error={formState.errors.monthDay}
         />
         <Input
           label="Hours"
           inputAttrs={{
-            value: hours,
+            value: formState.hours,
             type: "number",
-            onChange: (e) => setHours(parseInt(e.target.value)),
+            onChange: (e) =>
+              setFormState({ ...formState, hours: parseInt(e.target.value) }),
           }}
-          error={errors.hours}
+          error={formState.errors.hours}
         />
         <Input
           label="Minutes"
           inputAttrs={{
-            value: minutes,
+            value: formState.minutes,
             type: "number",
-            onChange: (e) => setMinutes(parseInt(e.target.value)),
+            onChange: (e) =>
+              setFormState({ ...formState, minutes: parseInt(e.target.value) }),
           }}
-          error={errors.minutes}
+          error={formState.errors.minutes}
         />
         <button
           className="w-full self-end rounded-sm bg-accent px-3 py-1 text-text-contrast"
