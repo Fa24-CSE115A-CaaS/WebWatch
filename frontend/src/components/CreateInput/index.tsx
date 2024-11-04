@@ -57,11 +57,14 @@ const CreateInput = () => {
         </button>
 
         {open && (
-          <CronDropdown
-            setOpen={setOpen}
-            formState={formState}
-            setFormState={setFormState}
-          />
+          <div className="absolute right-0 top-12 w-80">
+            <CronDropdown
+              setOpen={setOpen}
+              formState={formState}
+              showNameField={true}
+              setFormState={setFormState}
+            />
+          </div>
         )}
       </div>
       <button

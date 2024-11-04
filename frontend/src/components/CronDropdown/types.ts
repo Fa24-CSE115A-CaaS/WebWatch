@@ -1,9 +1,9 @@
 import { Dispatch, SetStateAction } from "react";
 
 export interface FormState {
-  name: string;
-  dayOfWeek: string;
-  month: string;
+  name?: string;
+  dayOfWeek?: string;
+  month?: string;
   monthDay?: number;
   hours?: number;
   minutes?: number;
@@ -18,5 +18,6 @@ export interface FormState {
 export interface CronDropdownProps<T> {
   setOpen: Dispatch<SetStateAction<boolean>>;
   formState: T;
+  showNameField?: boolean;
   setFormState: Dispatch<SetStateAction<T>>;
 }

@@ -10,12 +10,13 @@ const CronDropdown = <T extends FormState>({
   setOpen,
   formState,
   setFormState,
+  showNameField = false,
 }: CronDropdownProps<T>) => {
   const updateSchedule = () => {
     const { name, monthDay, hours, minutes } = formState;
     const errors: Errors = {};
 
-    if (name.trim().length <= 0) {
+    if (name && name.trim().length <= 0) {
       errors.name = "Please enter a name";
     }
 
@@ -41,31 +42,32 @@ const CronDropdown = <T extends FormState>({
 
   return (
     <div
-      className="absolute right-0 top-12 grid w-80 gap-2 rounded-sm border-[1px] border-border
-        bg-primary p-5 text-left"
+      className="top-12 grid gap-2 rounded-sm border-[1px] border-border bg-primary p-5 text-left"
       onClick={(e) => e.stopPropagation()}
     >
-      <Input
-        label="Name"
-        inputAttrs={{
-          onChange: (e) => {
-            formState.name = e.target.value;
-          },
-        }}
-        error={formState.errors.name}
-      />
+      {showNameField && (
+        <Input
+          label="Name"
+          inputAttrs={{
+            onChange: (e) => {
+              formState.name = e.target.value;
+            },
+          }}
+          error={formState.errors.name}
+        />
+      )}
       <Dropdown
         label="Day of Week:"
         choices={daysOfWeek}
         placeholder="Select a date"
-        value={formState.dayOfWeek}
+        value={formState.dayOfWeek || ""}
         onChange={(s) => setFormState({ ...formState, dayOfWeek: s })}
       />
       <Dropdown
         label="Month:"
         choices={months}
         placeholder="Select a month"
-        value={formState.month}
+        value={formState.month || ""}
         onChange={(s) => setFormState({ ...formState, month: s })}
       />
       <div className="grid grid-cols-2 gap-x-6 gap-y-2">
@@ -103,6 +105,7 @@ const CronDropdown = <T extends FormState>({
           error={formState.errors.minutes}
         />
         <button
+          type="button"
           className="w-full self-end rounded-sm bg-accent px-3 py-1 text-text-contrast"
           onClick={updateSchedule}
         >

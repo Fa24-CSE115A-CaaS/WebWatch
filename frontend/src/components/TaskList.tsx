@@ -11,13 +11,13 @@ type TaskComponent = React.FunctionComponent<TaskListProps>;
 const TaskList: TaskComponent = ({ tasks }) => {
   return (
     <section
-      className="xxl:w-[1500px] xxl:border-2 mx-auto mt-10 overflow-hidden rounded-md
-        border-[1px] border-border text-text xl:w-[1200px]"
+      className="mx-auto mt-10 overflow-hidden rounded-md border-[1px] border-border text-text
+        xl:w-[1200px] xxl:w-[1500px] xxl:border-2"
     >
       <table className="w-full table-fixed">
-        <thead className="xxl:text-lg bg-secondary text-left text-sm font-bold">
+        <thead className="bg-secondary text-left text-sm font-bold xxl:text-lg">
           <tr>
-            <th className="xxl:w-[15%] w-1/5">NAME</th>
+            <th className="w-1/5 xxl:w-[15%]">NAME</th>
             <th>WEBSITE</th>
             <th className="w-[15%]">ACTION</th>
             <th className="w-[15%]">INTERVAL</th>
@@ -26,7 +26,7 @@ const TaskList: TaskComponent = ({ tasks }) => {
         </thead>
         <tbody className="xxl:text-xl">
           {tasks.map((task) => (
-            <tr>
+            <tr key={task.id}>
               <td className="font-medium">{task.name}</td>
               <td className="xxl:pr-10">
                 <a className="underline" href={task.url}>

@@ -1,12 +1,9 @@
-import {
-  FunctionComponent,
-  InputHTMLAttributes,
-} from "react";
+import { FunctionComponent, InputHTMLAttributes } from "react";
 
 interface InputProps {
   label: string;
   containerClass?: string;
-  inputAttrs: InputHTMLAttributes<HTMLInputElement>;
+  inputAttrs?: InputHTMLAttributes<HTMLInputElement>;
   error?: string;
 }
 
@@ -20,7 +17,7 @@ const Input: InputComponent = ({
 }) => {
   return (
     <div className={`w-full ${containerClass}`}>
-      <label className="text-sm">{label}</label>
+      <label className="mb-2 block text-sm">{label}</label>
       <input
         className="w-full bg-secondary px-3 py-1 outline-none"
         {...inputAttrs}
