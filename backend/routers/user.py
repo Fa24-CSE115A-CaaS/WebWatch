@@ -89,7 +89,7 @@ async def get_user(user_email: int):
 
 
 # Update user details by id
-@router.put("{user_id}")
+@router.put("/{user_id}")
 async def users_update(user_id: int):
     with db.get_session() as session:
         user = session.get(User, user_id)

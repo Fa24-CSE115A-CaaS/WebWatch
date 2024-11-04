@@ -11,12 +11,10 @@ import os
 
 app = FastAPI()
 ph = PasswordHasher()
-
 load_dotenv()
-ACCESS_KEY = os.getenv("ACCESS_SECRET_KEY")
-#REFRESH_KEY = os.getenv("REFRESH_SECRET_KEY")
-REFRESH_KEY = secrets.token_urlsafe(32)  # Generates a secure, 32-character key
 
+ACCESS_KEY = os.getenv("ACCESS_SECRET_KEY")
+REFRESH_KEY = secrets.token_urlsafe(32)  # Generates a secure, 32-character key
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 access_expiration = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 refresh_expiration = int(os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES"))
@@ -25,13 +23,6 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
-def authenticate_user(email: str, password: str):
-    user = get_user_by_email(email)
-    if not user:
-        return False
-    if not verify_password(user.password_hash, password):
-        return False
-    return user
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
@@ -83,10 +74,3 @@ def _get_utc_now():
         # For older versions of Python
         current_utc_time = datetime.utcnow()
     return current_utc_time
-
-def get_user_by_email(email: str):
-    with db.get_session() as session:
-        user = session.exec(select(User).where(User.email == email)).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
