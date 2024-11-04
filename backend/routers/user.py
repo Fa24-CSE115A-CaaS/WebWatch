@@ -1,10 +1,10 @@
-from fastapi import APIRouter, HTTPException, Depends, Cookie
+from fastapi import APIRouter, HTTPException, status, Depends, Cookie
 from fastapi.responses import Response
 from sqlmodel import SQLModel, select, Session
-from schemas.user import UserBase, UserRegister, UserGet, UserUpdate, User, UserOutput, UserLogin, JwtTokenSchema, RefreshToken
+from schemas.user import UserRegister, UserLogin, User
 from auth import get_hashed_password, verify_password, create_access_token, create_refresh_token
-from database import Database
 
+from database import Database
 from datetime import timedelta
 from typing import Annotated
 
@@ -16,7 +16,7 @@ router = APIRouter(
 )
 
 # Registers new user
-@router.post("/register", response_model=UserOutput, status_code=201)
+@router.post("/register", status_code=201)
 async def create_user(user: UserRegister):
     hashed_password = get_hashed_password(user.password)
     new_user = User(email=user.email, password_hash=hashed_password)
@@ -24,29 +24,49 @@ async def create_user(user: UserRegister):
         session.add(new_user)
         session.commit()
         session.refresh(new_user)
-    return UserOutput(email=new_user.email, username=user.username)
+    return user.email
+      
 
 # Authenticates existing user
 @router.post('/login')
 async def login(request: UserLogin):
-    with db.get_session() as session:
-        user = session.exec(select(User).where(User.email == request.email)).first()
-    if not user:
+    try:
+        with db.get_session() as session:
+
+            # Query the user based on email
+            user = session.exec(select(User).where(User.email == request.email)).first()
+            if user is None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="User doesn't exist"
+                )
+
+            if not verify_password(user.password_hash, request.password):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Incorrect password"
+                )
+
+
+            access_token_expires = timedelta(minutes=15)
+
+            # Generate tokens
+            access_token = create_access_token(
+                data={"sub": str(user.id)},  # Token payload with user ID
+                expires_delta=access_token_expires
+            )
+            refresh_token = create_access_token(
+                data={"sub": str(user.id), "type": "refresh"},
+                expires_delta=timedelta(days=30)  # Refresh token with a longer expiration
+            )
+
+            return {"access_token": access_token, "refresh_token": refresh_token}
+    except Exception as e:
+        print(f"An error occurred: {e}")
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User doesn't exist"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error"
         )
-    if not verify_password(user.password_hash, request.password):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect password"
-        )
-    access_token = create_access_token(data={'email'})
-    fresh_token = create_refresh_token(data={"sub": user.email})
-    return {
-        "access_token": access_token,
-        "refresh_token": fresh_token,
-    }
 
 
 @router.get("/verify")
@@ -57,35 +77,9 @@ async def verify(token: str):
     if not user:
         raise NotFoundException(detail="User not found")
 
-@router.post("/refresh")
-async def refresh(refresh: Annotated[str | None, Cookie()] = None):
-    print(refresh)
-    if not refresh:
-        raise HTTPException(status_code=400, detail="Refresh token required")
-    
-    # Refresh the token and activate the user
-    token_state = refresh_token(token=refresh)
-    
-    await user.save(db=db)
-    
-    return {"msg": "Successfully activated", "token_state": token_state}
-
-@router.post("/refresh")
-async def refresh_token(refresh_token: RefreshToken):
-    with db.get_session() as session:
-        user = get_user_by_email(db, request.email)
-    if not refresh_token or not user:
-        raise HTTPException(status_code=401, detail="No refresh token")
-    decoded_token = await decode_token(refresh_token, 'id', type='refresh')
-    if not decoded_token:
-        raise HTTPException(status_code=401, detail="Invalid refresh token")
-    if not user:
-        raise HTTPException(status_code=401, detail="User does not exist")
-    access_token = create_access_token(data={"sub": user.email})
-    return JSONResponse({"token": access_token, "email": user.email}, status_code=200)
 
 # Get user details by ID
-@router.get("/{user_id}", response_model=UserOutput)
+@router.get("/{user_id}")
 async def get_user(user_email: int):
     with db.get_session() as session:
         user = session.exec(select(User).where(User.email == user_email)).first()
@@ -95,8 +89,8 @@ async def get_user(user_email: int):
 
 
 # Update user details by id
-@router.put("{user_id}", response_model=UserGet)
-async def users_update(user_id: int, user_update: UserUpdate):
+@router.put("{user_id}")
+async def users_update(user_id: int):
     with db.get_session() as session:
         user = session.get(User, user_id)
         if not user:
@@ -109,8 +103,9 @@ async def users_update(user_id: int, user_update: UserUpdate):
         session.refresh(user)
     return user
 
+
 # Delete a user by id
-@router.delete("{user_id}", response_model=UserGet)
+@router.delete("{user_id}")
 async def users_delete(user_id: int):
     with db.get_session() as session:
         user = session.get(User, user_id)

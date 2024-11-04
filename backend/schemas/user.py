@@ -1,6 +1,7 @@
 from sqlmodel import SQLModel, Field
 from pydantic import BaseModel, validator, EmailStr
 from datetime import datetime
+from typing import Optional
 
 
 
@@ -9,7 +10,8 @@ class UserBase(SQLModel):
     password_hash: str
 
 class User(UserBase, table=True):
-    id: int = Field(primary_key=True)
+    __tablename__ = "user"  # Ensures SQLModel uses the correct table name
+    id: Optional[int] = Field(default=None, primary_key=True)
 
 class UserGet(UserBase):
     id: int
@@ -41,7 +43,6 @@ class UserOutput(BaseModel):
 
 class UserRegister(BaseModel):
     email:EmailStr
-    username: str
     password: str
 
 """ class UserRegister(BaseModel):
