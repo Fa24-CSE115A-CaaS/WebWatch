@@ -59,7 +59,7 @@ class UserRegister(BaseModel):
 
 class TokenPair(BaseModel):
     access_token: str
-    refresh_token: str
+    # refresh_token: str
 '''
 
 class RefreshToken(BaseModel):

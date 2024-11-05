@@ -24,27 +24,18 @@ def create_access_token(data: dict):
     encoded_jwt = jwt.encode(to_encode, ACCESS_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+'''
 def create_refresh_token(data: dict):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=refresh_expiration)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, REFRESH_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+'''
 
 def decode_access_token(token: str) -> dict:
     try:
-        # Decode the token
         payload = jwt.decode(token, ACCESS_KEY, algorithms=[ALGORITHM])
-        
-        # Check if the token has expired
-        exp = payload.get("exp")
-        if not exp or datetime.fromtimestamp(exp, timezone.utc) < datetime.now(timezone.utc):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token has expired",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        
         return payload
     except JWTError:
         raise HTTPException(
@@ -52,3 +43,23 @@ def decode_access_token(token: str) -> dict:
             detail="Invalid token",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = decode_access_token(token)
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+        token_data = TokenData(email=email)
+    except JWTError:
+        raise credentials_exception
+    with db.get_session() as session:
+        user = session.exec(select(User).where(User.email == token_data.email)).first()
+        if user is None:
+            raise credentials_exception
+    return user

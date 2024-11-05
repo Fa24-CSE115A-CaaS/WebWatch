@@ -3,8 +3,8 @@ from fastapi import APIRouter, HTTPException, status, Depends, Cookie
 from sqlmodel import SQLModel, select, Session
 from schemas.user import UserRegister, UserLogin, UserOutput, User, TokenPair
 from auth.password import get_hashed_password, verify_password
-from auth.token import create_access_token, create_refresh_token, decode_access_token
-from fastapi.security import OAuth2PasswordRequestForm
+from auth.token import create_access_token, decode_access_token, get_current_user #, create_refresh_token
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 from database import Database
 from datetime import timedelta
@@ -13,8 +13,11 @@ from datetime import timedelta
 db = Database(production=False)
 
 router = APIRouter(
-    prefix="/user",
+    prefix="/users",
 )
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/token")
+
+
 
 @router.post(
     "/register",
@@ -48,7 +51,7 @@ async def create_user(user: UserRegister):
 
 # Authenticates existing user
 @router.post(
-    '/login',
+    '/token',
     status_code=status.HTTP_200_OK,
     response_model=TokenPair,
     responses={
@@ -56,28 +59,27 @@ async def create_user(user: UserRegister):
         status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error"}
     }
 )
-async def login(request: UserLogin):
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     with db.get_session() as session:
-        try:
-            # Query the user based on email
-            user = session.exec(select(User).where(User.email == request.email)).first()
-            if not user or not verify_password(user.password_hash, request.password):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Incorrect email or password"
-                )
-
-            # Generate tokens
-            access_token = create_access_token(
-                data={"id": user.token_uuid}, 
-            )
-            refresh_token = create_refresh_token(
-                data={"id": user.token_uuid, "type": "refresh"},
+        # Query the user based on email
+        user = session.exec(select(User).where(User.email == form_data.username)).first()
+        if not user or not verify_password(user.password_hash, form_data.password):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Incorrect email or password"
             )
 
-            return {"access_token": access_token, "refresh_token": refresh_token}
-        except HTTPException as e:
-            raise e
+        # Generate tokens
+        access_token = create_access_token(
+            data={"id": user.token_uuid}, 
+        )
+        '''
+        refresh_token = create_refresh_token(
+            data={"id": user.token_uuid, "type": "refresh"},
+        )
+        '''
+
+        return {"access_token": access_token, "token_type": "bearer"} #, "refresh_token": refresh_token}
 
 @router.get("/verify")
 async def verify(token: str):
@@ -90,6 +92,11 @@ async def verify(token: str):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     
     return {"email": user.email}
+
+@router.get("/users/me/", response_model=UserOutput)
+async def read_users_me(request: UserOutput = Depends(get_current_user)):
+    return current_user
+
 
 '''
 # Get user details by ID

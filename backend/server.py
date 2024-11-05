@@ -10,6 +10,11 @@ from typing import List
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 
+from fastapi.openapi.utils import get_openapi
+
+
+
+
 load_dotenv()
 scheduler = Scheduler()
 db = Database(production=False)
@@ -27,11 +32,42 @@ async def lifespan(app: FastAPI):
     await scheduler.shutdown()
 
 # Initialize FastAPI with lifespan
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(root_path="/api", lifespan=lifespan)
 
 # Defining existing endpoints
 app.include_router(user_router)
 app.include_router(task_router)
+
+
+# NECESSARY FOR SWAGGER DOCS AUTHENTICATION SCHEMA
+# Otherwise, the "Authorize" button uses /token instead of /api/users/token to authenticate...
+# TODO: Find a better way to do this
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="Your API",
+        version="1.0.0",
+        description="Description of your API",
+        routes=app.routes,
+    )
+    # Set the OAuth2 security schema with the correct token URL
+    openapi_schema["components"]["securitySchemes"] = {
+        "OAuth2PasswordBearer": {
+            "type": "oauth2",
+            "flows": {
+                "password": {
+                    "tokenUrl": "/api/users/token",
+                    "scopes": {}
+                }
+            }
+        }
+    }
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
+
 
 
 @app.get("/")
