@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException, status, Depends, Cookie
 # from fastapi.responses import Response
 from sqlmodel import SQLModel, select, Session
 from schemas.user import UserRegister, UserLogin, UserOutput, User, TokenPair
-from auth.password import get_hashed_password, verify_password
-from auth.token import create_access_token, decode_access_token, get_current_user #, create_refresh_token
+from auth_password import get_hashed_password, verify_password
+from auth_token import create_access_token, decode_access_token, get_current_user #, create_refresh_token
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 from database import Database
@@ -94,7 +94,7 @@ async def verify(token: str):
     return {"email": user.email}
 
 @router.get("/users/me/", response_model=UserOutput)
-async def read_users_me(request: UserOutput = Depends(get_current_user)):
+async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 

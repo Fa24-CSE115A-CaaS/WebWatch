@@ -3,18 +3,21 @@ from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timezone, timedelta
 from jose import JWTError, jwt
 from dotenv import load_dotenv
+from database import Database
 import secrets
 import os
-
+from schemas.user import User
+from sqlmodel import SQLModel, select, Session
 app = FastAPI()
 load_dotenv()
+
+db = Database(production=False)
 
 ACCESS_KEY = os.getenv("ACCESS_SECRET_KEY")
 REFRESH_KEY = os.getenv("REFRESH_SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 access_expiration = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 refresh_expiration = int(os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES"))
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 def create_access_token(data: dict):
@@ -52,14 +55,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     )
     try:
         payload = decode_access_token(token)
-        email: str = payload.get("sub")
-        if email is None:
+        uuid: str = payload.get("id")
+        if not uuid:
             raise credentials_exception
-        token_data = TokenData(email=email)
+        #token_data = TokenData(email=email)
     except JWTError:
         raise credentials_exception
     with db.get_session() as session:
-        user = session.exec(select(User).where(User.email == token_data.email)).first()
+        user = session.exec(select(User).where(User.token_uuid == uuid)).first()
         if user is None:
             raise credentials_exception
     return user
