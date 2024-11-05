@@ -16,8 +16,8 @@ const TaskList: TaskComponent = ({ tasks }) => {
 
   return (
     <section
-      className="mx-auto mt-10 overflow-hidden rounded-md border-[1px] border-border text-text
-        xl:w-[1200px] xxl:w-[1500px] xxl:border-2"
+      className="mx-auto mb-10 overflow-hidden rounded-md border-[1px] border-border text-text
+        xxl:border-2"
     >
       <table className="w-full table-fixed">
         <thead className="bg-secondary text-left text-sm font-bold xxl:text-lg">
@@ -39,6 +39,11 @@ const TaskList: TaskComponent = ({ tasks }) => {
           ))}
         </tbody>
       </table>
+      {tasks.length <= 0 && (
+        <div className="w-full bg-primary p-5 text-center xxl:px-8">
+          No tasks found.
+        </div>
+      )}
       {editTask && (
         <EditTaskModal task={editTask} closeModal={() => setEditTask(null)} />
       )}
