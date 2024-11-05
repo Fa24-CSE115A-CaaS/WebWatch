@@ -93,7 +93,7 @@ async def verify(token: str):
     
     return {"email": user.email}
 
-@router.get("/users/me/", response_model=UserOutput)
+@router.get("/me", response_model=UserOutput)
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
