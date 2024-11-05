@@ -1,7 +1,5 @@
 from fastapi import Depends, FastAPI, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer #, OAuth2PasswordRequestForm
-# from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-# from pydantic import BaseModel, EmailStr
+from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from argon2 import PasswordHasher
@@ -10,7 +8,6 @@ import secrets
 import os
 
 app = FastAPI()
-ph = PasswordHasher()
 load_dotenv()
 
 ACCESS_KEY = os.getenv("ACCESS_SECRET_KEY")
@@ -35,38 +32,8 @@ def create_refresh_token(data: dict):
     encoded_jwt = jwt.encode(to_encode, REFRESH_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+def get_hashed_password(plain_password: str) -> str:
+    return PasswordHasher().hash(plain_password)
 
-'''
-def get_current_user(token: str = Depends(oauth2_scheme)):
-    credential_exception = HTTPException(status_code=status.HTTP_401_CONTINUE, detail="Could not validate credentials", headers={"WWW-Authenticate" : "Bearer"})
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub") # get user stored in token
-        if username is None:
-            raise credential_exception
-    except JWTError:
-        raise credential_exception
-    user = get_user(db, username=token_data.username)
-    if user is None:
-        raise credential_exception
-    
-    return user
-'''
-
-def get_hashed_password(plain_password):
-    return ph.hash(plain_password)
-
-def verify_password(hashed_password, plain_password):
-    return ph.verify(hashed_password, plain_password)
-
-'''
-def _get_utc_now():
-    if sys.version_info >= (3, 2):
-        # For Python 3.2 and later
-        current_utc_time = datetime.now(timezone.utc)
-    else:
-        # For older versions of Python
-        current_utc_time = datetime.utcnow()
-    return current_utc_time
-
-'''
+def verify_password(hashed_password: str, plain_password: str) -> bool:
+    return PasswordHasher().verify(hashed_password, plain_password)
