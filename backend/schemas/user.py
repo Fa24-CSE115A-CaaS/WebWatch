@@ -10,7 +10,7 @@ class UserBase(SQLModel):
     password_hash: str
 
 class User(UserBase, table=True):
-    __tablename__ = "user"  # Ensures SQLModel uses the correct table name
+    __tablename__ = "user"  
     id: Optional[int] = Field(default=None, primary_key=True)
     # Used in JWTs to avoid exposing user db primary keys
     token_uuid: str = Field(default_factory=lambda: str(uuid4()))
@@ -57,11 +57,5 @@ class UserRegister(BaseModel):
             raise ValueError("The two passwords did not match.")
         return v
 
-class TokenPair(BaseModel):
+class Token(BaseModel):
     access_token: str
-    # refresh_token: str
-'''
-
-class RefreshToken(BaseModel):
-    refresh: str
-'''

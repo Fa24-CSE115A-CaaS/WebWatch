@@ -7,8 +7,6 @@ const AuthForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
-  
   
   const navigate = useNavigate();
 
@@ -35,7 +33,6 @@ const AuthForm = () => {
       localStorage.setItem('access_token', response.data.access_token);
     } catch (error) {
       console.error("Error:", error);
-      // Handle error (e.g., show error message)
     }
   };
   
@@ -58,10 +55,8 @@ const AuthForm = () => {
       console.log("Success:", response.data);
       localStorage.setItem('access_token', response.data.access_token);
       navigate('/me');
-      // Handle successful response (e.g., redirect, show message)
     } catch (error) {
       console.error("Error:", error);
-      // Handle error (e.g., show error message)
     }
   };
   

@@ -14,9 +14,6 @@ from contextlib import asynccontextmanager
 
 from fastapi.openapi.utils import get_openapi
 
-
-
-
 load_dotenv()
 scheduler = Scheduler()
 db = Database(production=False)
@@ -36,10 +33,10 @@ async def lifespan(app: FastAPI):
 # Initialize FastAPI with lifespan
 app = FastAPI(root_path="/api", lifespan=lifespan)
 
-# CORS Middleware
+# CORS Middleware (required for frontend to make requests)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173"], # TODO: Change this to the frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -57,9 +54,8 @@ def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
     openapi_schema = get_openapi(
-        title="Your API",
+        title="WebWatchAPI",
         version="1.0.0",
-        description="Description of your API",
         routes=app.routes,
     )
     # Set the OAuth2 security schema with the correct token URL

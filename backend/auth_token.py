@@ -11,30 +11,20 @@ from sqlmodel import SQLModel, select, Session
 app = FastAPI()
 load_dotenv()
 
+# TODO: Consider reworking database usage. FastAPI dependency injection?
 db = Database(production=False)
 
 ACCESS_KEY = os.getenv("ACCESS_SECRET_KEY")
-REFRESH_KEY = os.getenv("REFRESH_SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
-access_expiration = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
-refresh_expiration = int(os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES"))
+ACCESS_EXPIRATION = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 def create_access_token(data: dict):
     to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=access_expiration)
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_EXPIRATION)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, ACCESS_KEY, algorithm=ALGORITHM)
     return encoded_jwt
-
-'''
-def create_refresh_token(data: dict):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=refresh_expiration)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, REFRESH_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-'''
 
 def decode_access_token(token: str) -> dict:
     try:
@@ -47,6 +37,7 @@ def decode_access_token(token: str) -> dict:
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+# Used with FastAPI Depends to get the current user and protect other routes
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -58,7 +49,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         uuid: str = payload.get("id")
         if not uuid:
             raise credentials_exception
-        #token_data = TokenData(email=email)
     except JWTError:
         raise credentials_exception
     with db.get_session() as session:
