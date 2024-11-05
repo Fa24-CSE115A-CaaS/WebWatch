@@ -1,16 +1,20 @@
-from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException, Response
-from dotenv import load_dotenv
-from sqlmodel import SQLModel, select
 import asyncio
-from typing import List
-from schemas.task import Task, TaskCreate, TaskGet, TaskUpdate
-from schemas.user import User, UserCreate, UserGet, UserUpdate
+from routers.user import router as user_router
+from routers.task import router as task_router
+from schemas.task import Task
+from fastapi import FastAPI, APIRouter
+from fastapi.middleware.cors import CORSMiddleware
+
 from database import Database
+from sqlmodel import SQLModel, select, Session
 from scheduler import Scheduler
+from typing import List
+from dotenv import load_dotenv
+from contextlib import asynccontextmanager
+
+from fastapi.openapi.utils import get_openapi
 
 load_dotenv()
-
 scheduler = Scheduler()
 db = Database(production=False)
 
@@ -26,127 +30,54 @@ async def lifespan(app: FastAPI):
     # ON SHUTDOWN
     await scheduler.shutdown()
 
-app = FastAPI(lifespan=lifespan)
+# Initialize FastAPI with lifespan
+app = FastAPI(root_path="/api", lifespan=lifespan)
+
+# CORS Middleware (required for frontend to make requests)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"], # TODO: Change this to the frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Defining existing endpoints
+app.include_router(user_router)
+app.include_router(task_router)
+
+
+# NECESSARY FOR SWAGGER DOCS AUTHENTICATION SCHEMA
+# Otherwise, the "Authorize" button uses /token instead of /api/users/token to authenticate...
+# TODO: Find a better way to do this
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="WebWatchAPI",
+        version="1.0.0",
+        routes=app.routes,
+    )
+    # Set the OAuth2 security schema with the correct token URL
+    openapi_schema["components"]["securitySchemes"] = {
+        "OAuth2PasswordBearer": {
+            "type": "oauth2",
+            "flows": {
+                "password": {
+                    "tokenUrl": "/api/users/login",
+                    "scopes": {}
+                }
+            }
+        }
+    }
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
+
+
 
 @app.get("/")
 async def root():
     # The root API, not much functionality
     return {"WebWatchAPI": "WebWatchAPI"}
-
-# User Endpoints
-
-# Create a new user
-@app.post("/users", response_model=UserGet, status_code=201)
-async def users_create(user_create: UserCreate):
-    with db.get_session() as session:
-        user = User(email=user_create.email, password_hash=user_create.password_hash)
-        session.add(user)
-        session.commit()
-        session.refresh(user)
-    return user
-
-# List all users
-# @app.get("/users", response_model=List[UserGet])
-# async def users_list():
-#     with db.get_session() as session:
-#         users = session.exec(select(User)).all()
-#     if not users:
-#         raise HTTPException(status_code=404, detail="No users found")
-#     return users
-
-# Get a user by id
-@app.get("/users/{user_id}", response_model=UserGet)
-async def users_get(user_id: int):
-    with db.get_session() as session:
-        user = session.get(User, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
-
-# Update user details by id
-@app.put("/users/{user_id}", response_model=UserGet)
-async def users_update(user_id: int, user_update: UserUpdate):
-    with db.get_session() as session:
-        user = session.get(User, user_id)
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-        update_data = user_update.dict(exclude_unset=True)
-        for key, value in update_data.items():
-            setattr(user, key, value)
-        session.add(user)
-        session.commit()
-        session.refresh(user)
-    return user
-
-# Delete a user by id
-@app.delete("/users/{user_id}", response_model=UserGet)
-async def users_delete(user_id: int):
-    with db.get_session() as session:
-        user = session.get(User, user_id)
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        # Delete all tasks associated with the user
-        tasks = session.exec(select(Task).where(Task.user_id == user_id)).all()
-        for task in tasks:
-            session.delete(task)
-
-        session.delete(user)
-        session.commit()
-    return Response(status_code=204)
-
-# Task Endpoints
-
-# Create a new task
-@app.post("/tasks", response_model=TaskGet, status_code=201)
-async def tasks_create(task_create: TaskCreate):
-    # Validate user_id
-    with db.get_session() as session:
-        user = session.get(User, task_create.user_id)
-        if not user:
-            raise HTTPException(status_code=400, detail="Invalid user_id")
-        task = Task(**task_create.dict())
-        session.add(task)
-        session.commit()
-        session.refresh(task)
-    return task
-
-# List all tasks
-@app.get("/tasks", response_model=List[TaskGet])
-async def tasks_list():
-    with db.get_session() as session:
-        tasks = session.exec(select(Task)).all()
-    if not tasks:
-        raise HTTPException(status_code=404, detail="No tasks found")
-    return tasks
-
-# Update task details by id
-@app.put("/tasks/{task_id}", response_model=TaskGet)
-async def tasks_update(task_id: int, task_update: TaskUpdate):
-    with db.get_session() as session:
-        task = session.get(Task, task_id)
-        if not task:
-            raise HTTPException(status_code=404, detail="Task not found")
-        update_data = task_update.dict(exclude_unset=True)
-        # TODO: Find a better way to exclude user_id... const/static values in Model/Schema??
-        # Exclude user_id from being updated
-        if "user_id" in update_data:
-            del update_data["user_id"]
-        for key, value in update_data.items():
-            setattr(task, key, value)
-        session.add(task)
-        session.commit()
-        session.refresh(task)
-    return task
-
-# Delete task by id
-@app.delete("/tasks/{task_id}", response_model=TaskGet)
-async def tasks_delete(task_id: int):
-    # Delete a task
-    with db.get_session() as session:
-        task = session.get(Task, task_id)
-        if not task:
-            raise HTTPException(status_code=404, detail="Task not found")
-        session.delete(task)
-        session.commit()
-    return Response(status_code=204)
