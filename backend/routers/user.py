@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status #, Depends, Cookie
 # from fastapi.responses import Response
 from sqlmodel import SQLModel, select, Session
 from schemas.user import UserRegister, UserLogin, UserOutput, User, TokenPair
-from auth import get_hashed_password, verify_password, create_access_token, create_refresh_token
+from auth import get_hashed_password, verify_password, create_access_token, create_refresh_token, decode_access_token
 import uuid
 from database import Database
 from datetime import timedelta
@@ -80,16 +80,19 @@ async def login(request: UserLogin):
         except HTTPException as e:
             raise e
 
-'''
 @router.get("/verify")
 async def verify(token: str):
+    payload = decode_access_token(token)
+    user_id = payload.get("id")
+    
     with db.get_session() as session:
-        payload = await decode_access_token(token=token, db=db)
-        user = await models.User.find_by_id(db=db, id=payload[SUB])
-    if not user:
-        raise NotFoundException(detail="User not found")
+        user = session.exec(select(User).where(User.token_uuid == user_id)).first()
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    return {"email": user.email}
 
-
+'''
 # Get user details by ID
 @router.get("/{user_id}")
 async def get_user(user_email: int):
