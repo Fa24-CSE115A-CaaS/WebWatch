@@ -48,7 +48,9 @@ const Task: TaskComponent = ({ task, onEditModalOpen }) => {
               >
                 Edit
               </button>
-              <button className={dropdownButtonStyles}>Pause Task</button>
+              <button className={dropdownButtonStyles}>
+                {task.enabled ? "Pause Task" : "Run Task"}
+              </button>
               <button
                 className={`${dropdownButtonStyles} border-b-[0px] text-error`}
               >

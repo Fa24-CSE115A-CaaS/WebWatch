@@ -1,4 +1,4 @@
-import { FormEventHandler, useState } from "react";
+import { FormEventHandler, useContext, useState } from "react";
 // Components
 import Input from "../Input";
 import EditCheckbox from "./EditCheckbox";
@@ -7,10 +7,14 @@ import CronDropdown from "../CronDropdown";
 import { EditTaskModalComponent, FormState } from "./types";
 // Icons
 import { RxCross2 } from "react-icons/rx";
+import { axios } from "../../config";
+import { TasksPageContext } from "../../pages/Tasks";
+import { Task } from "../../types";
 
 const NOTIFICATION_OPTS = ["EMAIL", "DISCORD", "SLACK"];
 
 const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
+  const { tasks, setTasks } = useContext(TasksPageContext)!;
   const [formState, setFormState] = useState<FormState>({
     name: task.name,
     url: task.url,
@@ -24,8 +28,63 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
 
   const { name, url, notificationOptions, discordUrl, slackUrl } = formState;
 
-  const handleFormSubmit: FormEventHandler<HTMLFormElement> = (e) => {
+  const handleFormSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
+    let errors: typeof formState.errors = {};
+
+    if (name.trim().length <= 0) {
+      errors.name = "Please enter a name";
+    }
+
+    if (url.trim().length <= 0) {
+      errors.url = "Please enter a url";
+    }
+
+    if (notificationOptions.length <= 0) {
+      errors.notificationOptions =
+        "Please select at least one notification option";
+    }
+
+    if (
+      notificationOptions.includes("DISCORD") &&
+      discordUrl.trim().length <= 0
+    ) {
+      errors.discordUrl = "Please enter a Discord webhook url";
+    }
+
+    if (notificationOptions.includes("SLACK") && slackUrl.trim().length <= 0) {
+      errors.discordUrl = "Please enter a Slack webhook url";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormState({ ...formState, errors });
+      return;
+    }
+
+    const response = await axios.put(`/tasks/${task.id}`, {
+      name,
+      url,
+      enabled_notification_options: notificationOptions,
+      discord_url: discordUrl,
+    });
+
+    if (response.status === 200) {
+      setTasks(
+        tasks.map((t) => {
+          if (t.id !== task.id) {
+            return t;
+          }
+          return {
+            ...t,
+            name,
+            url,
+            enabledNotificationOptions: notificationOptions,
+            discordUrl,
+          } as Task;
+        }),
+      );
+      closeModal();
+    }
   };
 
   return (
@@ -56,6 +115,7 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
                 onChange: (e) =>
                   setFormState({ ...formState, name: e.target.value }),
               }}
+              error={formState.errors.name}
             />
             <Input
               label="Target URL"
@@ -65,6 +125,7 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
                 onChange: (e) =>
                   setFormState({ ...formState, url: e.target.value }),
               }}
+              error={formState.errors.url}
             />
             <div className="my-5">
               <h3 className="mb-2 text-xl xxl:text-2xl">Notfication Options</h3>
@@ -95,6 +156,9 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
                   />
                 );
               })}
+              {formState.errors.notificationOptions && (
+                <p>{formState.errors.notificationOptions}</p>
+              )}
             </div>
             <Input
               label="Discord Webhook URL"
@@ -104,6 +168,7 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
                 onChange: (e) =>
                   setFormState({ ...formState, discordUrl: e.target.value }),
               }}
+              error={formState.errors.discordUrl}
             />
             <Input
               label="Slack Webhook URL"
@@ -113,6 +178,7 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
                 onChange: (e) =>
                   setFormState({ ...formState, slackUrl: e.target.value }),
               }}
+              error={formState.errors.slackUrl}
             />
           </div>
           <div>
