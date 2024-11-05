@@ -1,7 +1,9 @@
 from fastapi import APIRouter, HTTPException
 from schemas.task import Task, TaskCreate, TaskUpdate, TaskGet
-from sqlmodel import SQLModel, select, Session
+from sqlmodel import select, Session
 from typing import List
+from database import Database
+from schemas.user import User
 
 
 ### TASK ENDPOINTS ###

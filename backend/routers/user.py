@@ -1,12 +1,12 @@
-from fastapi import APIRouter, HTTPException, status, Depends, Cookie
-from fastapi.responses import Response
+from fastapi import APIRouter, HTTPException, status #, Depends, Cookie
+# from fastapi.responses import Response
 from sqlmodel import SQLModel, select, Session
 from schemas.user import UserRegister, UserLogin, User
 from auth import get_hashed_password, verify_password, create_access_token, create_refresh_token
 
 from database import Database
 from datetime import timedelta
-from typing import Annotated
+# from typing import Annotated
 
 ### USER ENDPOINTS ###
 db = Database(production=False)
@@ -69,6 +69,7 @@ async def login(request: UserLogin):
         )
 
 
+'''
 @router.get("/verify")
 async def verify(token: str):
     with db.get_session() as session:
@@ -120,3 +121,4 @@ async def users_delete(user_id: int):
         session.delete(user)
         session.commit()
     return Response(status_code=204)
+'''

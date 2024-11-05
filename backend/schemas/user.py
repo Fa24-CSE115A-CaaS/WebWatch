@@ -13,16 +13,19 @@ class User(UserBase, table=True):
     __tablename__ = "user"  # Ensures SQLModel uses the correct table name
     id: Optional[int] = Field(default=None, primary_key=True)
 
+'''
 class UserGet(UserBase):
     id: int
 
     class Config:
         orm_mode = True
+'''
 
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
+'''
 class UserUpdate(BaseModel):
     email: EmailStr | None = None
     password_hash: str | None = None
@@ -36,6 +39,7 @@ class UserDelete(BaseModel):
 class UserReset(BaseModel):
     email: EmailStr
     password: str
+'''
 
 class UserOutput(BaseModel):
     email: EmailStr
@@ -45,7 +49,8 @@ class UserRegister(BaseModel):
     email:EmailStr
     password: str
 
-""" class UserRegister(BaseModel):
+'''
+class UserRegister(BaseModel):
     password: str
     confirm_password: str
 
@@ -54,7 +59,7 @@ class UserRegister(BaseModel):
         password = values.get("password")
         if v != password:
             raise ValueError("The two passwords did not match.")
-        return v """
+        return v 
 
 class JwtTokenSchema(BaseModel):
     token: str
@@ -67,3 +72,4 @@ class TokenPair(BaseModel):
 
 class RefreshToken(BaseModel):
     refresh: str
+'''
