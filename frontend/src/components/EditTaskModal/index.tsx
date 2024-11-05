@@ -5,6 +5,8 @@ import EditCheckbox from "./EditCheckbox";
 import CronDropdown from "../CronDropdown";
 // Types
 import { EditTaskModalComponent, FormState } from "./types";
+// Icons
+import { RxCross2 } from "react-icons/rx";
 
 const NOTIFICATION_OPTS = ["EMAIL", "DISCORD", "SLACK"];
 
@@ -33,11 +35,17 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
       onClick={closeModal}
     >
       <form
-        className="w-[1000px] rounded-lg bg-primary p-8 xxl:w-[1200px] xxl:p-10"
+        className="relative w-[1000px] rounded-lg bg-primary p-8 xxl:w-[1200px] xxl:p-10"
         onSubmit={handleFormSubmit}
         onClick={(e) => e.stopPropagation()}
       >
         <h1 className="mb-10 text-2xl xxl:text-3xl">Edit Task</h1>
+        <button
+          className="absolute right-0 top-0 bg-transparent p-5"
+          onClick={closeModal}
+        >
+          <RxCross2 size={20} />
+        </button>
         <div className="grid grid-cols-2 gap-10 xxl:gap-14">
           <div>
             <Input
