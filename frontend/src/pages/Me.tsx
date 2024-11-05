@@ -39,8 +39,10 @@ const Me = () => {
   }
 
   return (
-    <div>
-      <h1>Welcome, {user.email}</h1>
+    <div className="min-h-screen bg-primary flex flex-col items-center justify-start text-center p-4 text-white font-font">
+      <header className="mb-8 mt-16">
+        <h1 className="text-5xl font-bold text-accent mb-4">Welcome, {user.email} </h1>
+      </header>
     </div>
   );
 };
