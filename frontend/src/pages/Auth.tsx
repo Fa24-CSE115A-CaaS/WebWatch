@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -7,20 +8,44 @@ const AuthForm = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  interface AuthFormProps {
-    email: string;
-    password: string;
-    confirmPassword?: string;
-  }
+  
+  
+  const navigate = useNavigate();
 
-  
-  
   const handleLogin = async (email: string, password: string) => {
     const endpoint = "http://localhost:8000/api/users/login";
     const payload = new URLSearchParams();
     payload.append('grant_type', 'password');
     payload.append('username', email);
     payload.append('password', password);
+    payload.append('scope', '');
+    payload.append('client_id', 'string'); 
+    payload.append('client_secret', 'string'); 
+  
+    try {
+      const response = await axios.post(endpoint, payload, {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "accept": "application/json",
+        },
+      });
+  
+      console.log("Success:", response.data);
+      navigate('/Me');
+      localStorage.setItem('access_token', response.data.access_token);
+    } catch (error) {
+      console.error("Error:", error);
+      // Handle error (e.g., show error message)
+    }
+  };
+  
+  const handleRegister = async (email: string, password: string, confirmPassword: string) => {
+    const endpoint = "http://localhost:8000/api/users/register";
+    const payload = new URLSearchParams();
+    payload.append('grant_type', 'password');
+    payload.append('username', email);
+    payload.append('password', password);
+    payload.append('confirm_password', confirmPassword);
     payload.append('scope', '');
     payload.append('client_id', 'string'); // Replace with actual client_id if needed
     payload.append('client_secret', 'string'); // Replace with actual client_secret if needed
@@ -41,29 +66,6 @@ const AuthForm = () => {
     }
   };
   
-  const handleRegister = async (email: string, password: string, confirmPassword: string) => {
-    const endpoint = "http://localhost:8000/api/users/register";
-    const payload = {
-      email: email,
-      password: password,
-      confirm_password: confirmPassword
-    };
-  
-    try {
-      const response = await axios.post(endpoint, payload, {
-        headers: {
-          "Content-Type": "application/json",
-          "accept": "application/json",
-        },
-      });
-  
-      console.log("Success:", response.data);
-      // Handle successful response (e.g., redirect, show message)
-    } catch (error) {
-      console.error("Error:", error);
-      // Handle error (e.g., show error message)
-    }
-  };
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isLogin) {
