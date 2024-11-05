@@ -43,24 +43,19 @@ class UserReset(BaseModel):
 
 class UserOutput(BaseModel):
     email: EmailStr
-    username: str
 
 class UserRegister(BaseModel):
-    email:EmailStr
-    password: str
-
-'''
-class UserRegister(BaseModel):
+    email: EmailStr
     password: str
     confirm_password: str
 
     @validator("confirm_password")
     def verify_password_match(cls, v, values, **kwargs):
-        password = values.get("password")
-        if v != password:
+        if 'password' in values and v != values['password']:
             raise ValueError("The two passwords did not match.")
-        return v 
+        return v
 
+'''
 class JwtTokenSchema(BaseModel):
     token: str
     payload: dict

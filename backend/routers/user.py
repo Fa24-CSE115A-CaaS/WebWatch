@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status #, Depends, Cookie
 # from fastapi.responses import Response
 from sqlmodel import SQLModel, select, Session
-from schemas.user import UserRegister, UserLogin, User
+from schemas.user import UserRegister, UserLogin, UserOutput, User
 from auth import get_hashed_password, verify_password, create_access_token, create_refresh_token
 
 from database import Database
@@ -15,17 +15,35 @@ router = APIRouter(
     prefix="/user",
 )
 
-# Registers new user
-@router.post("/register", status_code=201)
+@router.post(
+    "/register",
+    status_code=status.HTTP_201_CREATED, 
+    response_model=UserOutput,
+    responses={
+        status.HTTP_409_CONFLICT: {"description": "Email already registered"},
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error"}
+    }
+)
 async def create_user(user: UserRegister):
-    hashed_password = get_hashed_password(user.password)
-    new_user = User(email=user.email, password_hash=hashed_password)
     with db.get_session() as session:
-        session.add(new_user)
-        session.commit()
-        session.refresh(new_user)
-    return user.email
-      
+        # Check if user already exists
+        existing_user = session.exec(select(User).where(User.email == user.email)).first()
+        if existing_user:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
+
+        # Hash the password and create a new user
+        hashed_password = get_hashed_password(user.password)
+        new_user = User(email=user.email, password_hash=hashed_password)
+        
+        try:
+            session.add(new_user)
+            session.commit()
+            session.refresh(new_user)
+        except Exception as e:
+            session.rollback()
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
+
+        return new_user
 
 # Authenticates existing user
 @router.post('/login')
