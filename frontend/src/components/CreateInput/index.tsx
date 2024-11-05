@@ -12,25 +12,29 @@ import { FormState } from "./types";
 // Util
 import { axios } from "../../config";
 
+const defaultState: FormState = {
+  url: "",
+  name: "",
+  month: "",
+  dayOfWeek: "",
+  errors: {},
+};
+
 const CreateInput = () => {
   const { open, setOpen, containerRef } = usePopup();
-  const [formState, setFormState] = useState<FormState>({
-    url: "",
-    name: "",
-    month: "",
-    dayOfWeek: "",
-    errors: {},
-  });
+  const [formState, setFormState] = useState<FormState>(defaultState);
 
   const onSubmit = async () => {
     try {
-      const res = await axios.post("/tasks/create", {
+      const res = await axios.post("/tasks", {
         url: formState.url,
         name: formState.name,
+        user_id: 1,
       });
 
       if (res.status === 201) {
         res.data as Task;
+        setFormState({ ...defaultState });
       }
     } catch {}
   };
@@ -44,6 +48,7 @@ const CreateInput = () => {
       <input
         className="h-full flex-1 border-0 bg-transparent pl-5 text-text outline-none"
         placeholder="Enter a website..."
+        value={formState.url}
         onChange={(e) => setFormState({ ...formState, url: e.target.value })}
       />
       <div
