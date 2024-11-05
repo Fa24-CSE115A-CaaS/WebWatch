@@ -1,16 +1,15 @@
-from fastapi import APIRouter, HTTPException, status #, Depends, Cookie
+from fastapi import APIRouter, HTTPException, status, Depends, Cookie
 # from fastapi.responses import Response
 from sqlmodel import SQLModel, select, Session
 from schemas.user import UserRegister, UserLogin, UserOutput, User, TokenPair
-from auth import get_hashed_password, verify_password, create_access_token, create_refresh_token, decode_access_token
-import uuid
+from auth.password import get_hashed_password, verify_password
+from auth.token import create_access_token, create_refresh_token, decode_access_token
+from fastapi.security import OAuth2PasswordRequestForm
+
 from database import Database
 from datetime import timedelta
-import os
-from dotenv import load_dotenv
 # from typing import Annotated
 
-load_dotenv()
 db = Database(production=False)
 
 router = APIRouter(
@@ -83,10 +82,10 @@ async def login(request: UserLogin):
 @router.get("/verify")
 async def verify(token: str):
     payload = decode_access_token(token)
-    user_id = payload.get("id")
+    uuid = payload.get("id")
     
     with db.get_session() as session:
-        user = session.exec(select(User).where(User.token_uuid == user_id)).first()
+        user = session.exec(select(User).where(User.token_uuid == uuid)).first()
         if not user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     
