@@ -68,28 +68,17 @@ async def login(request: UserLogin):
                     detail="Incorrect email or password"
                 )
 
-            # Load environment variables
-            access_token_expires = timedelta(minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 15)))
-            refresh_token_expires = timedelta(minutes=int(os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES", 43200)))
-
             # Generate tokens
             access_token = create_access_token(
-                data={"sub": str(user.id)},  # Token payload with user ID
-                expires_delta=access_token_expires
+                data={"id": str(user.id)}, 
             )
             refresh_token = create_refresh_token(
-                data={"sub": str(user.id), "type": "refresh"},
-                expires_delta=refresh_token_expires  
+                data={"id": str(user.id), "type": "refresh"},
             )
 
             return {"access_token": access_token, "refresh_token": refresh_token}
         except HTTPException as e:
             raise e
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Internal server error"
-            )
 
 '''
 @router.get("/verify")
