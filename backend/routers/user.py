@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, status #, Depends, Cookie
 from sqlmodel import SQLModel, select, Session
 from schemas.user import UserRegister, UserLogin, UserOutput, User, TokenPair
 from auth import get_hashed_password, verify_password, create_access_token, create_refresh_token
-
+import uuid
 from database import Database
 from datetime import timedelta
 import os
@@ -70,10 +70,10 @@ async def login(request: UserLogin):
 
             # Generate tokens
             access_token = create_access_token(
-                data={"id": str(user.id)}, 
+                data={"id": user.token_uuid}, 
             )
             refresh_token = create_refresh_token(
-                data={"id": str(user.id), "type": "refresh"},
+                data={"id": user.token_uuid, "type": "refresh"},
             )
 
             return {"access_token": access_token, "refresh_token": refresh_token}

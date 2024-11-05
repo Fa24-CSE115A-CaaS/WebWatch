@@ -2,7 +2,7 @@ from sqlmodel import SQLModel, Field
 from pydantic import BaseModel, validator, EmailStr
 from datetime import datetime
 from typing import Optional
-
+from uuid import uuid4
 
 
 class UserBase(SQLModel):
@@ -12,6 +12,8 @@ class UserBase(SQLModel):
 class User(UserBase, table=True):
     __tablename__ = "user"  # Ensures SQLModel uses the correct table name
     id: Optional[int] = Field(default=None, primary_key=True)
+    # Used in JWTs to avoid exposing user db primary keys
+    token_uuid: str = Field(default_factory=lambda: str(uuid4()))
 
 '''
 class UserGet(UserBase):
