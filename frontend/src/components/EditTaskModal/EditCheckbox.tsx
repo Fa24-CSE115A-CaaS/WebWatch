@@ -1,4 +1,5 @@
 import { FunctionComponent, MouseEventHandler } from "react";
+// Components
 import Input from "../Input";
 
 interface EditCheckboxProps {
@@ -18,12 +19,12 @@ const EditCheckbox: EditCheckboxComponent = ({ label, value, onClick }) => {
         inputAttrs={{
           type: "checkbox",
           className:
-            "w-6 h-6 accent-accent hover:accent-accent-hover cursor-pointer",
-          checked: value,
+            "w-6 h-6 xxl:w-8 xxl:h-8 accent-accent hover:accent-accent-hover cursor-pointer",
+          defaultChecked: value,
           onClick,
         }}
       />
-      <p>{label}</p>
+      <p className="xxl:text-xl">{label}</p>
     </div>
   );
 };

@@ -1,6 +1,9 @@
+import { useState } from "react";
+// Components
+import EditTaskModal from "./EditTaskModal";
+import TaskComponent from "./Task";
+// Types
 import { Task } from "../types";
-// Icons
-import { HiDotsVertical } from "react-icons/hi";
 
 type TaskListProps = {
   tasks: Task[];
@@ -9,6 +12,8 @@ type TaskListProps = {
 type TaskComponent = React.FunctionComponent<TaskListProps>;
 
 const TaskList: TaskComponent = ({ tasks }) => {
+  const [editTask, setEditTask] = useState<Task | null>(null);
+
   return (
     <section
       className="mx-auto mt-10 overflow-hidden rounded-md border-[1px] border-border text-text
@@ -26,29 +31,17 @@ const TaskList: TaskComponent = ({ tasks }) => {
         </thead>
         <tbody className="xxl:text-xl">
           {tasks.map((task) => (
-            <tr key={task.id}>
-              <td className="font-medium">{task.name}</td>
-              <td className="xxl:pr-10">
-                <a className="underline" href={task.url}>
-                  {task.url}
-                </a>
-              </td>
-              <td>
-                <div className="w-min rounded-full bg-info px-4 py-[2px] font-medium text-text-contrast">
-                  Monitor
-                </div>
-              </td>
-              <td>1d 5h 18m</td>
-              <td>
-                <div className="flex items-center justify-between">
-                  10:49
-                  <HiDotsVertical className="cursor-pointer" />
-                </div>
-              </td>
-            </tr>
+            <TaskComponent
+              task={task}
+              key={task.id}
+              onEditModalOpen={() => setEditTask(task)}
+            />
           ))}
         </tbody>
       </table>
+      {editTask && (
+        <EditTaskModal task={editTask} closeModal={() => setEditTask(null)} />
+      )}
     </section>
   );
 };

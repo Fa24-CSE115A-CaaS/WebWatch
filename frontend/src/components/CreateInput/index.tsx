@@ -3,13 +3,14 @@ import { useState } from "react";
 import CronDropdown from "../CronDropdown";
 // Hooks
 import usePopup from "../../hooks/usePopup";
-import { axios } from "../../config";
 // Icons
 import { FaRegBell } from "react-icons/fa";
 import { IoSearch, IoSettingsOutline } from "react-icons/io5";
 // Types
 import { Task } from "../../types";
 import { FormState } from "./types";
+// Util
+import { axios } from "../../config";
 
 const CreateInput = () => {
   const { open, setOpen, containerRef } = usePopup();
@@ -37,8 +38,7 @@ const CreateInput = () => {
   return (
     <div
       className="mx-auto my-10 flex h-12 w-[800px] items-center rounded-full border-[1px]
-        border-border bg-primary pl-5 text-text xxl:h-16 xxl:w-[1000px] xxl:border-2
-        xxl:text-xl"
+        border-border bg-primary pl-5 text-text xxl:h-16 xxl:border-2 xxl:text-xl"
     >
       <IoSearch className="h-5 w-5 xxl:h-6 xxl:w-6" />
       <input
@@ -57,7 +57,7 @@ const CreateInput = () => {
         </button>
 
         {open && (
-          <div className="absolute right-0 top-12 w-80">
+          <div className="absolute right-0 top-12 w-80 xxl:top-16 xxl:w-96">
             <CronDropdown
               setOpen={setOpen}
               formState={formState}
@@ -69,7 +69,8 @@ const CreateInput = () => {
       </div>
       <button
         className="flex h-full items-center justify-center rounded-r-full bg-accent px-5
-          text-text-contrast xxl:px-7"
+          text-text-contrast transition-all duration-100 ease-out hover:bg-accent-hover
+          xxl:px-7"
         onClick={onSubmit}
       >
         <FaRegBell className="h-5 w-5 xxl:h-6 xxl:w-6" />

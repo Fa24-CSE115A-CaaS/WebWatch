@@ -16,7 +16,7 @@ const CronDropdown = <T extends FormState>({
     const { name, monthDay, hours, minutes } = formState;
     const errors: Errors = {};
 
-    if (name && name.trim().length <= 0) {
+    if (name !== undefined && name.trim().length <= 0) {
       errors.name = "Please enter a name";
     }
 
@@ -106,7 +106,7 @@ const CronDropdown = <T extends FormState>({
         />
         <button
           type="button"
-          className="w-full self-end rounded-sm bg-accent px-3 py-1 text-text-contrast"
+          className="w-full self-end rounded-sm bg-accent px-3 py-1 text-text-contrast xxl:text-lg"
           onClick={updateSchedule}
         >
           Save

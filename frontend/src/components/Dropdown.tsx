@@ -1,5 +1,7 @@
 import { FunctionComponent, Dispatch, SetStateAction } from "react";
+// Icons
 import { FaChevronDown, FaChevronUp } from "react-icons/fa6";
+// Hooks
 import usePopup from "../hooks/usePopup";
 
 interface DropdownProps {
@@ -25,16 +27,16 @@ const Dropdown: DropdownComponent = ({
 
   return (
     <div className={`w-full ${containerClass}`} ref={containerRef}>
-      <label className="text-sm">{label}</label>
+      <label className="mb-2 block text-sm xxl:text-lg">{label}</label>
       <div
         className="flex cursor-pointer items-center bg-secondary px-3 py-1"
         onClick={() => setOpen(!open)}
       >
-        <p className="flex-1">{value || placeholder}</p>
+        <p className="flex-1 xxl:text-xl">{value || placeholder}</p>
         {open ? <FaChevronUp size={15} /> : <FaChevronDown size={15} />}
       </div>
       {open && (
-        <div className="relative">
+        <div className="relative xxl:text-xl">
           <div className="absolute top-2 w-full rounded-md border-[1px] border-border bg-secondary">
             {choices.map((choice, i) => (
               <div

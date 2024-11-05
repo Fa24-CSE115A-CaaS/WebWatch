@@ -17,12 +17,12 @@ const Input: InputComponent = ({
 }) => {
   return (
     <div className={`w-full ${containerClass}`}>
-      <label className="mb-2 block text-sm">{label}</label>
+      <label className="mb-2 block text-sm xxl:text-lg">{label}</label>
       <input
-        className="w-full bg-secondary px-3 py-1 outline-none"
+        className="w-full bg-secondary px-3 py-1 outline-none xxl:text-xl"
         {...inputAttrs}
       />
-      {error && <p className="text-xs text-error">{error}</p>}
+      {error && <p className="text-xs text-error xxl:text-sm">{error}</p>}
     </div>
   );
 };
