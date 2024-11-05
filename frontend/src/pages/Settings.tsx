@@ -12,7 +12,7 @@ const Settings = () => {
     <div className="w-1/2 mx-auto mt-8 rounded min-h-screen text-text">
       <div className="flex">
         {/* Column 1 - Sidebar*/}
-        <nav className="rounded-l-xl border-solid border-border border-2 min-h-screen w-max bg-secondary text-left">
+        <nav className="rounded-l-xl border-solid border-border border-2 min-h-screen w-max bg-secondary text-left overflow-hidden">
           <div className="rounded-tl-xl" aria-label="Tabs" role="tablist" aria-orientation="vertical">
             <button
               type="button"
