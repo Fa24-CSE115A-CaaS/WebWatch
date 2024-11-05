@@ -22,7 +22,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/login")
 @router.post(
     "/register",
     status_code=status.HTTP_201_CREATED, 
-    response_model=UserOutput,
+    response_model=TokenPair,
     responses={
         status.HTTP_409_CONFLICT: {"description": "Email already registered"},
         status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error"}
@@ -47,7 +47,11 @@ async def create_user(user: UserRegister):
             session.rollback()
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
-        return new_user
+        user = session.exec(select(User).where(User.email == user.email)).first()
+        access_token = create_access_token(
+            data={"id": user.token_uuid}, 
+        )        
+        return {"access_token": access_token, "token_type": "bearer"}
 
 # Authenticates existing user
 @router.post(
