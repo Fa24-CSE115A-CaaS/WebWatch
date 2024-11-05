@@ -55,15 +55,10 @@ class UserRegister(BaseModel):
             raise ValueError("The two passwords did not match.")
         return v
 
-'''
-class JwtTokenSchema(BaseModel):
-    token: str
-    payload: dict
-    expire: datetime
-
 class TokenPair(BaseModel):
-    access: JwtTokenSchema
-    refresh: JwtTokenSchema
+    access_token: str
+    refresh_token: str
+'''
 
 class RefreshToken(BaseModel):
     refresh: str

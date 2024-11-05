@@ -1,14 +1,16 @@
 from fastapi import APIRouter, HTTPException, status #, Depends, Cookie
 # from fastapi.responses import Response
 from sqlmodel import SQLModel, select, Session
-from schemas.user import UserRegister, UserLogin, UserOutput, User
+from schemas.user import UserRegister, UserLogin, UserOutput, User, TokenPair
 from auth import get_hashed_password, verify_password, create_access_token, create_refresh_token
 
 from database import Database
 from datetime import timedelta
+import os
+from dotenv import load_dotenv
 # from typing import Annotated
 
-### USER ENDPOINTS ###
+load_dotenv()
 db = Database(production=False)
 
 router = APIRouter(
@@ -46,46 +48,48 @@ async def create_user(user: UserRegister):
         return new_user
 
 # Authenticates existing user
-@router.post('/login')
+@router.post(
+    '/login',
+    status_code=status.HTTP_200_OK,
+    response_model=TokenPair,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {"description": "Incorrect email or password"},
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error"}
+    }
+)
 async def login(request: UserLogin):
-    try:
-        with db.get_session() as session:
-
+    with db.get_session() as session:
+        try:
             # Query the user based on email
             user = session.exec(select(User).where(User.email == request.email)).first()
-            if user is None:
+            if not user or not verify_password(user.password_hash, request.password):
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="User doesn't exist"
+                    detail="Incorrect email or password"
                 )
 
-            if not verify_password(user.password_hash, request.password):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Incorrect password"
-                )
-
-
-            access_token_expires = timedelta(minutes=15)
+            # Load environment variables
+            access_token_expires = timedelta(minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 15)))
+            refresh_token_expires = timedelta(minutes=int(os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES", 43200)))
 
             # Generate tokens
             access_token = create_access_token(
                 data={"sub": str(user.id)},  # Token payload with user ID
                 expires_delta=access_token_expires
             )
-            refresh_token = create_access_token(
+            refresh_token = create_refresh_token(
                 data={"sub": str(user.id), "type": "refresh"},
-                expires_delta=timedelta(days=30)  # Refresh token with a longer expiration
+                expires_delta=refresh_token_expires  
             )
 
             return {"access_token": access_token, "refresh_token": refresh_token}
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error"
-        )
-
+        except HTTPException as e:
+            raise e
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Internal server error"
+            )
 
 '''
 @router.get("/verify")
