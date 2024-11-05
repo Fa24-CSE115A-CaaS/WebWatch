@@ -1,4 +1,5 @@
 import { useState } from "react";
+import axios from 'axios';
 
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -12,30 +13,63 @@ const AuthForm = () => {
     confirmPassword?: string;
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const endpoint = isLogin ? "/api/login" : "/api/register";
-    const payload: AuthFormProps = { email, password, ...(isLogin ? {} : { confirmPassword }) };
-
+  
+  
+  const handleLogin = async (email: string, password: string) => {
+    const endpoint = "http://localhost:8000/api/users/login";
+    const payload = new URLSearchParams();
+    payload.append('grant_type', 'password');
+    payload.append('username', email);
+    payload.append('password', password);
+    payload.append('scope', '');
+    payload.append('client_id', 'string'); // Replace with actual client_id if needed
+    payload.append('client_secret', 'string'); // Replace with actual client_secret if needed
+  
     try {
-      const response = await fetch(endpoint, {
-        method: "POST",
+      const response = await axios.post(endpoint, payload, {
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
+          "accept": "application/json",
         },
-        body: JSON.stringify(payload),
       });
-
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-
-      const data = await response.json();
-      console.log("Success:", data);
+  
+      console.log("Success:", response.data);
       // Handle successful response (e.g., redirect, show message)
     } catch (error) {
       console.error("Error:", error);
       // Handle error (e.g., show error message)
+    }
+  };
+  
+  const handleRegister = async (email: string, password: string, confirmPassword: string) => {
+    const endpoint = "http://localhost:8000/api/users/register";
+    const payload = {
+      email: email,
+      password: password,
+      confirm_password: confirmPassword
+    };
+  
+    try {
+      const response = await axios.post(endpoint, payload, {
+        headers: {
+          "Content-Type": "application/json",
+          "accept": "application/json",
+        },
+      });
+  
+      console.log("Success:", response.data);
+      // Handle successful response (e.g., redirect, show message)
+    } catch (error) {
+      console.error("Error:", error);
+      // Handle error (e.g., show error message)
+    }
+  };
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (isLogin) {
+      await handleLogin(email, password);
+    } else {
+      await handleRegister(email, password, confirmPassword);
     }
   };
 

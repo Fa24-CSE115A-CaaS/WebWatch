@@ -3,6 +3,8 @@ from routers.user import router as user_router
 from routers.task import router as task_router
 from schemas.task import Task
 from fastapi import FastAPI, APIRouter
+from fastapi.middleware.cors import CORSMiddleware
+
 from database import Database
 from sqlmodel import SQLModel, select, Session
 from scheduler import Scheduler
@@ -34,6 +36,15 @@ async def lifespan(app: FastAPI):
 # Initialize FastAPI with lifespan
 app = FastAPI(root_path="/api", lifespan=lifespan)
 
+# CORS Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Defining existing endpoints
 app.include_router(user_router)
 app.include_router(task_router)
@@ -57,7 +68,7 @@ def custom_openapi():
             "type": "oauth2",
             "flows": {
                 "password": {
-                    "tokenUrl": "/api/users/token",
+                    "tokenUrl": "/api/users/login",
                     "scopes": {}
                 }
             }

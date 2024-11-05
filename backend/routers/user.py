@@ -15,7 +15,7 @@ db = Database(production=False)
 router = APIRouter(
     prefix="/users",
 )
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/login")
 
 
 
@@ -51,7 +51,7 @@ async def create_user(user: UserRegister):
 
 # Authenticates existing user
 @router.post(
-    '/token',
+    '/login',
     status_code=status.HTTP_200_OK,
     response_model=TokenPair,
     responses={
