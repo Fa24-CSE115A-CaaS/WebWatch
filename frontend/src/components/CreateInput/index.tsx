@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 // Components
 import CronDropdown from "../CronDropdown";
 // Hooks
@@ -7,10 +7,11 @@ import usePopup from "../../hooks/usePopup";
 import { FaRegBell } from "react-icons/fa";
 import { IoSearch, IoSettingsOutline } from "react-icons/io5";
 // Types
-import { Task } from "../../types";
+import { TaskResponse } from "../../types";
 import { FormState } from "./types";
 // Util
 import { axios } from "../../config";
+import { TasksPageContext } from "../../pages/Tasks";
 
 const defaultState: FormState = {
   url: "",
@@ -21,20 +22,38 @@ const defaultState: FormState = {
 };
 
 const CreateInput = () => {
+  const { tasks, setTasks } = useContext(TasksPageContext)!;
   const { open, setOpen, containerRef } = usePopup();
   const [formState, setFormState] = useState<FormState>(defaultState);
 
   const onSubmit = async () => {
     try {
+      const token = localStorage.getItem('access_token')
       const res = await axios.post("/tasks", {
         url: formState.url,
         name: formState.name,
         user_id: 1,
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       });
 
       if (res.status === 201) {
-        res.data as Task;
+        const data = res.data as TaskResponse;
         setFormState({ ...defaultState });
+        setTasks([
+          ...tasks,
+          {
+            id: data.id,
+            name: data.name,
+            content: data.content,
+            url: data.url,
+            discordUrl: data.discord_url,
+            enabledNotificationOptions: data.enabled_notification_options,
+            enabled: data.enabled,
+          },
+        ]);
       }
     } catch {}
   };
