@@ -1,16 +1,26 @@
-from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException
-from dotenv import load_dotenv
-from schemas.task import Task, TaskCreate, TaskGet, TaskUpdate
-from sqlmodel import select
 import asyncio
+from routers.user import router as user_router
+from routers.task import router as task_router
+from schemas.task import Task
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from database import Database
+from sqlmodel import select
 from scheduler import Scheduler
+from dotenv import load_dotenv
+from contextlib import asynccontextmanager
+
+from fastapi.openapi.utils import get_openapi
+from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
-
 scheduler = Scheduler()
-db = Database(production=True)
+db = Database(production=False)
+
+origins = [
+    "http://localhost:5173"
+]
 
 
 @asynccontextmanager
@@ -25,85 +35,47 @@ async def lifespan(app: FastAPI):
     # ON SHUTDOWN
     await scheduler.shutdown()
 
+# Initialize FastAPI with lifespan
+app = FastAPI(root_path="/api", lifespan=lifespan)
 
-app = FastAPI(lifespan=lifespan)
+# CORS Middleware (required for frontend to make requests)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"], # TODO: Change this to the frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-
-@app.get("/")
-async def root():
-    # The root API, not much functionality
-    return {"WebWatchAPI": "WebWatchAPI"}
-
-
-@app.put("/tasks/status", response_model=TaskGet)
-async def tasks_update(task_id: int, session_token: str | None = None):
-    with db.get_session() as session:
-        task = session.get(Task, task_id)
-        if not task:
-            raise HTTPException(status_code=404, detail="Task not found")
-    return task
+# Defining existing endpoints
+app.include_router(user_router)
+app.include_router(task_router)
 
 
-@app.post("/tasks/create", response_model=TaskGet, status_code=201)
-async def tasks_create(body: TaskCreate, session_token: str | None = None):
-    # TODO: Relate User with task
-    validated_task = Task.model_validate(body)
-    with db.get_session() as session:
-        session.add(validated_task)
-        session.commit()
-        session.refresh(validated_task)
-    return validated_task
+# NECESSARY FOR SWAGGER DOCS AUTHENTICATION SCHEMA
+# Otherwise, the "Authorize" button uses /token instead of /api/users/token to authenticate...
+# TODO: Find a better way to do this
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="WebWatchAPI",
+        version="1.0.0",
+        routes=app.routes,
+    )
+    # Set the OAuth2 security schema with the correct token URL
+    openapi_schema["components"]["securitySchemes"] = {
+        "OAuth2PasswordBearer": {
+            "type": "oauth2",
+            "flows": {
+                "password": {
+                    "tokenUrl": "/api/users/login",
+                    "scopes": {}
+                }
+            }
+        }
+    }
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
 
-
-@app.put("/tasks/update", response_model=TaskGet)
-async def tasks_update(
-    task_id: int, body: TaskUpdate, session_token: str | None = None
-):
-    with db.get_session() as session:
-        task = session.get(Task, task_id)
-        if not task:
-            raise HTTPException(status_code=404, detail="Task not found")
-        update_data = body.model_dump(exclude_unset=True)
-        task.sqlmodel_update(update_data)
-        session.add(task)
-        session.commit()
-        session.refresh(task)
-
-    # Start task if enabled
-    if task.enabled:
-        await scheduler.add_task(task)
-    else:
-        await scheduler.remove_task(task)
-    return task
-
-
-@app.put("/tasks/remove", response_model=TaskGet)
-async def tasks_remove(task_id: int, session_token: str | None = None):
-    with db.get_session() as session:
-        task = session.get(Task, task_id)
-        if not task:
-            raise HTTPException(status_code=404, detail="Task not found")
-        session.delete(task)
-        session.commit()
-
-    await scheduler.remove_task(task)
-
-    return task
-
-
-@app.get("/user/authentication")
-async def user_authentication(hash: str):
-    # For the authentication of existing accounts
-    return {"Session Token": "PLACEHOLDER", "Status": 0}
-
-
-@app.get("/user/register")
-async def user_register(email: str, hash: str):
-    # For the creation of new accounts
-    return {"Session Token": "PLACEHOLDER", "Status": 0}
-
-
-@app.get("/user/update")
-async def user_update(hash: str, contents: str | None = None):
-    # For changing passwords, updating emails, deleting accounts, etc.
-    return {"Session Token": "PLACEHOLDER", "Status": 0}
+app.openapi = custom_openapi
