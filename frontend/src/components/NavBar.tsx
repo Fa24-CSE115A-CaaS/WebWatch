@@ -1,10 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 //import useEffect from "../App";
 
 const NavBar = () => {
   const [show_profile_dropdown, set_show_profile_dropdown] = useState(false);
-  const handleProfileDropdown = () =>
-    set_show_profile_dropdown(!show_profile_dropdown);
+  const handleProfileDropdown = () => {
+    set_show_profile_dropdown(true);
+  }
+
+  useEffect(() => {
+    function handleClickOutside(event: any) {
+      if (!event.target.closest("#user-menu")) {
+        set_show_profile_dropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    }, []);    
+        
   return (
     <nav className="bg-secondary text-text">
       <div className="px-2 sm:px-6 lg:px-8">
@@ -64,20 +75,17 @@ const NavBar = () => {
       </div>
       {show_profile_dropdown && (
         <div
-          className="text-contrast absolute right-0 z-10 mr-4 mt-4 w-fit origin-top-right rounded-md
-            bg-secondary p-2 text-center shadow-lg ring-1 ring-black ring-opacity-5
-            focus:outline-none"
+          id="user-menu"
+          className="bg-primary text-contrast absolute right-0 z-10 mr-4 mt-4 w-max-fit origin-top-right rounded-md bg-primary text-center focus:outline-none"
           role="menu"
           aria-orientation="vertical"
           aria-labelledby="menu-button"
           tabIndex={-1}
-          onMouseLeave={handleProfileDropdown}
         >
           <div className="" role="none">
             <a
               href="/settings"
-              className="btn mb-2 block w-full bg-accent px-4 py-2 text-sm text-text-contrast
-                hover:bg-accent-hover"
+              className="block w-full px-4 py-2 text-sm text-text rounded-t-md border-l-2 border-r-2 border-t-2 border-border"
               role="menuitem"
               tabIndex={-1}
               id="menu-item-0"
@@ -85,8 +93,7 @@ const NavBar = () => {
               Manage your WebWatch account
             </a>
             <a
-              className="btn mb-2 block w-full bg-accent px-4 py-2 text-sm text-text-contrast
-                hover:bg-accent-hover"
+              className="block w-full px-4 py-2 text-sm text-text border-2 border-border"
               href="/theme-guide"
             >
               Change Theme
@@ -94,8 +101,7 @@ const NavBar = () => {
             <form method="POST" action="#" role="none">
               <button
                 type="submit"
-                className="btn block w-full bg-accent px-4 py-2 text-sm text-text-contrast
-                  hover:bg-accent-hover"
+                className="block w-full px-4 py-2 text-sm text-text rounded-b-md border-l-2 border-r-2 border-b-2 border-border"
                 role="menuitem"
                 tabIndex={-1}
                 id="menu-item-3"
