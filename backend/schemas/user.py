@@ -44,18 +44,12 @@ class UserReset(BaseModel):
 '''
 
 class UserOutput(BaseModel):
+    id: int
     email: EmailStr
 
 class UserRegister(BaseModel):
     email: EmailStr
     password: str
-    confirm_password: str
-
-    @validator("confirm_password")
-    def verify_password_match(cls, v, values, **kwargs):
-        if 'password' in values and v != values['password']:
-            raise ValueError("The two passwords did not match.")
-        return v
 
 class Token(BaseModel):
     access_token: str

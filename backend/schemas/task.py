@@ -60,11 +60,13 @@ class TaskCreate(TaskBase):
 
 
 class TaskUpdate(TaskBase):
+    user_id: int | None = None
     name: str | None = Field(default=None, max_length=50)
     url: str | None = None
     enabled_notification_options: NotificationOptions | None = Field(
         default=None, sa_column=Column(JSON())
     )
+    enabled: bool | None = None
 
-class TaskDelete(TaskBase):
+class TaskDelete:
     pass

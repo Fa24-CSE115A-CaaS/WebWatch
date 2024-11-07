@@ -7,6 +7,14 @@
     @apply px-5 py-3 xxl:px-8;
   }
 
+  tbody:last-child:first-child {
+    @apply rounded-bl-md;
+  }
+
+  tbody:last-child:last-child {
+    @apply rounded-br-md;
+  }
+
   td {
     @apply p-5 xxl:p-8 border-t-[1px] border-border bg-primary overflow-hidden text-nowrap text-ellipsis xxl:border-t-2;
   }
@@ -17,7 +25,7 @@
   --primary: #444444;
   --secondary: #363636;
   --accent: #c0b5ff;
-  --accent-hover: #9890c7;
+  --accent-hover: #9488db;
   --border: #5d585f;
   --error: #e45050;
   --info: #abcbe9;
@@ -41,8 +49,25 @@
   }
 }
 
+/* Removing arrows on number input */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
 body {
   background-color: var(--background);
+  height: 100vh;
+}
+
+body:has(.modal) {
+  overflow: hidden;
 }
 
 .btn {

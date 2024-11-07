@@ -2,21 +2,26 @@ import asyncio
 from routers.user import router as user_router
 from routers.task import router as task_router
 from schemas.task import Task
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import Database
-from sqlmodel import SQLModel, select, Session
+from sqlmodel import select
 from scheduler import Scheduler
-from typing import List
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 
 from fastapi.openapi.utils import get_openapi
+from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
 scheduler = Scheduler()
 db = Database(production=False)
+
+origins = [
+    "http://localhost:5173"
+]
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -74,10 +79,3 @@ def custom_openapi():
     return app.openapi_schema
 
 app.openapi = custom_openapi
-
-
-
-@app.get("/")
-async def root():
-    # The root API, not much functionality
-    return {"WebWatchAPI": "WebWatchAPI"}

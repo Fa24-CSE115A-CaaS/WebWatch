@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response
 from schemas.task import Task, TaskCreate, TaskUpdate, TaskGet
-from sqlmodel import select, Session
+from sqlmodel import select
 from typing import List
 from database import Database
 from schemas.user import User
@@ -9,8 +9,10 @@ from schemas.user import User
 ### TASK ENDPOINTS ###
 
 router = APIRouter(
-    prefix="/task",
+    prefix="/tasks",
 )
+
+db = Database(production=False)
 
 # Create a new task
 @router.post("", response_model=TaskGet, status_code=201)
@@ -36,26 +38,21 @@ async def tasks_list():
     return tasks
 
 # Update task details by id
-@router.put("{task_id}", response_model=TaskGet)
+@router.put("/{task_id}", response_model=TaskGet)
 async def tasks_update(task_id: int, task_update: TaskUpdate):
     with db.get_session() as session:
         task = session.get(Task, task_id)
         if not task:
             raise HTTPException(status_code=404, detail="Task not found")
-        update_data = task_update.dict(exclude_unset=True)
-        # TODO: Find a better way to exclude user_id... const/static values in Model/Schema??
-        # Exclude user_id from being updated
-        if "user_id" in update_data:
-            del update_data["user_id"]
-        for key, value in update_data.items():
-            setattr(task, key, value)
+        update_data = task_update.model_dump(exclude_unset=True)
+        task.sqlmodel_update(update_data)
         session.add(task)
         session.commit()
         session.refresh(task)
     return task
 
 # Delete task by id
-@router.delete("{task_id}", response_model=TaskGet)
+@router.delete("/{task_id}", response_model=TaskGet)
 async def tasks_delete(task_id: int):
     # Delete a task
     with db.get_session() as session:
