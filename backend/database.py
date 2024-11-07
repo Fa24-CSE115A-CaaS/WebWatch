@@ -5,8 +5,9 @@ import os
 
 load_dotenv()
 
+
 class Database:
-    def __init__(self, production: bool = False):  
+    def __init__(self, production: bool = False):
         self.engine = None
         if production:
             self._create_mysql()
@@ -25,9 +26,11 @@ class Database:
         password = os.getenv("MYSQL_PASSWORD")
         server = os.getenv("MYSQL_SERVER")
         dbname = os.getenv("MYSQL_DBNAME")
-        db_url = f"mysql+pymysql://{username}:{password}@{server}/{dbname}?charset=utf8mb4"
+        db_url = (
+            f"mysql+pymysql://{username}:{password}@{server}/{dbname}?charset=utf8mb4"
+        )
         self.engine = create_engine(db_url, echo=False, pool_recycle=3600)
-    
+
     def get_session(self):
         return Session(self.engine)
 
@@ -38,7 +41,12 @@ if __name__ == "__main__":
 
     # INSERTION DEMO
     with db.get_session() as session:
-        input = TaskCreate(name="DEMO TASK", content="FILLER", url="FILLER", enabled_notification_options=['EMAIL'])
+        input = TaskCreate(
+            name="DEMO TASK",
+            content="FILLER",
+            url="FILLER",
+            enabled_notification_options=["EMAIL"],
+        )
         new_task = Task.model_validate(input)
         session.add(new_task)
         session.commit()

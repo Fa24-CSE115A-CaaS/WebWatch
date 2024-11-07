@@ -11,6 +11,7 @@ import urllib.parse
 
 # TODO: Use logging instead of print statements for better debugging
 
+
 class WebScraper:
     def __init__(self, webdriver_path=None, chrome_exe_path=None):
         # Determine the base directory of the script
@@ -18,9 +19,13 @@ class WebScraper:
 
         # Set default paths if not provided
         if webdriver_path is None:
-            webdriver_path = os.path.join(base_dir, "scraper-linux64/chrome/chromedriver-linux64/chromedriver")
+            webdriver_path = os.path.join(
+                base_dir, "scraper-linux64/chrome/chromedriver-linux64/chromedriver"
+            )
         if chrome_exe_path is None:
-            chrome_exe_path = os.path.join(base_dir, "scraper-linux64/chrome/chrome-linux64/chrome")
+            chrome_exe_path = os.path.join(
+                base_dir, "scraper-linux64/chrome/chrome-linux64/chrome"
+            )
 
         self.webdriver_path = webdriver_path
         self.chrome_exe_path = chrome_exe_path
@@ -83,10 +88,12 @@ class WebScraper:
 
             # Get the page source and parse it with BeautifulSoup
             page_source = self.driver.page_source
-            soup = BeautifulSoup(page_source, 'html.parser')
+            soup = BeautifulSoup(page_source, "html.parser")
 
             # Extract all visible text from the page
-            page_text = soup.get_text(separator='\n', strip=True)  # Separate text by new lines
+            page_text = soup.get_text(
+                separator="\n", strip=True
+            )  # Separate text by new lines
             return page_text
 
         except Exception as e:
@@ -97,7 +104,7 @@ class WebScraper:
         page_text = self.scrape_all_text(url)
 
         # Generate filename using website name and timestamp
-        website_name = urllib.parse.urlparse(url).netloc.replace('.', '_')
+        website_name = urllib.parse.urlparse(url).netloc.replace(".", "_")
         timestamp = int(time.time())
         filename = f"scraper-linux64/scrapes/{website_name}-{timestamp}.txt"
 
@@ -105,10 +112,11 @@ class WebScraper:
             os.makedirs("scraper-linux64/scrapes")
 
         # Save the extracted text content to a file
-        with open(filename, 'w', encoding='utf-8') as f:
+        with open(filename, "w", encoding="utf-8") as f:
             f.write(page_text)
 
         print(f"Saved all visible text content to: {filename}")
+
 
 # Main function to handle URL input or argument
 if __name__ == "__main__":

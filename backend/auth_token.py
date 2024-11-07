@@ -8,6 +8,7 @@ import secrets
 import os
 from schemas.user import User
 from sqlmodel import SQLModel, select, Session
+
 app = FastAPI()
 load_dotenv()
 
@@ -19,12 +20,14 @@ ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_EXPIRATION = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+
 def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_EXPIRATION)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, ACCESS_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
 
 def decode_access_token(token: str) -> dict:
     try:
@@ -36,6 +39,7 @@ def decode_access_token(token: str) -> dict:
             detail="Invalid token",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
 
 # Used with FastAPI Depends to get the current user and protect other routes
 async def get_current_user(token: str = Depends(oauth2_scheme)):

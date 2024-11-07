@@ -68,5 +68,6 @@ class TaskUpdate(TaskBase):
     )
     enabled: bool | None = None
 
+
 class TaskDelete:
     pass
