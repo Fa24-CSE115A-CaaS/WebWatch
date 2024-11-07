@@ -18,9 +18,7 @@ load_dotenv()
 scheduler = Scheduler()
 db = Database(production=False)
 
-origins = [
-    "http://localhost:5173"
-]
+origins = ["http://localhost:5173"]
 
 
 @asynccontextmanager
@@ -35,13 +33,14 @@ async def lifespan(app: FastAPI):
     # ON SHUTDOWN
     await scheduler.shutdown()
 
+
 # Initialize FastAPI with lifespan
 app = FastAPI(root_path="/api", lifespan=lifespan)
 
 # CORS Middleware (required for frontend to make requests)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"], # TODO: Change this to the frontend URL
+    allow_origins=["http://localhost:5173"],  # TODO: Change this to the frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -67,15 +66,11 @@ def custom_openapi():
     openapi_schema["components"]["securitySchemes"] = {
         "OAuth2PasswordBearer": {
             "type": "oauth2",
-            "flows": {
-                "password": {
-                    "tokenUrl": "/api/users/login",
-                    "scopes": {}
-                }
-            }
+            "flows": {"password": {"tokenUrl": "/api/users/login", "scopes": {}}},
         }
     }
     app.openapi_schema = openapi_schema
     return app.openapi_schema
+
 
 app.openapi = custom_openapi

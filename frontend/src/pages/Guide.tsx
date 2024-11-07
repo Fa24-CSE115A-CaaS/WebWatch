@@ -12,7 +12,7 @@ function Guide() {
   const btnStyles =
     "text-text font-main m-3 block w-52 rounded-md px-3 py-2 font-medium border-[1px] border-border";
   return (
-    <div className="bg-background h-screen w-screen p-5">
+    <div className="h-screen w-screen bg-background p-5">
       <div className="mx-auto w-min">
         <button className={`${btnStyles} bg-primary`}>Primary</button>
         <button className={`${btnStyles} bg-secondary`}>Secondary</button>

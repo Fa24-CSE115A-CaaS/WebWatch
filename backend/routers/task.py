@@ -14,6 +14,7 @@ router = APIRouter(
 
 db = Database(production=False)
 
+
 # Create a new task
 @router.post("", response_model=TaskGet, status_code=201)
 async def tasks_create(task_create: TaskCreate):
@@ -28,6 +29,7 @@ async def tasks_create(task_create: TaskCreate):
         session.refresh(task)
     return task
 
+
 # List all tasks
 @router.get("", response_model=List[TaskGet])
 async def tasks_list():
@@ -36,6 +38,7 @@ async def tasks_list():
     if not tasks:
         raise HTTPException(status_code=404, detail="No tasks found")
     return tasks
+
 
 # Update task details by id
 @router.put("/{task_id}", response_model=TaskGet)
@@ -50,6 +53,7 @@ async def tasks_update(task_id: int, task_update: TaskUpdate):
         session.commit()
         session.refresh(task)
     return task
+
 
 # Delete task by id
 @router.delete("/{task_id}", response_model=TaskGet)

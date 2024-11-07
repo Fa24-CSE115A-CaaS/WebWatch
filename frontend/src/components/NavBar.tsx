@@ -65,7 +65,8 @@ const NavBar = () => {
       {show_profile_dropdown && (
         <div
           className="text-contrast absolute right-0 z-10 mr-4 mt-4 w-fit origin-top-right rounded-md
-            bg-secondary p-2 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none text-center"
+            bg-secondary p-2 text-center shadow-lg ring-1 ring-black ring-opacity-5
+            focus:outline-none"
           role="menu"
           aria-orientation="vertical"
           aria-labelledby="menu-button"
