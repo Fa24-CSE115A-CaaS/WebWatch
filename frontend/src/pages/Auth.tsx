@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -9,6 +9,15 @@ const AuthForm = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash === "#signup") {
+      setIsLogin(false);
+    } else {
+      setIsLogin(true);
+    }
+  }, []);
 
   const handleLogin = async (email: string, password: string) => {
     const endpoint = "http://localhost:8000/api/users/login";
@@ -92,7 +101,7 @@ const AuthForm = () => {
                 className={`relative mx-4 px-4 py-2 text-lg font-bold ${!isLogin ? "decoration-accent" : ""}`}
                 onClick={() => setIsLogin(false)}
               >
-                Register
+                Sign Up
                 {!isLogin && (
                   <span className="absolute bottom-0 left-0 right-0 h-0.5 -translate-y-1/2 transform bg-accent"></span>
                 )}
