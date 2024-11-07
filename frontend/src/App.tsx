@@ -35,7 +35,7 @@ const router = createBrowserRouter([
   {
     path: "/tasks",
     Component: Tasks,
-  }
+  },
 ]);
 
 const App = () => {
