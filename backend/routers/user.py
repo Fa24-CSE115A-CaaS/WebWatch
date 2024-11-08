@@ -113,12 +113,13 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 
-"""
 # Update user details by id
-@router.put("/{user_id}")
-async def users_update(user_id: int):
+@router.put("/update")
+async def users_update(token: str, user_update: UserRegister):
+    payload = decode_access_token(token)
+    uuid = payload.get("id")
     with db.get_session() as session:
-        user = session.get(User, user_id)
+        user = session.exec(select(User).where(User.token_uuid == uuid)).first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         update_data = user_update.dict(exclude_unset=True)
@@ -131,19 +132,20 @@ async def users_update(user_id: int):
 
 
 # Delete a user by id
-@router.delete("{user_id}")
-async def users_delete(user_id: int):
+@router.delete("/delete")
+async def users_delete(uuid: int):
+    payload = decode_access_token(token)
+    uuid = payload.get("id")
     with db.get_session() as session:
-        user = session.get(User, user_id)
+        user = session.exec(select(User).where(User.token_uuid == uuid)).first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
         # Delete all tasks associated with the user
-        tasks = session.exec(select(Task).where(Task.user_id == user_id)).all()
+        tasks = session.exec(select(Task).where(Task.user_id == uuid)).all()
         for task in tasks:
             session.delete(task)
 
         session.delete(user)
         session.commit()
     return Response(status_code=204)
-"""
