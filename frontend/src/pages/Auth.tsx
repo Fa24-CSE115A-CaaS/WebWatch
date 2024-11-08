@@ -18,7 +18,7 @@ const AuthForm = () => {
   }, []);
 
   const handleLogin = async (email: string, password: string) => {
-    const endpoint = "http://localhost:8000/api/users/login";
+    const endpoint = import.meta.env.VITE_LOGIN_ENDPOINT;
     const payload = new URLSearchParams();
     payload.append("grant_type", "password");
     payload.append("username", email);
@@ -51,7 +51,7 @@ const AuthForm = () => {
     password: string,
     confirmPassword: string,
   ) => {
-    const endpoint = "http://localhost:8000/api/users/register";
+    const endpoint = import.meta.env.VITE_REGISTER_ENDPOINT;
     const payload = {
       email: email,
       password: password,
