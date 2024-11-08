@@ -35,7 +35,6 @@ const AuthForm = () => {
         },
       });
 
-      console.log("Success:", response.data);
       navigate("/Me");
       localStorage.setItem("access_token", response.data.access_token);
     } catch (error) {
@@ -57,7 +56,7 @@ const AuthForm = () => {
       password: password,
       confirm_password: confirmPassword,
     };
-
+  
     try {
       const response = await axios.post(endpoint, payload, {
         headers: {
@@ -65,17 +64,30 @@ const AuthForm = () => {
           accept: "application/json",
         },
       });
-
-      console.log("Success:", response.data);
+  
       localStorage.setItem("access_token", response.data.access_token);
       navigate("/me");
     } catch (error) {
-      console.error("Error:", error);
-      setError("Registration failed. Please try again.");
+      // Display error message from server
+      if (axios.isAxiosError(error) && error.response) {
+        const errorDetails = error.response.data.detail;
+        if (Array.isArray(errorDetails)) {
+          const errorMessages = errorDetails
+            .map((err: { msg: string }) => err.msg)
+            .filter((msg: string | undefined) => msg)
+            .join(", ");
+          setError(`Registration failed: ${errorMessages}`);
+        } else {
+          setError("Registration failed. Please try again.");
+        }
+      } else {
+        setError("Registration failed. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
   };
+  
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

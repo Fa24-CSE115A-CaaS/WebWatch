@@ -3,6 +3,7 @@ from pydantic import BaseModel, validator, EmailStr
 from datetime import datetime
 from typing import Optional
 from uuid import uuid4
+import re
 import os
 
 
