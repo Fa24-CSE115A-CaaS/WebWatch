@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const Settings = () => {
     const [activeTab, setActiveTab] = useState("vertical-tab-1");
+
+    const navigate = useNavigate();
 
     const handleTabClick = (tabId: string) => {
         setActiveTab(tabId);
@@ -21,14 +24,50 @@ const Settings = () => {
                 let reader = new FileReader();
                 reader.readAsDataURL(file);
                 reader.onload = function() {
-                  let image = document.getElementById("profileImage") as HTMLImageElement;
-                  image.src = reader.result as string;
-                  // TODO: Send the image to the server
+                    let image = document.getElementById("profileImage") as HTMLImageElement;
+                    image.src = reader.result as string;
+                    // TODO: Send the image to the server
                 }
             }
         };
         input.click();
     };
+
+    const updateAccount = () => {
+        let token = localStorage.getItem("access_token");
+        if (!token) {
+            navigate("/auth");
+            return;
+        }
+        let email = (document.getElementById("form_email") as HTMLInputElement).value;
+        let password = (document.getElementById("form_password") as HTMLInputElement).value;
+        if (email && RegExp("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$").test(email)) {
+            alert("Please enter a valid email");
+            return;
+        }
+        if (password) {
+            if (password !== (document.getElementById("form_confirm_password") as HTMLInputElement).value) {
+                alert("Passwords do not match");
+                return;
+            } else if (password.length < 8) {  
+                alert("Password must be at least 8 characters long");
+                return;
+            }
+        }
+        let contents = {} as any;
+        if (email) contents["email"] = email;
+        if (password) contents["password"] = password;
+        axios.put("/users/update", { headers: { Authorization: `Bearer ${token}` }, data: { contents } })
+    }
+
+    const deleteAccount = () => {
+        let token = localStorage.getItem("access_token");
+        if (!token) {
+            navigate("/auth");
+            return;
+        }
+        axios.delete("/users/delete", { headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } })
+    }
 
     return (
         <div className="mx-auto mt-8 min-h-screen w-1/2 rounded text-text">
@@ -114,26 +153,33 @@ const Settings = () => {
                                 <form className="pb-4">
                                     <label className="mb-2 block text-lg">Email</label>
                                     <input
+                                        id="form_email"
                                         type="email"
                                         className="mb-4 w-full rounded-lg border border-border bg-secondary p-2 outline-none"
                                     />
                                     <h2 className="my-8 mb-4 text-2xl">Reset Password</h2>
                                     <label className="mb-2 block text-lg">Password</label>
                                     <input
+                                        id="form_password"
                                         type="password"
                                         className="mb-4 w-full rounded-lg border border-border bg-secondary p-2 outline-none"
                                     />
                                     <label className="mb-2 block text-lg">Confirm Password</label>
                                     <input
+                                        id="form_confirm_password"
                                         type="password"
                                         className="mb-4 w-full rounded-lg border border-border bg-secondary p-2 outline-none"
                                     />
-                                    <button className="mt-4 rounded-lg bg-accent p-2 px-16 text-text-contrast hover:bg-accent-hover">
+                                    <button className="mt-4 rounded-lg bg-accent p-2 px-16 text-text-contrast hover:bg-accent-hover"
+                                        onClick={() => updateAccount()}
+                                    >
                                         Save
                                     </button>
                                 </form>
                                 <h2 className="my-8 mb-4 text-2xl">Danger Zone</h2>
-                                <button className="rounded-lg bg-error px-3 py-2">
+                                <button className="rounded-lg bg-error px-3 py-2"
+                                    onClick={() => deleteAccount()}
+                                >
                                     Delete my account
                                 </button>
                             </>
