@@ -54,7 +54,7 @@ const Home = () => {
                 className="mt-4 w-40 rounded-lg bg-accent px-10 py-2 text-text-contrast
                   hover:bg-accent-hover"
               >
-                Sign Up
+                Register
               </button>
             </Link>
           </div>
