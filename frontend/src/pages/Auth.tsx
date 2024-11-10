@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -7,18 +7,25 @@ const AuthForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const hash = window.location.hash;
+    setIsLogin(hash !== "#register");
+  }, []);
+
   const handleLogin = async (email: string, password: string) => {
-    const endpoint = "http://localhost:8000/api/users/login";
+    const endpoint = import.meta.env.VITE_LOGIN_ENDPOINT;
     const payload = new URLSearchParams();
     payload.append("grant_type", "password");
     payload.append("username", email);
     payload.append("password", password);
     payload.append("scope", "");
-    payload.append("client_id", "string");
-    payload.append("client_secret", "string");
+    payload.append("client_id", "");
+    payload.append("client_secret", "");
 
     try {
       const response = await axios.post(endpoint, payload, {
@@ -28,11 +35,13 @@ const AuthForm = () => {
         },
       });
 
-      console.log("Success:", response.data);
       navigate("/Me");
       localStorage.setItem("access_token", response.data.access_token);
     } catch (error) {
       console.error("Error:", error);
+      setError("Login failed. Please check your credentials.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -41,13 +50,13 @@ const AuthForm = () => {
     password: string,
     confirmPassword: string,
   ) => {
-    const endpoint = "http://localhost:8000/api/users/register";
+    const endpoint = import.meta.env.VITE_REGISTER_ENDPOINT;
     const payload = {
       email: email,
       password: password,
       confirm_password: confirmPassword,
     };
-
+  
     try {
       const response = await axios.post(endpoint, payload, {
         headers: {
@@ -55,22 +64,53 @@ const AuthForm = () => {
           accept: "application/json",
         },
       });
-
-      console.log("Success:", response.data);
+  
       localStorage.setItem("access_token", response.data.access_token);
       navigate("/me");
     } catch (error) {
-      console.error("Error:", error);
+      // Display error message from server
+      if (axios.isAxiosError(error) && error.response) {
+        const errorDetails = error.response.data.detail;
+        if (Array.isArray(errorDetails)) {
+          const errorMessages = errorDetails
+            .map((err: { msg: string }) => err.msg)
+            .filter((msg: string | undefined) => msg)
+            .join(", ");
+          setError(`Registration failed: ${errorMessages}`);
+        } else {
+          setError("Registration failed. Please try again.");
+        }
+      } else {
+        setError("Registration failed. Please try again.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
+  
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    if (!email || !password || (!isLogin && password !== confirmPassword)) {
+      setError("Please fill in all fields correctly.");
+      setLoading(false);
+      return;
+    }
+
     if (isLogin) {
       await handleLogin(email, password);
     } else {
       await handleRegister(email, password, confirmPassword);
     }
+  };
+
+  const handleTabSwitch = (isLogin: boolean) => {
+    setIsLogin(isLogin);
+    setError("");
+    setLoading(false);
   };
 
   return (
@@ -81,7 +121,7 @@ const AuthForm = () => {
             <div className="m-4 flex justify-center">
               <button
                 className={`relative mx-4 px-4 py-2 text-lg font-bold ${isLogin ? "decoration-accent" : ""}`}
-                onClick={() => setIsLogin(true)}
+                onClick={() => handleTabSwitch(true)}
               >
                 Login
                 {isLogin && (
@@ -90,7 +130,7 @@ const AuthForm = () => {
               </button>
               <button
                 className={`relative mx-4 px-4 py-2 text-lg font-bold ${!isLogin ? "decoration-accent" : ""}`}
-                onClick={() => setIsLogin(false)}
+                onClick={() => handleTabSwitch(false)}
               >
                 Register
                 {!isLogin && (
@@ -99,6 +139,7 @@ const AuthForm = () => {
               </button>
             </div>
             <form onSubmit={handleSubmit}>
+              {error && <div className="mb-4 text-red-500">{error}</div>}
               <div className="mb-4">
                 <label htmlFor="email" className="mb-2 block">
                   Email
@@ -140,8 +181,9 @@ const AuthForm = () => {
               <button
                 type="submit"
                 className="mt-4 w-full rounded-lg bg-accent p-2 text-text-contrast hover:bg-accent-hover"
+                disabled={loading}
               >
-                {isLogin ? "Login" : "Create Account"}
+                {loading ? "Processing..." : isLogin ? "Login" : "Create Account"}
               </button>
             </form>
           </div>

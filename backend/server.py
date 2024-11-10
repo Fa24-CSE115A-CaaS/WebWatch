@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from database import Database
 from sqlmodel import select
 from scheduler import Scheduler
+import os
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 
@@ -16,11 +17,17 @@ from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
 scheduler = Scheduler()
-db = Database(production=False)
-
-origins = ["http://localhost:5173"]
 
 
+# Setup database and CORS middleware based on environment
+if os.getenv("ENV") == "production":
+    db = Database(production=True)
+    origins = ["https://webwatch.live"]
+else:
+    db = Database(production=False)
+    origins = ["http://localhost:5173"]
+
+# Lifespan event to start and stop tasks
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # ON BOOT
