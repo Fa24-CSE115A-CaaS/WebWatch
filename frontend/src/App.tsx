@@ -22,11 +22,20 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/auth",
+    path: "/auth/login",
     element: (
       <>
         <NavBar />
-        <Auth />
+        <Auth isLogin={true} />
+      </>
+    ),
+  },
+  {
+    path: "/auth/register",
+    element: (
+      <>
+        <NavBar />
+        <Auth isLogin={false} />
       </>
     ),
   },
