@@ -36,7 +36,7 @@ const AuthForm = ({ isLogin: initialIsLogin }: AuthFormProps) => {
       });
 
       localStorage.setItem("access_token", response.data.access_token);
-      navigate("/me");
+      navigate("/tasks");
     } catch (error) {
       handleError(error, "Login failed. Please check your credentials.");
     } finally {
@@ -55,7 +55,7 @@ const AuthForm = ({ isLogin: initialIsLogin }: AuthFormProps) => {
       setLoading(true);
       const response = await axios.post("/users/register", payload);
       localStorage.setItem("access_token", response.data.access_token);
-      navigate("/me");
+      navigate("/tasks");
     } catch (error) {
       handleError(error, "Registration failed. Please try again.");
     } finally {

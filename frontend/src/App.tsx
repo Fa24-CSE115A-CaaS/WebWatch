@@ -9,7 +9,6 @@ import Home from "./pages/Home";
 import Guide from "./pages/Guide";
 import Settings from "./pages/Settings";
 import Tasks from "./pages/Tasks";
-import Me from "./pages/Me";
 
 const router = createBrowserRouter([
   {
@@ -36,15 +35,6 @@ const router = createBrowserRouter([
       <>
         <NavBar />
         <Auth isLogin={false} />
-      </>
-    ),
-  },
-  {
-    path: "/me",
-    element: (
-      <>
-        <NavBar />
-        <Me />
       </>
     ),
   },

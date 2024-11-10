@@ -13,7 +13,7 @@ const Auth = ({ isLogin }: AuthProps) => {
 
   useEffect(() => {
     if (isTokenValid) {
-      navigate("/me");
+      navigate("/tasks");
     }
   }, [isTokenValid, navigate]);
 
