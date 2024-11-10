@@ -1,6 +1,7 @@
 // Hooks
 import usePopup from "../hooks/usePopup";
 import { useTheme } from "../hooks/useTheme";
+import useAuth from "../hooks/useAuth";
 // Icons
 import { FaCircle } from "react-icons/fa";
 import { IoIosCloudOutline } from "react-icons/io";
@@ -8,6 +9,7 @@ import { IoIosCloudOutline } from "react-icons/io";
 const NavBar = () => {
   const { open, setOpen, containerRef } = usePopup();
   const { changeTheme } = useTheme();
+  const { user } = useAuth({ redirectToAuth: false }); // Use named parameter for clarity
 
   return (
     <>
@@ -20,18 +22,19 @@ const NavBar = () => {
             <a href="/">Dashboard</a>
           </div>
           <div className="relative flex items-center gap-4">
-            <a href="/auth">Get Started</a>
-            <button
-              className="relative flex cursor-pointer rounded-full bg-gray-50 text-sm focus:outline-none
-                focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800
-                dark:bg-gray-800"
-              id="user-menu-button"
-              aria-expanded="false"
-              aria-haspopup="true"
-              onClick={() => setOpen((prev) => !prev)}
-            >
-              <FaCircle size={30} />
-            </button>
+            {user && (
+              <button
+                className="relative flex cursor-pointer rounded-full bg-gray-50 text-sm focus:outline-none
+                  focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800
+                  dark:bg-gray-800"
+                id="user-menu-button"
+                aria-expanded="false"
+                aria-haspopup="true"
+                onClick={() => setOpen((prev) => !prev)}
+              >
+                <FaCircle size={30} />
+              </button>
+            )}
           </div>
         </div>
       </nav>
