@@ -4,11 +4,11 @@ const Home = () => {
   return (
     <div
       className="flex min-h-screen flex-col items-center justify-start bg-primary p-4 text-center
-        text-white"
+        text-text"
     >
       <header className="mb-8 mt-16">
         <h1 className="mb-4 text-5xl font-bold text-accent">WebWatch</h1>
-        <p className="text-xl text-white">
+        <p className="text-xl text-text">
           Keep track of your favorite websites effortlessly
         </p>
       </header>
@@ -20,14 +20,14 @@ const Home = () => {
           <h2 className="mb-4 text-3xl font-semibold text-accent">
             What We Do
           </h2>
-          <p className="text-lg text-white">
+          <p className="text-lg text-text">
             Our app allows you to monitor changes on any web page. Get notified
             instantly when something changes, so you never miss an update.
           </p>
         </section>
         <section className="mb-8">
           <h2 className="mb-4 text-3xl font-semibold text-accent">Features</h2>
-          <ul className="list-inside list-disc text-center text-lg text-white">
+          <ul className="list-inside list-disc text-center text-lg text-text">
             <li>Real-time monitoring of web pages</li>
             <li>Customizable alert settings</li>
             <li>User-friendly interface</li>
@@ -37,7 +37,7 @@ const Home = () => {
           <h2 className="mb-4 text-3xl font-semibold text-accent">
             Get Started
           </h2>
-          <p className="mb-4 text-lg text-white">
+          <p className="mb-4 text-lg text-text">
             Sign up today and start monitoring your favorite websites with ease.
           </p>
           <div className="flex justify-center space-x-4">
@@ -60,7 +60,7 @@ const Home = () => {
           </div>
         </section>
       </main>
-      <footer className="mt-8 text-white">
+      <footer className="mt-8 text-text">
         &copy; {new Date().getFullYear()} WebWatch. All rights reserved.
       </footer>
     </div>
