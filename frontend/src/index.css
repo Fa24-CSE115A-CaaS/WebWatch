@@ -21,6 +21,22 @@
 }
 
 :root {
+  font-family: "Space Grotesk", sans-serif;
+}
+
+:root {
+  --background: #f0f0f0;
+  --primary: #f7f7f7;
+  --secondary: #e0e0e0;
+  --accent: #7564d1;
+  --accent-hover: #504492;
+  --border: #cdcdcd;
+  --info: #5697d4;
+  --text: #222222;
+  --text-contrast: #eeeeee;
+}
+
+:root:has(body.dark) {
   --background: #242424;
   --primary: #444444;
   --secondary: #363636;
@@ -31,22 +47,6 @@
   --info: #abcbe9;
   --text: #eeeeee;
   --text-contrast: #222222;
-
-  font-family: "Space Grotesk", sans-serif;
-}
-
-@media (prefers-color-scheme: light) {
-  :root:not(:has(body.dark)) {
-    --background: #f0f0f0;
-    --primary: #f7f7f7;
-    --secondary: #e0e0e0;
-    --accent: #7564d1;
-    --accent-hover: #504492;
-    --border: #cdcdcd;
-    --info: #5697d4;
-    --text: #222222;
-    --text-contrast: #eeeeee;
-  }
 }
 
 /* Removing arrows on number input */
@@ -68,8 +68,4 @@ body {
 
 body:has(.modal) {
   overflow: hidden;
-}
-
-.btn {
-  @apply rounded border-border px-4 py-2 font-bold;
 }
