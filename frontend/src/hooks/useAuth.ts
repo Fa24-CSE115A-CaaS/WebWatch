@@ -21,7 +21,7 @@ const useAuth = ({ redirectToAuth = true }: UseAuthOptions = {}) => {
       const token = localStorage.getItem("access_token");
       if (!token) {
         setIsTokenValid(false);
-        if (redirectToAuth) navigate("/auth");
+        if (redirectToAuth) navigate("/auth/login");
         return;
       }
 
