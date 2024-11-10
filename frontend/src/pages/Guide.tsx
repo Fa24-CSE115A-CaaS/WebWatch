@@ -1,13 +1,7 @@
+import { useTheme } from "../hooks/useTheme";
+
 function Guide() {
-  const handleThemeChange = () => {
-    if (document.body.classList.contains("dark")) {
-      document.body.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    } else {
-      document.body.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    }
-  };
+  const { changeTheme } = useTheme();
 
   const btnStyles =
     "text-text font-main m-3 block w-52 rounded-md px-3 py-2 font-medium border-[1px] border-border";
@@ -35,7 +29,7 @@ function Guide() {
         </button>
         <button
           className={`${btnStyles} bg-primary`}
-          onClick={handleThemeChange}
+          onClick={changeTheme}
         >
           Change Theme
         </button>
