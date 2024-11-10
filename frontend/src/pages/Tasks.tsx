@@ -56,7 +56,7 @@ const Tasks = () => {
   }, [isTokenValid]);
 
   if (!isTokenValid) {
-    return null; // or a loading spinner, or a message indicating redirection
+    return <div>Loading...</div>;
   }
 
   return (
