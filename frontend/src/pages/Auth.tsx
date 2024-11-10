@@ -14,8 +14,6 @@ const Auth = ({ isLogin }: AuthProps) => {
   useEffect(() => {
     if (isTokenValid) {
       navigate("/tasks");
-    } else {
-      localStorage.removeItem("access_token");
     }
   }, [isTokenValid, navigate]);
 

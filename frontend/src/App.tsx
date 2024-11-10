@@ -20,6 +20,7 @@ const router = createBrowserRouter([
       </>
     ),
   },
+  // Auth protected route
   {
     path: "/auth/login",
     element: (
@@ -29,6 +30,7 @@ const router = createBrowserRouter([
       </>
     ),
   },
+  // Auth protected route
   {
     path: "/auth/register",
     element: (
@@ -38,6 +40,7 @@ const router = createBrowserRouter([
       </>
     ),
   },
+  // Auth protected route
   {
     path: "/settings",
     element: (
@@ -56,6 +59,7 @@ const router = createBrowserRouter([
       </>
     ),
   },
+  // Auth protected route
   {
     path: "/tasks",
     element: (
