@@ -8,7 +8,7 @@ interface AuthProps {
 }
 
 const Auth = ({ isLogin }: AuthProps) => {
-  const { user, isTokenValid } = useAuth({ redirectToAuth: false });
+  const { isTokenValid } = useAuth({ redirectToAuth: false });
   const navigate = useNavigate();
 
   useEffect(() => {

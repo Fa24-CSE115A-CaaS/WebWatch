@@ -36,7 +36,7 @@ const useAuth = ({ redirectToAuth = true }: UseAuthOptions = {}) => {
       } catch (error) {
         console.error("Error fetching user data:", error);
         setIsTokenValid(false);
-        if (redirectToAuth) navigate("/auth");
+        if (redirectToAuth) navigate("/auth/login");
       }
     };
 

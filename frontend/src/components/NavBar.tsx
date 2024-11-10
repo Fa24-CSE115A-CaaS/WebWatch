@@ -14,14 +14,32 @@ const NavBar = () => {
   return (
     <>
       <nav className="bg-secondary px-2 text-text sm:px-6 lg:px-8">
-        <div className="item-center flex h-16 justify-between">
+        <div className="flex h-16 justify-between items-center">
           <div className="flex items-center gap-4">
-            <h1 className="flex items-center gap-2">
-              <IoIosCloudOutline size={20} /> WebWatch
-            </h1>
-            <a href="/">Dashboard</a>
+            <a href="/">
+              <h1 className="flex items-center gap-2">
+                <IoIosCloudOutline size={20} /> WebWatch
+              </h1>
+            </a>
           </div>
-          <div className="relative flex items-center gap-4">
+          {user && (
+            <div className="flex-grow flex justify-center">
+              <a href="/tasks">
+                <button
+                  className="
+                  w-40 rounded-lg bg-accent py-2 text-text-contrast
+                  hover:bg-accent-hover
+                  "
+                  id="tasks-button"
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                >
+                  Tasks
+                </button>
+              </a>
+            </div>
+          )}
+          <div className="flex items-center gap-4">
             {user && (
               <button
                 className="relative flex cursor-pointer rounded-full bg-gray-50 text-sm focus:outline-none
