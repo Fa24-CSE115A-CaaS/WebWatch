@@ -1,4 +1,3 @@
-// Components
 import TaskList from "../components/TaskList";
 import CreateInput from "../components/CreateInput";
 import {
@@ -10,6 +9,7 @@ import {
 } from "react";
 import { Task, TaskResponse } from "../types";
 import { axios } from "../config";
+import useAuth from "../hooks/useAuth";
 
 interface TaskPageContext {
   tasks: Task[];
@@ -19,12 +19,15 @@ interface TaskPageContext {
 export const TasksPageContext = createContext<TaskPageContext | null>(null);
 
 const Tasks = () => {
+  const { user, isTokenValid } = useAuth({ redirectToAuth: true });
   const [tasks, setTasks] = useState<Task[]>([]);
 
   useEffect(() => {
+    if (!isTokenValid) return;
+
     let valid = true;
     const fetchTasks = async () => {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("access_token");
       const response = await axios.get("/tasks", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -50,7 +53,11 @@ const Tasks = () => {
     return () => {
       valid = false;
     };
-  }, []);
+  }, [isTokenValid]);
+
+  if (!isTokenValid) {
+    return null; // or a loading spinner, or a message indicating redirection
+  }
 
   return (
     <TasksPageContext.Provider value={{ tasks, setTasks }}>
@@ -64,6 +71,7 @@ const Tasks = () => {
           <h1 className="mb-5 text-2xl font-semibold">Paused</h1>
           <TaskList tasks={tasks.filter((t) => !t.enabled)} />
         </div>
+        {user && <p className="mt-4 text-center">Logged in as: {user.email}</p>}
       </main>
     </TasksPageContext.Provider>
   );
