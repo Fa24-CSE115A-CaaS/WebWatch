@@ -52,13 +52,6 @@ class UserGet(UserBase):
 """
 
 """
-class UserUpdate(BaseModel):
-    email: EmailStr | None = None
-    password_hash: str | None = None
-
-    class Config:
-        orm_mode = True
-
 class UserDelete(BaseModel):
     pass
 
@@ -67,6 +60,13 @@ class UserReset(BaseModel):
     password: str
 """
 
+class UserUpdate(BaseModel):
+    discord_default_webhook: Optional[str] = None
+    slack_default_webhook: Optional[str] = None
+
+
+    class Config:
+        orm_mode = True
 
 class UserOutput(BaseModel):
     id: int
