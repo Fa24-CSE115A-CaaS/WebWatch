@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import { axios } from "../config";
 import { useNavigate } from "react-router-dom";
+import { AxiosError } from "axios";
 
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -18,7 +19,6 @@ const AuthForm = () => {
   }, []);
 
   const handleLogin = async (email: string, password: string) => {
-    const endpoint = import.meta.env.VITE_LOGIN_ENDPOINT;
     const payload = new URLSearchParams();
     payload.append("grant_type", "password");
     payload.append("username", email);
@@ -28,18 +28,24 @@ const AuthForm = () => {
     payload.append("client_secret", "");
 
     try {
-      const response = await axios.post(endpoint, payload, {
+      setLoading(true);
+      const response = await axios.post("/users/login", payload, {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           accept: "application/json",
         },
       });
 
-      navigate("/Me");
       localStorage.setItem("access_token", response.data.access_token);
+      navigate("/me");
     } catch (error) {
-      console.error("Error:", error);
-      setError("Login failed. Please check your credentials.");
+      const axiosError = error as AxiosError;
+      if (axiosError.response) {
+        setError("Login failed. Please check your credentials.");
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
+      console.error("Error:", axiosError);
     } finally {
       setLoading(false);
     }
@@ -50,26 +56,20 @@ const AuthForm = () => {
     password: string,
     confirmPassword: string,
   ) => {
-    const endpoint = import.meta.env.VITE_REGISTER_ENDPOINT;
     const payload = {
       email: email,
       password: password,
       confirm_password: confirmPassword,
     };
-  
+
     try {
-      const response = await axios.post(endpoint, payload, {
-        headers: {
-          "Content-Type": "application/json",
-          accept: "application/json",
-        },
-      });
-  
+      setLoading(true);
+      const response = await axios.post("/users/register", payload);
       localStorage.setItem("access_token", response.data.access_token);
       navigate("/me");
     } catch (error) {
-      // Display error message from server
-      if (axios.isAxiosError(error) && error.response) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response) {
         const errorDetails = error.response.data.detail;
         if (Array.isArray(errorDetails)) {
           const errorMessages = errorDetails
@@ -81,13 +81,13 @@ const AuthForm = () => {
           setError("Registration failed. Please try again.");
         }
       } else {
-        setError("Registration failed. Please try again.");
+        setError("An unexpected error occurred. Please try again.");
       }
+      console.error("Error:", axiosError);
     } finally {
       setLoading(false);
     }
   };
-  
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
