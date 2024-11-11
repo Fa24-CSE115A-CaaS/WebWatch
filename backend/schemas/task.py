@@ -55,9 +55,9 @@ class TaskGet(TaskBase):
     id: int
 
 
-""" class TaskCreate(TaskBase):
+class TaskCreate(TaskBase):
     pass
- """
+
 
 class TaskUpdate(TaskBase):
     user_id: int | None = None
