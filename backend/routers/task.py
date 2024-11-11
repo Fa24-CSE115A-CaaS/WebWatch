@@ -66,16 +66,11 @@ async def tasks_delete(task_id: int):
             task = session.get(Task, task_id)
             if not task:
                 raise HTTPException(status_code=404, detail="Task not found")
-            
-            # Log task before deletion
 
             session.delete(task)
             session.commit()
-        
-        
         except Exception as e:
             raise HTTPException(status_code=500, detail="Error deleting task")
-    
     return Response(status_code=204)
 
  
