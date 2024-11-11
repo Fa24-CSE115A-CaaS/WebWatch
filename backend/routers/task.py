@@ -5,7 +5,6 @@ from typing import List
 from database import Database
 from schemas.user import User
 
-
 ### TASK ENDPOINTS ###
 
 router = APIRouter(
@@ -47,8 +46,12 @@ async def tasks_update(task_id: int, task_update: TaskUpdate):
         task = session.get(Task, task_id)
         if not task:
             raise HTTPException(status_code=404, detail="Task not found")
-        update_data = task_update.model_dump(exclude_unset=True)
-        task.sqlmodel_update(update_data)
+        
+        # Update task fields
+        update_data = task_update.dict(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(task, key, value)
+
         session.add(task)
         session.commit()
         session.refresh(task)
@@ -58,11 +61,16 @@ async def tasks_update(task_id: int, task_update: TaskUpdate):
 # Delete task by id
 @router.delete("/{task_id}", response_model=TaskGet)
 async def tasks_delete(task_id: int):
-    # Delete a task
     with db.get_session() as session:
-        task = session.get(Task, task_id)
-        if not task:
-            raise HTTPException(status_code=404, detail="Task not found")
-        session.delete(task)
-        session.commit()
+        try:
+            task = session.get(Task, task_id)
+            if not task:
+                raise HTTPException(status_code=404, detail="Task not found")
+
+            session.delete(task)
+            session.commit()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="Error deleting task")
     return Response(status_code=204)
+
+ 

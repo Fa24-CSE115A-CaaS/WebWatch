@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends, Cookie
 from sqlmodel import SQLModel, select, Session
-from schemas.user import UserRegister, UserLogin, UserOutput, User, Token
+from schemas.user import UserRegister, UserLogin, UserUpdate, UserOutput, User, Token
 from auth_password import get_hashed_password, verify_password
 from auth_token import (
     create_access_token,
@@ -112,24 +112,28 @@ async def verify(token: str):
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
-
-"""
-# Update user details by id
-@router.put("/{user_id}")
-async def users_update(user_id: int):
+@router.put("/{user_id}", response_model=UserOutput)
+async def users_update(user_id: int, user_update: UserUpdate):
     with db.get_session() as session:
         user = session.get(User, user_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        update_data = user_update.dict(exclude_unset=True)
+
+        # Update fields that are provided in the request
+        update_data = user_update.dict(exclude_unset=True)  # Exclude fields that weren't provided
         for key, value in update_data.items():
             setattr(user, key, value)
-        session.add(user)
-        session.commit()
-        session.refresh(user)
+
+        try:
+            session.add(user)
+            session.commit()
+            session.refresh(user)
+        except Exception as e:
+            session.rollback()
+            raise HTTPException(status_code=500, detail="Internal server error")
     return user
 
-
+"""
 # Delete a user by id
 @router.delete("{user_id}")
 async def users_delete(user_id: int):
