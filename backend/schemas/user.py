@@ -67,13 +67,11 @@ class UserUpdate(BaseModel):
 
     class Config:
         orm_mode = True
+        
 
 class UserOutput(BaseModel):
     id: int
     email: EmailStr
-
-
-
 
 
 class Token(BaseModel):
