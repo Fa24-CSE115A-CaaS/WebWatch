@@ -25,13 +25,5 @@ jobs:
         key: ${{ secrets.PRIVATE_KEY }}
         port: 22
         script: |
-          docker-compose down
-          cd /home/webwatch/app/WebWatch/
-          git pull origin main
-          git status
-          cd /home/webwatch/app/WebWatch/frontend
-          npm install
-          npm run build
-          rm -Rf /home/webwatch/nginx/html/*
-          cp -r /home/webwatch/app/WebWatch/frontend/dist/* /home/webwatch/nginx/html/
-          docker-compose up -d
+          cd /home/webwatch
+          ./ci.sh
