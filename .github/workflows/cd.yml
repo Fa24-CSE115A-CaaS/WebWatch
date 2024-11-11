@@ -29,4 +29,9 @@ jobs:
           cd /home/webwatch/app/WebWatch/
           git pull origin main
           git status
-          docker-compose up
+          cd /home/webwatch/app/WebWatch/frontend
+          npm install
+          npm run build
+          rm -Rf /home/webwatch/nginx/html/*
+          cp -r /home/webwatch/app/WebWatch/frontend/dist/* /home/webwatch/nginx/html/
+          docker-compose up -d
