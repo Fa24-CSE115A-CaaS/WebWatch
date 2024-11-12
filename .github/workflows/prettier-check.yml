@@ -22,10 +22,10 @@ jobs:
 
       # Install dependencies (including Prettier and plugins)
       - name: Install dependencies
-        run: |
-          cd frontend
-          npm install
+        working-directory: frontend
+        run: npm install
 
       # Run Prettier check
       - name: Run Prettier check
+        working-directory: frontend
         run: npx prettier --check "**/*.{js,jsx,ts,tsx,html,css,json,md}"
