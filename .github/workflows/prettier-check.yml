@@ -1,0 +1,28 @@
+name: Prettier Format Check
+
+on:
+  pull_request:
+    branches:
+      - main 
+
+jobs:
+  prettier-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Node.js environment for Prettier
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      # Install and run Prettier
+      - name: Install Prettier
+        run: npm install --global prettier
+
+      - name: Run Prettier check
+        run: prettier --check "**/*.{js,jsx,ts,tsx,html,css,json,md}"
