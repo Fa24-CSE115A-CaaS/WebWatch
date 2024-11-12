@@ -76,3 +76,12 @@ class UserOutput(BaseModel):
 
 class Token(BaseModel):
     access_token: str
+
+class PasswordReset(BaseModel):
+    email: EmailStr
+
+
+class PasswordResetRequest(BaseModel):
+    reset_token: str
+    new_password: str
+    confirm_password: str
