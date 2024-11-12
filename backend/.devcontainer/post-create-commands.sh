@@ -16,4 +16,4 @@ cd scraper-linux64 && ./downloadchrome.sh
 cd /workspaces/WebWatch/backend
 
 # Run the server
-uvicorn server:app --reload
+uvicorn server:app --reload --host 0.0.0.0 --port 8000
