@@ -46,7 +46,7 @@ async def tasks_update(task_id: int, task_update: TaskUpdate):
         task = session.get(Task, task_id)
         if not task:
             raise HTTPException(status_code=404, detail="Task not found")
-        
+
         # Update task fields
         update_data = task_update.dict(exclude_unset=True)
         for key, value in update_data.items():
@@ -72,5 +72,3 @@ async def tasks_delete(task_id: int):
         except Exception as e:
             raise HTTPException(status_code=500, detail="Error deleting task")
     return Response(status_code=204)
-
- 

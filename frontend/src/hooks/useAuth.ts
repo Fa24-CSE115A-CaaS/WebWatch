@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { axios } from "../config"; 
+import { axios } from "../config";
 
 interface User {
   email: string;
 }
 
-// Allows caller to either enforce redirection to /auth or not 
+// Allows caller to either enforce redirection to /auth or not
 interface UseAuthOptions {
   redirectToAuth?: boolean;
 }
