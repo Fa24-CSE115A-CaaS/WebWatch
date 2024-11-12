@@ -67,3 +67,4 @@ class TaskUpdate(TaskBase):
         default=None, sa_column=Column(JSON())
     )
     enabled: bool | None = None
+

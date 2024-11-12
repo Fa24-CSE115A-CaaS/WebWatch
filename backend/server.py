@@ -27,7 +27,6 @@ else:
     db = Database(production=False)
     origins = ["http://localhost:5173"]
 
-
 # Lifespan event to start and stop tasks
 @asynccontextmanager
 async def lifespan(app: FastAPI):

@@ -27,7 +27,10 @@ function Guide() {
         <button className={`${btnStyles} bg-text-contrast`}>
           Text Contrast
         </button>
-        <button className={`${btnStyles} bg-primary`} onClick={changeTheme}>
+        <button
+          className={`${btnStyles} bg-primary`}
+          onClick={changeTheme}
+        >
           Change Theme
         </button>
       </div>
