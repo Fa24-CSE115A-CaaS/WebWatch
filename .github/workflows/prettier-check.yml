@@ -22,7 +22,7 @@ jobs:
 
       # Install dependencies (including Prettier and plugins)
       - name: Install dependencies
-        run: npm install -g prettier-plugin-tailwindcss eslint-config-prettier
+        run: npm install
 
       # Run Prettier check
       - name: Run Prettier check
