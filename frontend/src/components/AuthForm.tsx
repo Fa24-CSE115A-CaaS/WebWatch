@@ -44,7 +44,11 @@ const AuthForm = ({ isLogin: initialIsLogin }: AuthFormProps) => {
     }
   };
 
-  const handleRegister = async (email: string, password: string, confirmPassword: string) => {
+  const handleRegister = async (
+    email: string,
+    password: string,
+    confirmPassword: string,
+  ) => {
     const payload = {
       email: email,
       password: password,
@@ -182,7 +186,11 @@ const AuthForm = ({ isLogin: initialIsLogin }: AuthFormProps) => {
                 className="mt-4 w-full rounded-lg bg-accent p-2 text-text-contrast hover:bg-accent-hover"
                 disabled={loading}
               >
-                {loading ? "Processing..." : isLogin ? "Login" : "Create Account"}
+                {loading
+                  ? "Processing..."
+                  : isLogin
+                    ? "Login"
+                    : "Create Account"}
               </button>
             </form>
           </div>

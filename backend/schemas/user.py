@@ -20,6 +20,7 @@ class User(UserBase, table=True):
     discord_default_webhook: Optional[str] = None
     slack_default_webhook: Optional[str] = None
 
+
 class UserRegister(BaseModel):
     email: EmailStr
     password: str
@@ -39,9 +40,11 @@ class UserRegister(BaseModel):
                 raise ValueError("Password must contain at least one special character")
         return value
 
+
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
 
 """
 class UserGet(UserBase):
@@ -60,14 +63,14 @@ class UserReset(BaseModel):
     password: str
 """
 
+
 class UserUpdate(BaseModel):
     discord_default_webhook: Optional[str] = None
     slack_default_webhook: Optional[str] = None
 
-
     class Config:
         orm_mode = True
-        
+
 
 class UserOutput(BaseModel):
     id: int

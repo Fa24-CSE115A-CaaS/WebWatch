@@ -14,7 +14,7 @@ const NavBar = () => {
   return (
     <>
       <nav className="bg-secondary px-2 text-text sm:px-6 lg:px-8">
-        <div className="flex h-16 justify-between items-center">
+        <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-4">
             <a href="/">
               <h1 className="flex items-center gap-2">
@@ -23,13 +23,10 @@ const NavBar = () => {
             </a>
           </div>
           {user && (
-            <div className="flex-grow flex justify-center">
+            <div className="flex flex-grow justify-center">
               <a href="/tasks">
                 <button
-                  className="
-                  w-40 rounded-lg bg-accent py-2 text-text-contrast
-                  hover:bg-accent-hover
-                  "
+                  className="w-40 rounded-lg bg-accent py-2 text-text-contrast hover:bg-accent-hover"
                   id="tasks-button"
                   aria-expanded="false"
                   aria-haspopup="true"
