@@ -44,7 +44,11 @@ const AuthForm = ({ isLogin: initialIsLogin }: AuthFormProps) => {
     }
   };
 
-  const handleRegister = async (email: string, password: string, confirmPassword: string) => {
+  const handleRegister = async (
+    email: string,
+    password: string,
+    confirmPassword: string,
+  ) => {
     const payload = {
       email: email,
       password: password,
@@ -66,7 +70,9 @@ const AuthForm = ({ isLogin: initialIsLogin }: AuthFormProps) => {
   const handleError = (error: unknown, defaultMessage: string) => {
     const axiosError = error as AxiosError;
     if (axiosError.response) {
-      const errorDetails = (axiosError.response.data as { detail: { msg: string }[] }).detail;
+      const errorDetails = (
+        axiosError.response.data as { detail: { msg: string }[] }
+      ).detail;
       if (Array.isArray(errorDetails)) {
         const errorMessages = errorDetails
           .map((err: { msg: string }) => err.msg)
@@ -182,7 +188,11 @@ const AuthForm = ({ isLogin: initialIsLogin }: AuthFormProps) => {
                 className="mt-4 w-full rounded-lg bg-accent p-2 text-text-contrast hover:bg-accent-hover"
                 disabled={loading}
               >
-                {loading ? "Processing..." : isLogin ? "Login" : "Create Account"}
+                {loading
+                  ? "Processing..."
+                  : isLogin
+                    ? "Login"
+                    : "Create Account"}
               </button>
             </form>
           </div>
