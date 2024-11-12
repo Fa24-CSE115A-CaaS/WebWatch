@@ -14,15 +14,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set up Node.js environment for Prettier
+      # Set up Node.js environment
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '16'
 
-      # Install and run Prettier
-      - name: Install Prettier
-        run: npm install --global prettier
+      # Install dependencies (including Prettier and plugins)
+      - name: Install dependencies
+        run: npm install
 
+      # Run Prettier check
       - name: Run Prettier check
-        run: prettier --check "**/*.{js,jsx,ts,tsx,html,css,json,md}"
+        run: npx prettier --check "**/*.{js,jsx,ts,tsx,html,css,json,md}"
