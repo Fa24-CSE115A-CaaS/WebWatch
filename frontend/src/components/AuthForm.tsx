@@ -70,7 +70,7 @@ const AuthForm = ({ isLogin: initialIsLogin }: AuthFormProps) => {
   const handleError = (error: unknown, defaultMessage: string) => {
     const axiosError = error as AxiosError;
     if (axiosError.response) {
-      const errorDetails = axiosError.response.data.detail;
+      const errorDetails = (axiosError.response.data as { detail: { msg: string }[] }).detail;
       if (Array.isArray(errorDetails)) {
         const errorMessages = errorDetails
           .map((err: { msg: string }) => err.msg)
