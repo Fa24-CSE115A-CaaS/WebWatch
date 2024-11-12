@@ -9,44 +9,72 @@ import Home from "./pages/Home";
 import Guide from "./pages/Guide";
 import Settings from "./pages/Settings";
 import Tasks from "./pages/Tasks";
-import Me from "./pages/Me";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    Component: Home,
+    element: (
+      <>
+        <NavBar />
+        <Home />
+      </>
+    ),
   },
+  // Auth protected route
   {
-    path: "/auth",
-    Component: Auth,
+    path: "/auth/login",
+    element: (
+      <>
+        <NavBar />
+        <Auth isLogin={true} />
+      </>
+    ),
   },
+  // Auth protected route
   {
-    path: "/me",
-    Component: Me,
+    path: "/auth/register",
+    element: (
+      <>
+        <NavBar />
+        <Auth isLogin={false} />
+      </>
+    ),
   },
+  // Auth protected route
   {
     path: "/settings",
-    Component: Settings,
+    element: (
+      <>
+        <NavBar />
+        <Settings />
+      </>
+    ),
   },
   {
     path: "/theme-guide",
-    Component: Guide,
+    element: (
+      <>
+        <NavBar />
+        <Guide />
+      </>
+    ),
   },
+  // Auth protected route
   {
     path: "/tasks",
-    Component: Tasks,
+    element: (
+      <>
+        <NavBar />
+        <Tasks />
+      </>
+    ),
   },
 ]);
 
 const App = () => {
   useTheme();
 
-  return (
-    <div>
-      <NavBar />
-      <RouterProvider router={router}></RouterProvider>
-    </div>
-  );
+  return <RouterProvider router={router} />;
 };
 
 export default App;

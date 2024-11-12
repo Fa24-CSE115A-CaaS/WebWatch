@@ -1,6 +1,7 @@
 // Hooks
 import usePopup from "../hooks/usePopup";
 import { useTheme } from "../hooks/useTheme";
+import useAuth from "../hooks/useAuth";
 // Icons
 import { FaCircle } from "react-icons/fa";
 import { IoIosCloudOutline } from "react-icons/io";
@@ -8,30 +9,50 @@ import { IoIosCloudOutline } from "react-icons/io";
 const NavBar = () => {
   const { open, setOpen, containerRef } = usePopup();
   const { changeTheme } = useTheme();
+  const { user } = useAuth({ redirectToAuth: false }); // Use named parameter for clarity
 
   return (
     <>
       <nav className="bg-secondary px-2 text-text sm:px-6 lg:px-8">
-        <div className="item-center flex h-16 justify-between">
+        <div className="flex h-16 justify-between items-center">
           <div className="flex items-center gap-4">
-            <h1 className="flex items-center gap-2">
-              <IoIosCloudOutline size={20} /> WebWatch
-            </h1>
-            <a href="/">Dashboard</a>
+            <a href="/">
+              <h1 className="flex items-center gap-2">
+                <IoIosCloudOutline size={20} /> WebWatch
+              </h1>
+            </a>
           </div>
-          <div className="relative flex items-center gap-4">
-            <a href="/auth">Get Started</a>
-            <button
-              className="relative flex cursor-pointer rounded-full bg-gray-50 text-sm focus:outline-none
-                focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800
-                dark:bg-gray-800"
-              id="user-menu-button"
-              aria-expanded="false"
-              aria-haspopup="true"
-              onClick={() => setOpen((prev) => !prev)}
-            >
-              <FaCircle size={30} />
-            </button>
+          {user && (
+            <div className="flex-grow flex justify-center">
+              <a href="/tasks">
+                <button
+                  className="
+                  w-40 rounded-lg bg-accent py-2 text-text-contrast
+                  hover:bg-accent-hover
+                  "
+                  id="tasks-button"
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                >
+                  Tasks
+                </button>
+              </a>
+            </div>
+          )}
+          <div className="flex items-center gap-4">
+            {user && (
+              <button
+                className="relative flex cursor-pointer rounded-full bg-gray-50 text-sm focus:outline-none
+                  focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800
+                  dark:bg-gray-800"
+                id="user-menu-button"
+                aria-expanded="false"
+                aria-haspopup="true"
+                onClick={() => setOpen((prev) => !prev)}
+              >
+                <FaCircle size={30} />
+              </button>
+            )}
           </div>
         </div>
       </nav>

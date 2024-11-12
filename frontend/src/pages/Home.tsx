@@ -41,7 +41,7 @@ const Home = () => {
             Sign up today and start monitoring your favorite websites with ease.
           </p>
           <div className="flex justify-center space-x-4">
-            <Link to="/auth">
+            <Link to="/auth/login">
               <button
                 className="mt-4 w-40 rounded-lg bg-accent px-10 py-2 text-text-contrast
                   hover:bg-accent-hover"
@@ -49,7 +49,7 @@ const Home = () => {
                 Login
               </button>
             </Link>
-            <Link to="/auth#register">
+            <Link to="/auth/register">
               <button
                 className="mt-4 w-40 rounded-lg bg-accent px-10 py-2 text-text-contrast
                   hover:bg-accent-hover"

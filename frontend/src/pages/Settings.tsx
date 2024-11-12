@@ -1,8 +1,18 @@
-import { useState } from "react";
+import useAuth from "../hooks/useAuth";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaUserCircle } from "react-icons/fa";
 
 const Settings = () => {
+  const { user, isTokenValid } = useAuth({ redirectToAuth: true });
   const [activeTab, setActiveTab] = useState("vertical-tab-1");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isTokenValid) {
+      return;
+    }
+  }, [isTokenValid, navigate]);
 
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);
