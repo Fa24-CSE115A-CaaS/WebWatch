@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { FaUserCircle } from "react-icons/fa";
 
 const Settings = () => {
-  const { user, isTokenValid } = useAuth({ redirectToAuth: true });
+  const { isTokenValid } = useAuth({ redirectToAuth: true });
   const [activeTab, setActiveTab] = useState("vertical-tab-1");
   const navigate = useNavigate();
 
