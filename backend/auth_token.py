@@ -22,6 +22,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 DbSession = Annotated[Session, Depends(db.get_session)]
 
+
 def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_EXPIRATION)
@@ -56,7 +57,7 @@ async def get_current_user(session: DbSession, token: str = Depends(oauth2_schem
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    
+
     user = session.exec(select(User).where(User.token_uuid == uuid)).first()
     if user is None:
         raise credentials_exception

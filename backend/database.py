@@ -6,7 +6,7 @@ import os
 class Database:
     def __init__(self, mode: str = "DEV"):
         self.engine = None
-        
+
         if mode == "PRODUCTION":
             self._create_mysql()
         else:
@@ -28,7 +28,7 @@ class Database:
             f"mysql+pymysql://{username}:{password}@{server}/{dbname}?charset=utf8mb4"
         )
         self.engine = create_engine(db_url, echo=False, pool_recycle=3600)
-    
+
     def get_session(self):
         with Session(self.engine) as session:
             yield session

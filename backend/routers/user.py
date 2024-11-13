@@ -22,6 +22,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/login")
 
 DbSession = Annotated[Session, Depends(db.get_session)]
 
+
 @router.post(
     "/register",
     status_code=status.HTTP_201_CREATED,
@@ -33,9 +34,7 @@ DbSession = Annotated[Session, Depends(db.get_session)]
 )
 async def create_user(user: UserRegister, session: DbSession):
     # Check if user already exists
-    existing_user = session.exec(
-        select(User).where(User.email == user.email)
-    ).first()
+    existing_user = session.exec(select(User).where(User.email == user.email)).first()
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="Email already registered"
@@ -76,9 +75,7 @@ async def create_user(user: UserRegister, session: DbSession):
 )
 async def login(session: DbSession, form_data: OAuth2PasswordRequestForm = Depends()):
     # Query the user based on email
-    user = session.exec(
-        select(User).where(User.email == form_data.username)
-    ).first()
+    user = session.exec(select(User).where(User.email == form_data.username)).first()
     if not user or not verify_password(user.password_hash, form_data.password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
