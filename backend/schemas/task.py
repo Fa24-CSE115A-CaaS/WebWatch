@@ -4,7 +4,6 @@ from sqlalchemy.types import JSON
 from pydantic import field_validator
 from sqlmodel import SQLModel, Field
 import asyncio
-from .user import User
 
 
 NotificationOptions = List[Literal["EMAIL", "DISCORD", "SLACK"]]
@@ -12,7 +11,6 @@ NotificationOptions = List[Literal["EMAIL", "DISCORD", "SLACK"]]
 
 class TaskBase(SQLModel):
     name: str = Field(max_length=50)
-    user_id: int
     content: str | None = None
     url: str
     discord_url: str | None = None
@@ -53,6 +51,7 @@ class Task(TaskBase, table=True):
 
 class TaskGet(TaskBase):
     id: int
+    user_id: int
 
 
 class TaskCreate(TaskBase):
@@ -60,9 +59,10 @@ class TaskCreate(TaskBase):
 
 
 class TaskUpdate(TaskBase):
-    user_id: int | None = None
     name: str | None = Field(default=None, max_length=50)
+    content: str | None = None
     url: str | None = None
+    discord_url: str | None = None
     enabled_notification_options: NotificationOptions | None = Field(
         default=None, sa_column=Column(JSON())
     )

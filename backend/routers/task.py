@@ -1,9 +1,11 @@
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, Depends
 from schemas.task import Task, TaskCreate, TaskUpdate, TaskGet
-from sqlmodel import select
-from typing import List
+from sqlmodel import Session, select
+from typing import Annotated, List
 from database import Database
 from schemas.user import User
+from auth_token import get_current_user
+from dependencies.task import get_task
 
 ### TASK ENDPOINTS ###
 
@@ -13,62 +15,44 @@ router = APIRouter(
 
 db = Database(production=False)
 
+DbSession = Annotated[Session, Depends(db.generate_session)]
+UserData = Annotated[User, Depends(get_current_user)]
+TaskData = Annotated[Task, Depends(get_task)]
 
 # Create a new task
 @router.post("", response_model=TaskGet, status_code=201)
-async def tasks_create(task_create: TaskCreate):
-    # Validate user_id
-    with db.get_session() as session:
-        user = session.get(User, task_create.user_id)
-        if not user:
-            raise HTTPException(status_code=400, detail="Invalid user_id")
-        task = Task(**task_create.dict())
-        session.add(task)
-        session.commit()
-        session.refresh(task)
+async def tasks_create(task_create: TaskCreate, session: DbSession, user: UserData):
+    task = Task(**task_create.model_dump(), user_id=user.id)
+    session.add(task)
+    session.commit()
+    session.refresh(task)
     return task
 
 
 # List all tasks
 @router.get("", response_model=List[TaskGet])
-async def tasks_list():
-    with db.get_session() as session:
-        tasks = session.exec(select(Task)).all()
-    if not tasks:
-        raise HTTPException(status_code=404, detail="No tasks found")
+async def tasks_list(session: DbSession, user: UserData):
+    tasks = session.exec(select(Task).where(Task.user_id == user.id)).all()
     return tasks
 
 
 # Update task details by id
 @router.put("/{task_id}", response_model=TaskGet)
-async def tasks_update(task_id: int, task_update: TaskUpdate):
-    with db.get_session() as session:
-        task = session.get(Task, task_id)
-        if not task:
-            raise HTTPException(status_code=404, detail="Task not found")
+async def tasks_update(task_id: TaskData, task_update: TaskUpdate, session: DbSession):
+    task = session.get(Task, task_id)
+    update_data = task_update.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(task, key, value)
 
-        # Update task fields
-        update_data = task_update.dict(exclude_unset=True)
-        for key, value in update_data.items():
-            setattr(task, key, value)
-
-        session.add(task)
-        session.commit()
-        session.refresh(task)
+    session.add(task)
+    session.commit()
+    session.refresh(task)
     return task
 
 
 # Delete task by id
-@router.delete("/{task_id}", response_model=TaskGet)
-async def tasks_delete(task_id: int):
-    with db.get_session() as session:
-        try:
-            task = session.get(Task, task_id)
-            if not task:
-                raise HTTPException(status_code=404, detail="Task not found")
-
-            session.delete(task)
-            session.commit()
-        except Exception as e:
-            raise HTTPException(status_code=500, detail="Error deleting task")
-    return Response(status_code=204)
+@router.delete("/{task_id}", status_code=204)
+async def tasks_delete(task_id: TaskData, session: DbSession):
+    task = session.get(Task, task_id)
+    session.delete(task)
+    session.commit()

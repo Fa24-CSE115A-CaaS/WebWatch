@@ -33,6 +33,10 @@ class Database:
 
     def get_session(self):
         return Session(self.engine)
+    
+    def generate_session(self):
+        with Session(self.engine) as session:
+            yield session
 
 
 # DEMO
