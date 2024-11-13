@@ -13,7 +13,7 @@ app = FastAPI()
 load_dotenv()
 
 # TODO: Consider reworking database usage. FastAPI dependency injection?
-db = Database(production=False)
+db = Database(mode=os.getenv("ENV"))
 
 ACCESS_KEY = os.getenv("ACCESS_SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")

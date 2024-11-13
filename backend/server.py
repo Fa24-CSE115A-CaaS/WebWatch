@@ -20,12 +20,12 @@ scheduler = Scheduler()
 
 
 # Setup database and CORS middleware based on environment
-if os.getenv("ENV") == "production":
-    db = Database(production=True)
+if os.getenv("ENV") == "PRODUCTION":
     origins = ["https://webwatch.live"]
 else:
-    db = Database(production=False)
     origins = ["http://localhost:5173"]
+
+db = Database(mode=os.getenv("ENV"))
 
 
 # Lifespan event to start and stop tasks

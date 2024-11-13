@@ -6,6 +6,7 @@ from database import Database
 from schemas.user import User
 from auth_token import get_current_user
 from dependencies.task import get_task
+import os
 
 ### TASK ENDPOINTS ###
 
@@ -13,7 +14,7 @@ router = APIRouter(
     prefix="/tasks",
 )
 
-db = Database(production=False)
+db = Database(mode=os.getenv("ENV"))
 
 DbSession = Annotated[Session, Depends(db.generate_session)]
 UserData = Annotated[User, Depends(get_current_user)]

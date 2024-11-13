@@ -1,15 +1,13 @@
 from sqlmodel import SQLModel, Session, create_engine, select
 from schemas.task import TaskCreate, Task
-from dotenv import load_dotenv
 import os
-
-load_dotenv()
 
 
 class Database:
-    def __init__(self, production: bool = False):
+    def __init__(self, mode: str = "DEV"):
         self.engine = None
-        if production:
+        
+        if mode == "PRODUCTION":
             self._create_mysql()
         else:
             self._create_sqlite()
@@ -41,7 +39,7 @@ class Database:
 
 # DEMO
 if __name__ == "__main__":
-    db = Database(production=True)
+    db = Database(mode=os.getenv("ENV"))
 
     # INSERTION DEMO
     with db.get_session() as session:

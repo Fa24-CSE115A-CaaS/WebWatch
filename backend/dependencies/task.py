@@ -7,8 +7,10 @@ from auth_token import get_current_user
 from database import Database
 from schemas.task import Task
 from schemas.user import User
+import os
 
-db = Database()
+db = Database(os.getenv("ENV"))
+
 DbSession = Annotated[Session, Depends(db.generate_session)]
 UserData = Annotated[User, Depends(get_current_user)]
 

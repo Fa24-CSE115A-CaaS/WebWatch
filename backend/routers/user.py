@@ -10,9 +10,9 @@ from auth_token import (
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 from database import Database
-from datetime import timedelta
+import os
 
-db = Database(production=False)
+db = Database(mode=os.getenv("ENV"))
 
 router = APIRouter(
     prefix="/users",
