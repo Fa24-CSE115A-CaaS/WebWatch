@@ -16,7 +16,7 @@ router = APIRouter(
 
 db = Database(mode=os.getenv("ENV"))
 
-DbSession = Annotated[Session, Depends(db.generate_session)]
+DbSession = Annotated[Session, Depends(db.get_session)]
 UserData = Annotated[User, Depends(get_current_user)]
 TaskData = Annotated[Task, Depends(get_task)]
 

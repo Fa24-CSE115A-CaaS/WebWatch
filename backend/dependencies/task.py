@@ -11,7 +11,7 @@ import os
 
 db = Database(os.getenv("ENV"))
 
-DbSession = Annotated[Session, Depends(db.generate_session)]
+DbSession = Annotated[Session, Depends(db.get_session)]
 UserData = Annotated[User, Depends(get_current_user)]
 
 async def get_task(user: UserData, session: DbSession, task_id: int = Path()):
