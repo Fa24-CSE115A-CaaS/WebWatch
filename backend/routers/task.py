@@ -20,6 +20,7 @@ DbSession = Annotated[Session, Depends(db.get_session)]
 UserData = Annotated[User, Depends(get_current_user)]
 TaskData = Annotated[Task, Depends(get_task)]
 
+
 # Create a new task
 @router.post("", response_model=TaskGet, status_code=201)
 async def tasks_create(task_create: TaskCreate, session: DbSession, user: UserData):
