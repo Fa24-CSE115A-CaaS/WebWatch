@@ -1,12 +1,30 @@
+import { useContext } from "react";
 // Icons
 import { HiDotsVertical } from "react-icons/hi";
 // Hooks
 import usePopup from "../../hooks/usePopup";
+// Context
+import { TasksPageContext } from "../../pages/Tasks";
 // Types
 import { TaskComponent } from "./types";
+// Util
+import { axios } from "../../config";
 
 const Task: TaskComponent = ({ task, onEditModalOpen }) => {
+  const { tasks, setTasks } = useContext(TasksPageContext)!;
   const { open, setOpen, containerRef } = usePopup();
+
+  const deleteTask = async () => {
+    try {
+      const response = await axios.delete(`/tasks/${task.id}`);
+      if (response.status === 204) {
+        setTasks([...tasks.filter((t) => t.id !== task.id)]);
+      }
+    } catch (e) {
+      // TODO: Emit a global error
+      console.log(e);
+    }
+  };
 
   const dropdownButtonStyles =
     "block w-full border-b-[1px] border-border px-4 py-2 text-left hover:bg-primary bg-secondary";
@@ -53,6 +71,7 @@ const Task: TaskComponent = ({ task, onEditModalOpen }) => {
               </button>
               <button
                 className={`${dropdownButtonStyles} border-b-[0px] text-error`}
+                onClick={deleteTask}
               >
                 Delete Task
               </button>
