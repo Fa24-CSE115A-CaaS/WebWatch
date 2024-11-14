@@ -28,17 +28,15 @@ const CreateInput = () => {
 
   const onSubmit = async () => {
     try {
-      const token = localStorage.getItem("access_token");
       const res = await axios.post(
         "/tasks",
         {
           url: formState.url,
           name: formState.name,
-          user_id: 1,
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
         },
       );

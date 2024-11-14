@@ -61,12 +61,20 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
       return;
     }
 
-    const response = await axios.put(`/tasks/${task.id}`, {
-      name,
-      url,
-      enabled_notification_options: notificationOptions,
-      discord_url: discordUrl,
-    });
+    const response = await axios.put(
+      `/tasks/${task.id}`,
+      {
+        name,
+        url,
+        enabled_notification_options: notificationOptions,
+        discord_url: discordUrl,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      },
+    );
 
     if (response.status === 200) {
       setTasks(

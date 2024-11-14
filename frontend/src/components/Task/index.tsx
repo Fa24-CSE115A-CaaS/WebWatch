@@ -16,7 +16,11 @@ const Task: TaskComponent = ({ task, onEditModalOpen }) => {
 
   const deleteTask = async () => {
     try {
-      const response = await axios.delete(`/tasks/${task.id}`);
+      const response = await axios.delete(`/tasks/${task.id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      });
       if (response.status === 204) {
         setTasks([...tasks.filter((t) => t.id !== task.id)]);
       }
