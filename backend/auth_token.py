@@ -1,24 +1,26 @@
+from typing import Annotated
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from dotenv import load_dotenv
 from database import Database
-import secrets
 import os
 from schemas.user import User
-from sqlmodel import SQLModel, select, Session
+from sqlmodel import select, Session
 
 app = FastAPI()
 load_dotenv()
 
 # TODO: Consider reworking database usage. FastAPI dependency injection?
-db = Database(production=False)
+db = Database(mode=os.getenv("ENV"))
 
 ACCESS_KEY = os.getenv("ACCESS_SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_EXPIRATION = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+DbSession = Annotated[Session, Depends(db.get_session)]
 
 
 def create_access_token(data: dict):
@@ -42,7 +44,7 @@ def decode_access_token(token: str) -> dict:
 
 
 # Used with FastAPI Depends to get the current user and protect other routes
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(session: DbSession, token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -55,8 +57,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    with db.get_session() as session:
-        user = session.exec(select(User).where(User.token_uuid == uuid)).first()
-        if user is None:
-            raise credentials_exception
+
+    user = session.exec(select(User).where(User.token_uuid == uuid)).first()
+    if user is None:
+        raise credentials_exception
     return user

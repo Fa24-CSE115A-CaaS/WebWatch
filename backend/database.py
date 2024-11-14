@@ -1,15 +1,13 @@
 from sqlmodel import SQLModel, Session, create_engine, select
 from schemas.task import TaskCreate, Task
-from dotenv import load_dotenv
 import os
-
-load_dotenv()
 
 
 class Database:
-    def __init__(self, production: bool = False):
+    def __init__(self, mode: str = "DEV"):
         self.engine = None
-        if production:
+
+        if mode == "PRODUCTION":
             self._create_mysql()
         else:
             self._create_sqlite()
@@ -32,27 +30,27 @@ class Database:
         self.engine = create_engine(db_url, echo=False, pool_recycle=3600)
 
     def get_session(self):
-        return Session(self.engine)
+        with Session(self.engine) as session:
+            yield session
 
 
 # DEMO
 if __name__ == "__main__":
-    db = Database(production=True)
+    db = Database(mode=os.getenv("ENV"))
+    session = next(db.get_session())
 
     # INSERTION DEMO
-    with db.get_session() as session:
-        input = TaskCreate(
-            name="DEMO TASK",
-            content="FILLER",
-            url="FILLER",
-            enabled_notification_options=["EMAIL"],
-        )
-        new_task = Task.model_validate(input)
-        session.add(new_task)
-        session.commit()
+    input = TaskCreate(
+        name="DEMO TASK",
+        content="FILLER",
+        url="FILLER",
+        enabled_notification_options=["EMAIL"],
+    )
+    new_task = Task.model_validate(input)
+    session.add(new_task)
+    session.commit()
 
     # SELECTION DEMO
-    with db.get_session() as session:
-        statement = select(Task).where(Task.name.in_(["DEMO TASK"]))
-        for task in session.exec(statement):
-            print(f"Name: {task.name}\tContent: {task.content}")
+    statement = select(Task).where(Task.name.in_(["DEMO TASK"]))
+    for task in session.exec(statement):
+        print(f"Name: {task.name}\tContent: {task.content}")

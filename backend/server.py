@@ -20,12 +20,12 @@ scheduler = Scheduler()
 
 
 # Setup database and CORS middleware based on environment
-if os.getenv("ENV") == "production":
-    db = Database(production=True)
+if os.getenv("ENV") == "PRODUCTION":
     origins = ["https://webwatch.live"]
 else:
-    db = Database(production=False)
     origins = ["http://localhost:5173"]
+
+db = Database(mode=os.getenv("ENV"))
 
 
 # Lifespan event to start and stop tasks
@@ -33,10 +33,10 @@ else:
 async def lifespan(app: FastAPI):
     # ON BOOT
     # START ALL ENABLED TASKS
-    with db.get_session() as session:
-        enabled_tasks = session.exec(select(Task).where(Task.enabled == True))
-        reinit = [scheduler.add_task(task) for task in enabled_tasks]
-        await asyncio.gather(*reinit)
+    session = next(db.get_session())
+    enabled_tasks = session.exec(select(Task).where(Task.enabled == True))
+    reinit = [scheduler.add_task(task) for task in enabled_tasks]
+    await asyncio.gather(*reinit)
     yield
     # ON SHUTDOWN
     await scheduler.shutdown()
