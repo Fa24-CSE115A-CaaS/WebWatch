@@ -2,8 +2,6 @@ name: Black Format Check
 
 on:
   pull_request:
-    branches:
-      - main
 
 jobs:
   black-check:
