@@ -35,7 +35,7 @@ class TaskBase(SQLModel):
 
     async def run(self):
         # PLACEHOLDER
-        while True:
+        while self.enabled:
             await asyncio.sleep(1)
             print(self.name)
 

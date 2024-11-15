@@ -26,8 +26,8 @@ else:
     origins = ["http://localhost:5173"]
 
 # Dependencies to get the scheduler and database instances
-SchedulerDep = Annotated[Scheduler, Depends(get_scheduler)]
 db = Database(mode=os.getenv("ENV"))
+SchedulerDep = Annotated[Scheduler, Depends(get_scheduler)]
 
 
 # Lifespan event to start and stop tasks
