@@ -5,10 +5,20 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
 
 class Scheduler:
+    _instance = None
+
+    # Singleton pattern to ensure only one instance of the scheduler is created
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(Scheduler, cls).__new__(cls)
+            cls._instance.__init__()
+        return cls._instance
+
     def __init__(self):
-        self.executor = ProcessPoolExecutor()
-        self.loop = asyncio.new_event_loop()
-        self.running_tasks = dict()
+        if not hasattr(self, "executor"):
+            self.executor = ProcessPoolExecutor()
+            self.loop = asyncio.new_event_loop()
+            self.running_tasks = dict()
 
     async def shutdown(self):
         for _, task in self.running_tasks:
@@ -44,6 +54,9 @@ class Scheduler:
         self.remove_task(task)
         self.add_task(task)
 
+scheduler_instance = Scheduler()
+def get_scheduler():
+    return scheduler_instance
 
 # # TESTING CODE
 # async def main():
