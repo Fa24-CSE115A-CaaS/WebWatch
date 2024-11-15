@@ -42,7 +42,9 @@ class Scheduler:
             logging.info(f"Creating async task for {task.get_id()}")
             async_task = asyncio.create_task(task.run())
             self.running_tasks[task.get_id()] = async_task
-            logging.info(f"Task {task.get_id()} is now running and added to running_tasks")
+            logging.info(
+                f"Task {task.get_id()} is now running and added to running_tasks"
+            )
 
     async def remove_task(self, task: Task):
         # Kills task based on id passed
@@ -57,16 +59,22 @@ class Scheduler:
             del self.running_tasks[task.get_id()]
             logging.info(f"Task {task.get_id()} removed from running_tasks")
         else:
-            logging.warning(f"Task {task.get_id()} is already stopped or not found in running_tasks")
+            logging.warning(
+                f"Task {task.get_id()} is already stopped or not found in running_tasks"
+            )
 
     async def restart_task(self, task: Task):
         # Mapping to stopping then starting
         await self.remove_task(task)
         await self.add_task(task)
 
+
 scheduler_instance = Scheduler()
+
+
 def get_scheduler():
     return scheduler_instance
+
 
 # # TESTING CODE
 # async def main():

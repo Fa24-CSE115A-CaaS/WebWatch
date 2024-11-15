@@ -10,6 +10,7 @@ import os
 
 NotificationOptions = List[Literal["EMAIL", "DISCORD", "SLACK"]]
 
+
 class TaskBase(SQLModel):
     name: str = Field(max_length=50)
     content: str | None = None
@@ -58,6 +59,7 @@ class Task(TaskBase, table=True):
 
     def get_user(self):
         from database import Database
+
         db = Database(mode=os.getenv("ENV"))
         session = next(db.get_session())
         result = session.exec(select(User).where(User.id == self.user_id)).first()
@@ -65,6 +67,7 @@ class Task(TaskBase, table=True):
 
     def update_content_in_db(self, new_content):
         from database import Database
+
         db = Database(mode=os.getenv("ENV"))
         session = next(db.get_session())
         task = session.exec(select(Task).where(Task.id == self.id)).first()
@@ -73,6 +76,7 @@ class Task(TaskBase, table=True):
             session.add(task)
             session.commit()
         session.close()
+
 
 class TaskGet(TaskBase):
     id: int
