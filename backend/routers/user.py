@@ -109,19 +109,19 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 
-@router.put("/{user_id}", response_model=UserOutput)
-async def users_update(user_id: int, user_update: UserUpdate, session: DbSession):
-    user = session.get(User, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
+@router.put("/{user_id}", response_model=UserOutput, )
+async def users_update(
+    user_id: int, 
+    user_update: UserUpdate,
+    session: DbSession, 
+    current_user=Depends(get_current_user)
+):
     # Update fields that are provided in the request
     update_data = user_update.model_dump(
         exclude_unset=True
     )  # Exclude fields that weren't provided
     for key, value in update_data.items():
         setattr(user, key, value)
-
     try:
         session.add(user)
         session.commit()
