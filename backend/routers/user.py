@@ -119,6 +119,15 @@ async def users_update(
     session: DbSession,
     current_user=Depends(get_current_user),
 ):
+    # Ensure the user is updating their own information
+    if user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to update this user")
+
+    # Query the user again within the same session
+    user = session.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
     # Update fields that are provided in the request
     update_data = user_update.model_dump(
         exclude_unset=True
@@ -133,7 +142,6 @@ async def users_update(
         session.rollback()
         raise HTTPException(status_code=500, detail="Internal server error")
     return user
-
 
 """
 # Delete a user by id
