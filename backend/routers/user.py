@@ -121,7 +121,9 @@ async def users_update(
 ):
     # Ensure the user is updating their own information
     if user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to update this user")
+        raise HTTPException(
+            status_code=403, detail="Not authorized to update this user"
+        )
 
     # Query the user again within the same session
     user = session.get(User, user_id)
@@ -142,6 +144,7 @@ async def users_update(
         session.rollback()
         raise HTTPException(status_code=500, detail="Internal server error")
     return user
+
 
 """
 # Delete a user by id
