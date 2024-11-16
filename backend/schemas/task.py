@@ -19,7 +19,7 @@ class TaskBase(SQLModel):
     enabled_notification_options: NotificationOptions = Field(
         default=["EMAIL"], sa_column=Column(JSON())
     )
-    enabled: bool = False  # If the task is enabled then it should be running
+    enabled: bool = True  # If the task is enabled then it should be running
 
     @field_validator("enabled_notification_options")
     @classmethod

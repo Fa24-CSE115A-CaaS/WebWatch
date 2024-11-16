@@ -27,10 +27,9 @@ const Tasks = () => {
 
     let valid = true;
     const fetchTasks = async () => {
-      const token = localStorage.getItem("access_token");
       const response = await axios.get("/tasks", {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
       });
 
