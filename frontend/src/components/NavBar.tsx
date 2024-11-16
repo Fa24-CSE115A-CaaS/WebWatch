@@ -1,7 +1,8 @@
 // Hooks
-import usePopup from "../hooks/usePopup";
-import { useTheme } from "../hooks/useTheme";
 import useAuth from "../hooks/useAuth";
+import usePopup from "../hooks/usePopup";
+import useTheme from "../hooks/useTheme";
+import { useLocation } from "react-router-dom";
 // Icons
 import { FaCircle } from "react-icons/fa";
 import { IoIosCloudOutline } from "react-icons/io";
@@ -9,12 +10,13 @@ import { IoIosCloudOutline } from "react-icons/io";
 const NavBar = () => {
   const { open, setOpen, containerRef } = usePopup();
   const { changeTheme } = useTheme();
-  const { user } = useAuth({ redirectToAuth: false }); // Use named parameter for clarity
+  const { user, logout } = useAuth({ redirectToAuth: false }); // Use named parameter for clarity
+  const location = useLocation();
 
   return (
     <>
       <nav className="bg-secondary px-2 text-text sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-16 items-center justify-between gap-20">
           <div className="flex items-center gap-4">
             <a href="/">
               <h1 className="flex items-center gap-2">
@@ -23,16 +25,18 @@ const NavBar = () => {
             </a>
           </div>
           {user && (
-            <div className="flex flex-grow justify-center">
-              <a href="/tasks">
-                <button
-                  className="w-40 rounded-lg bg-accent py-2 text-text-contrast hover:bg-accent-hover"
-                  id="tasks-button"
-                  aria-expanded="false"
-                  aria-haspopup="true"
-                >
-                  Tasks
-                </button>
+            <div className="flex flex-1 items-center gap-8">
+              <a
+                href="/tasks"
+                className={`${location.pathname == "/tasks" && "text-accent"}`}
+              >
+                Tasks
+              </a>
+              <a
+                href="/settings"
+                className={`${location.pathname == "/settings" && "text-accent"}`}
+              >
+                Account
               </a>
             </div>
           )}
@@ -78,17 +82,16 @@ const NavBar = () => {
             >
               Change Theme
             </a>
-            <form method="POST" action="#" role="none">
-              <button
-                type="submit"
-                className="block px-5 py-3 text-error"
-                role="menuitem"
-                tabIndex={-1}
-                id="menu-item-3"
-              >
-                Sign out
-              </button>
-            </form>
+            <button
+              className="block px-5 py-3 text-error"
+              role="menuitem"
+              onClick={() => {
+                logout();
+                setOpen(false);
+              }}
+            >
+              Sign out
+            </button>
           </div>
         )}
       </div>
