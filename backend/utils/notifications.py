@@ -51,11 +51,11 @@ def send_password_reset_email(recipient_email: str, reset_link: str):
     password = os.getenv("EMAIL_PASSWORD")
 
     # Email content
-    subject = "Password Reset Request"
+    subject = "Email Login Link"
     body = f"""
     Hi,
 
-    It looks like you've requested to reset your password. Click the link below to reset it:
+    It looks like you've requested an email login link. Click the link below to log in:
 
     {reset_link}
 
@@ -81,6 +81,6 @@ def send_password_reset_email(recipient_email: str, reset_link: str):
             server.starttls(context=context)
             server.login(username, password)
             server.sendmail(sender_email, recipient_email, message.as_string())
-        print("Password reset email sent successfully.")
+        print("Email login link sent successfully.")
     except Exception as e:
-        print(f"Error sending password reset email: {e}")
+        print(f"Error sending email login link: {e}")

@@ -156,7 +156,7 @@ async def email_auth(user_email: PasswordReset, session: DbSession):
         )  # Generate a password reset token
         reset_link = f"{os.getenv("FRONTEND_URL")}/auth/email_auth?token={reset_token}"
         send_password_reset_email(user_email.email, reset_link)
-        return {"detail": "Password reset email sent successfully"}
+        return {"detail": "Email login link sent successfully"}
     except Exception as e:
         session.rollback()
         raise HTTPException(
