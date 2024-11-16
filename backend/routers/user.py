@@ -109,12 +109,15 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 
-@router.put("/{user_id}", response_model=UserOutput, )
+@router.put(
+    "/{user_id}",
+    response_model=UserOutput,
+)
 async def users_update(
-    user_id: int, 
+    user_id: int,
     user_update: UserUpdate,
-    session: DbSession, 
-    current_user=Depends(get_current_user)
+    session: DbSession,
+    current_user=Depends(get_current_user),
 ):
     # Update fields that are provided in the request
     update_data = user_update.model_dump(
