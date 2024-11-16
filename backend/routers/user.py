@@ -1,7 +1,16 @@
 from typing import Annotated
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlmodel import select, Session
-from schemas.user import UserRegister, UserUpdate, UserOutput, User, Token, PasswordReset, PasswordResetRequest, DeleteAccountRequest
+from schemas.user import (
+    UserRegister,
+    UserUpdate,
+    UserOutput,
+    User,
+    Token,
+    PasswordReset,
+    PasswordResetRequest,
+    DeleteAccountRequest,
+)
 from auth_password import get_hashed_password, verify_password
 from auth_token import (
     create_access_token,
@@ -138,9 +147,13 @@ async def forgot_password(user_email: PasswordReset, session: DbSession):
     try:
         user = session.exec(select(User).where(User.email == user_email.email)).first()
         if not user:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-                
-        reset_token = create_access_token(data={"id": user.token_uuid}) # Generate a password reset token 
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            )
+
+        reset_token = create_access_token(
+            data={"id": user.token_uuid}
+        )  # Generate a password reset token
         reset_link = f"http://localhost:8001/reset_password?token={reset_token}"
         send_password_reset_email(user_email.email, reset_link)
         return {"detail": "Password reset email sent successfully"}
@@ -149,21 +162,21 @@ async def forgot_password(user_email: PasswordReset, session: DbSession):
         session.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred while sending the password reset email"
+            detail="An unexpected error occurred while sending the password reset email",
         )
-         
+
 
 @router.post("/reset_password", status_code=status.HTTP_200_OK)
-async def reset_password(    
-    reset_request: PasswordResetRequest, 
-    session: DbSession, 
-    current_user=Depends(get_current_user)
+async def reset_password(
+    reset_request: PasswordResetRequest,
+    session: DbSession,
+    current_user=Depends(get_current_user),
 ):
     try:
         if reset_request.new_password != reset_request.confirm_password:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="New password and confirm password do not match"
+                detail="New password and confirm password do not match",
             )
 
         current_user.password_hash = get_hashed_password(reset_request.new_password)
@@ -175,18 +188,19 @@ async def reset_password(
         session.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
+            detail="An unexpected error occurred",
         )
 
+
 @router.delete("/delete")
-async def delete_user(
-    session: DbSession, 
-    current_user=Depends(get_current_user)
-):    
+async def delete_user(session: DbSession, current_user=Depends(get_current_user)):
     try:
         session.delete(current_user)
         session.commit()
     except Exception as e:
         session.rollback()
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error deleting user")
-    return {"detail": "User deleted successfully"} 
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error deleting user",
+        )
+    return {"detail": "User deleted successfully"}

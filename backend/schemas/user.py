@@ -45,6 +45,7 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
+
 class UserUpdate(BaseModel):
     discord_default_webhook: Optional[str] = None
     slack_default_webhook: Optional[str] = None

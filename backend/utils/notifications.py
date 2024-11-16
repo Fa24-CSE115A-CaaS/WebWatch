@@ -42,7 +42,7 @@ def send_discord_msg(webhook_url, message):
 def send_password_reset_email(recipient_email: str, reset_link: str):
     # Load environment variables
     load_dotenv()
-    
+
     # Email server configuration from environment variables
     smtp_server = os.getenv("EMAIL_SERVER")
     smtp_port = int(os.getenv("EMAIL_PORT"))
@@ -63,17 +63,17 @@ def send_password_reset_email(recipient_email: str, reset_link: str):
 
     Thanks!
     """
-    
+
     # Format sender name
     formatted_sender = formataddr(("WebWatch", sender_email))
-    
+
     # Create the email message
     message = MIMEMultipart()
     message["From"] = formatted_sender
     message["To"] = recipient_email
     message["Subject"] = subject
     message.attach(MIMEText(body, "plain"))
-    
+
     # Send the email
     try:
         context = ssl.create_default_context()
