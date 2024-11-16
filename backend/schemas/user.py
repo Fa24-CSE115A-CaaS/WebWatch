@@ -45,25 +45,6 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
-
-"""
-class UserGet(UserBase):
-    id: int
-
-    class Config:
-        orm_mode = True
-"""
-
-"""
-class UserDelete(BaseModel):
-    pass
-
-class UserReset(BaseModel):
-    email: EmailStr
-    password: str
-"""
-
-
 class UserUpdate(BaseModel):
     discord_default_webhook: Optional[str] = None
     slack_default_webhook: Optional[str] = None
@@ -79,3 +60,25 @@ class UserOutput(BaseModel):
 
 class Token(BaseModel):
     access_token: str
+
+
+class PasswordReset(BaseModel):
+    email: EmailStr
+
+
+class PasswordResetRequest(BaseModel):
+    new_password: str
+    confirm_password: str
+
+
+class DeleteAccountRequest(BaseModel):
+    password: str
+
+
+"""
+class UserGet(UserBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+"""
