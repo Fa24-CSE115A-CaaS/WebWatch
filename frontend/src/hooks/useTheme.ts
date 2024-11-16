@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-export const useTheme = () => {
+const useTheme = () => {
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
 
   const changeTheme = () => {
@@ -42,3 +42,5 @@ export const useTheme = () => {
 
   return { changeTheme };
 };
+
+export default useTheme
