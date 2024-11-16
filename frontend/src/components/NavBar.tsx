@@ -9,7 +9,7 @@ import { IoIosCloudOutline } from "react-icons/io";
 const NavBar = () => {
   const { open, setOpen, containerRef } = usePopup();
   const { changeTheme } = useTheme();
-  const { user } = useAuth({ redirectToAuth: false }); // Use named parameter for clarity
+  const { user, logout } = useAuth({ redirectToAuth: false }); // Use named parameter for clarity
 
   return (
     <>
@@ -78,17 +78,16 @@ const NavBar = () => {
             >
               Change Theme
             </a>
-            <form method="POST" action="#" role="none">
-              <button
-                type="submit"
-                className="block px-5 py-3 text-error"
-                role="menuitem"
-                tabIndex={-1}
-                id="menu-item-3"
-              >
-                Sign out
-              </button>
-            </form>
+            <button
+              className="block px-5 py-3 text-error"
+              role="menuitem"
+              onClick={() => {
+                logout();
+                setOpen(false);
+              }}
+            >
+              Sign out
+            </button>
           </div>
         )}
       </div>
