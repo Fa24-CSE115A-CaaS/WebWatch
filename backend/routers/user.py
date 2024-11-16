@@ -158,7 +158,7 @@ async def email_auth(user_email: PasswordReset, session: DbSession):
         send_password_reset_email(user_email.email, reset_link)
         return {"detail": "Password reset email sent successfully"}
     except Exception as e:
-        print(f"Error: {e} \n\n")
+        session.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred while sending the password reset email",
@@ -179,13 +179,27 @@ async def reset_password(
             )
 
         current_user.password_hash = get_hashed_password(reset_request.new_password)
-        session = session.object_session(current_user)
         session.add(current_user)
         session.commit()
         session.refresh(current_user)
         return {"detail": "Password reset successful"}
     except Exception as e:
+        session.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred",
         )
+
+
+@router.delete("/delete")
+async def delete_user(session: DbSession, current_user=Depends(get_current_user)):
+    try:
+        session.delete(current_user)
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error deleting user",
+        )
+    return {"detail": "User deleted successfully"}
