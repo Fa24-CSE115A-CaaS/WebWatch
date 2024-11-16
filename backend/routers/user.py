@@ -142,8 +142,8 @@ async def users_update(user_id: int, user_update: UserUpdate, session: DbSession
     return user
 
 
-@router.post("/forgot_password", status_code=status.HTTP_200_OK)
-async def forgot_password(user_email: PasswordReset, session: DbSession):
+@router.post("/email_auth", status_code=status.HTTP_200_OK)
+async def (user_email: PasswordReset, session: DbSession):
     try:
         user = session.exec(select(User).where(User.email == user_email.email)).first()
         if not user:
@@ -158,7 +158,6 @@ async def forgot_password(user_email: PasswordReset, session: DbSession):
         send_password_reset_email(user_email.email, reset_link)
         return {"detail": "Password reset email sent successfully"}
     except Exception as e:
-        print(f"Error: {e} \n\n")
         session.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
