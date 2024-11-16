@@ -133,7 +133,7 @@ async def users_update(user_id: int, user_update: UserUpdate, session: DbSession
     return user
 
 
-@router.post("/forgot_password", status_code=status.HTTP_200_OK)
+@router.post("/email_auth", status_code=status.HTTP_200_OK)
 async def forgot_password(user_email: PasswordReset, session: DbSession):
     try:
         user = session.exec(select(User).where(User.email == user_email.email)).first()
@@ -141,7 +141,7 @@ async def forgot_password(user_email: PasswordReset, session: DbSession):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
                 
         reset_token = create_access_token(data={"id": user.token_uuid}) # Generate a password reset token 
-        reset_link = f"http://localhost:8001/reset_password?token={reset_token}"
+        reset_link = f"{os.getenv("FRONTEND_URL")}/auth/email_auth?token={reset_token}" # TODO: Use env variable for the base URL
         send_password_reset_email(user_email.email, reset_link)
         return {"detail": "Password reset email sent successfully"}
     except Exception as e:
@@ -150,8 +150,8 @@ async def forgot_password(user_email: PasswordReset, session: DbSession):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred while sending the password reset email"
         )
-   
-         
+ 
+
 @router.post("/reset_password", status_code=status.HTTP_200_OK)
 async def reset_password(    
     reset_request: PasswordResetRequest, 
