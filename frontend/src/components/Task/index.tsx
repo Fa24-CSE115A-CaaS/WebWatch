@@ -29,12 +29,14 @@ const Task: TaskComponent = ({ task, onEditModalOpen }) => {
         },
       );
       if (response.status === 200) {
-        setTasks(tasks.map(t => {
-          if (t.id === task.id) {
-            return {...t, enabled: newEnabled};
-          }
-          return t;
-        }));
+        setTasks(
+          tasks.map((t) => {
+            if (t.id === task.id) {
+              return { ...t, enabled: newEnabled };
+            }
+            return t;
+          }),
+        );
       }
     } catch (e) {
       // TODO: Emit a global error
