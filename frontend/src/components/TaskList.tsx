@@ -21,7 +21,9 @@ const TaskList: TaskComponent = ({ tasks }) => {
           <tr>
             <th className="w-1/5 rounded-tl-md xxl:w-[15%]">NAME</th>
             <th>WEBSITE</th>
-            <th className="w-[15%]">ACTION</th>
+            {/* NOTE: Archived Action Column for future usage 
+              <th className="w-[15%]">ACTION</th> 
+            */}
             <th className="w-[15%]">INTERVAL</th>
             <th className="w-[15%] rounded-tr-md">NEXT CHECK</th>
           </tr>

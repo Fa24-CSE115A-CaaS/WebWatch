@@ -41,11 +41,13 @@ const Task: TaskComponent = ({ task, onEditModalOpen }) => {
           {task.url}
         </a>
       </td>
-      <td>
-        <div className="w-min rounded-full bg-info px-4 py-[2px] font-medium text-text-contrast">
-          Monitor
-        </div>
-      </td>
+      {/* NOTE: Archived Action Column for future usage
+        <td>
+          <div className="w-min rounded-full bg-info px-4 py-[2px] font-medium text-text-contrast">
+            Monitor
+          </div>
+        </td> 
+      */}
       <td>1d 5h 18m</td>
       <td className="overflow-visible">
         <div className="flex items-center justify-between">
