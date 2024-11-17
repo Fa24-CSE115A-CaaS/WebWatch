@@ -2,12 +2,13 @@ import asyncio
 from routers.user import router as user_router
 from routers.task import router as task_router
 from schemas.task import Task
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+from typing import Annotated
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import Database
 from sqlmodel import select
-from scheduler import Scheduler
+from scheduler import get_scheduler, Scheduler
 import os
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
@@ -16,7 +17,6 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
-scheduler = Scheduler()
 
 
 # Setup database and CORS middleware based on environment
@@ -25,7 +25,9 @@ if os.getenv("ENV") == "PRODUCTION":
 else:
     origins = ["http://localhost:5173"]
 
+# Dependencies to get the scheduler and database instances
 db = Database(mode=os.getenv("ENV"))
+SchedulerDep = Annotated[Scheduler, Depends(get_scheduler)]
 
 
 # Lifespan event to start and stop tasks
@@ -33,6 +35,8 @@ db = Database(mode=os.getenv("ENV"))
 async def lifespan(app: FastAPI):
     # ON BOOT
     # START ALL ENABLED TASKS
+
+    scheduler = get_scheduler()
     session = next(db.get_session())
     enabled_tasks = session.exec(select(Task).where(Task.enabled == True))
     reinit = [scheduler.add_task(task) for task in enabled_tasks]
