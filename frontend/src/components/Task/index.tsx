@@ -14,6 +14,34 @@ const Task: TaskComponent = ({ task, onEditModalOpen }) => {
   const { tasks, setTasks } = useContext(TasksPageContext)!;
   const { open, setOpen, containerRef } = usePopup();
 
+  const toggleTask = async () => {
+    try {
+      const newEnabled = !task.enabled;
+      const response = await axios.put(
+        `/tasks/${task.id}`,
+        {
+          enabled: newEnabled,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        },
+      );
+      if (response.status === 200) {
+        setTasks(tasks.map(t => {
+          if (t.id === task.id) {
+            return {...t, enabled: newEnabled};
+          }
+          return t;
+        }));
+      }
+    } catch (e) {
+      // TODO: Emit a global error
+      console.log(e);
+    }
+  };
+
   const deleteTask = async () => {
     try {
       const response = await axios.delete(`/tasks/${task.id}`, {
@@ -72,7 +100,7 @@ const Task: TaskComponent = ({ task, onEditModalOpen }) => {
               >
                 Edit
               </button>
-              <button className={dropdownButtonStyles}>
+              <button className={dropdownButtonStyles} onClick={toggleTask}>
                 {task.enabled ? "Pause Task" : "Run Task"}
               </button>
               <button
