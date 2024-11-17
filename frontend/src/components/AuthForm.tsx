@@ -70,17 +70,28 @@ const AuthForm = ({ isLogin: initialIsLogin }: AuthFormProps) => {
   const handleError = (error: unknown, defaultMessage: string) => {
     const axiosError = error as AxiosError;
     if (axiosError.response) {
-      const errorDetails = (
-        axiosError.response.data as { detail: { msg: string }[] }
-      ).detail;
-      if (Array.isArray(errorDetails)) {
-        const errorMessages = errorDetails
-          .map((err: { msg: string }) => err.msg)
-          .filter((msg: string | undefined) => msg)
-          .join(", ");
-        setError(`Error: ${errorMessages}`);
-      } else {
-        setError(defaultMessage);
+      const status = axiosError.response.status;
+      switch (status) {
+        case 400:
+          setError("Incorrect email or password. Please try again.");
+          break;
+        case 401:
+          setError("Unauthorized. Please check your credentials.");
+          break;
+        case 403:
+          setError("Forbidden. You don't have permission to access this.");
+          break;
+        case 404:
+          setError("User not found. Please check your input.");
+          break;
+        case 409:
+          setError("Email already registered. Please use a different email.");
+          break;
+        case 500:
+          setError("Internal Server Error. Please try again later.");
+          break;
+        default:
+          setError(defaultMessage);
       }
     } else {
       setError("An unexpected error occurred. Please try again.");
