@@ -78,7 +78,7 @@ const router = createBrowserRouter([
         <Test />
       </>
     ),
-  }
+  },
 ]);
 
 const App = () => {
