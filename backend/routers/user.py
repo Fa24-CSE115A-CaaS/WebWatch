@@ -108,7 +108,15 @@ async def login(session: DbSession, form_data: OAuth2PasswordRequestForm = Depen
     logging.info(f"User login attempt with email {form_data.username}")
     # Query the user based on email
     user = session.exec(select(User).where(User.email == form_data.username)).first()
-    if not user or not verify_password(user.password_hash, form_data.password):
+    if not user:
+        logging.warning(f"Incorrect email or password for {form_data.username}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect email or password",
+        )
+    try:
+        verify_password(user.password_hash, form_data.password)
+    except ValueError:
         logging.warning(f"Incorrect email or password for {form_data.username}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
