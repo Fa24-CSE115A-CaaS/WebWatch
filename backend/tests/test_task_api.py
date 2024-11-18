@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+from constants.task import MIN_INTERVAL_SECONDS, MAX_INTERVAL_SECONDS
 from server import app
 
 client = TestClient(app)
@@ -14,6 +15,14 @@ def register_user():
 
 
 access_token = register_user()
+
+TASK_DATA = {
+    "name": "Test Task",
+    "url": "https://webwatch.live/test",
+    "enabled_notification_options": ["EMAIL"],
+    "interval": MIN_INTERVAL_SECONDS,
+    "enabled": True,
+}
 
 
 def test_task_retrieve_list():
@@ -34,27 +43,43 @@ def test_task_create():
     response = client.post(
         "/tasks",
         headers={"Authorization": "Bearer " + access_token},
-        json={
-            "name": "Test Task",
-            "url": "https://webwatch.live/test",
-            "enabled_notification_options": ["EMAIL"],
-            "enabled": True,
-        },
+        json=TASK_DATA,
     )
     assert response.status_code == 201
     assert response.json()["id"] == 1
+
+
+def test_task_create_interval_too_small():
+    # Test task creation
+    task_data = TASK_DATA.copy()
+    task_data["interval"] = MIN_INTERVAL_SECONDS - 1
+    response = client.post(
+        "/tasks",
+        headers={"Authorization": "Bearer " + access_token},
+        json=task_data,
+    )
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["loc"][1] == "interval"
+
+
+def test_task_create_interval_too_large():
+    # Test task creation
+    task_data = TASK_DATA.copy()
+    task_data["interval"] = MAX_INTERVAL_SECONDS + 1
+    response = client.post(
+        "/tasks",
+        headers={"Authorization": "Bearer " + access_token},
+        json=task_data,
+    )
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["loc"][1] == "interval"
 
 
 def test_task_create_no_auth():
     # Test task creation without authorization
     response = client.post(
         "/tasks",
-        json={
-            "name": "Test Task",
-            "url": "https://webwatch.live/test",
-            "enabled_notification_options": ["EMAIL"],
-            "enabled": True,
-        },
+        json=TASK_DATA,
     )
     assert response.status_code == 401
     assert response.json() == {"detail": "Not authenticated"}
@@ -67,9 +92,6 @@ def test_task_edit():
         headers={"Authorization": "Bearer " + access_token},
         json={
             "name": "Test Task edited",
-            "url": "https://webwatch.live/test",
-            "enabled_notification_options": ["EMAIL"],
-            "enabled": True,
         },
     )
     assert response.status_code == 200
@@ -82,9 +104,6 @@ def test_task_edit_no_auth():
         "/tasks/1",
         json={
             "name": "Test Task edited",
-            "url": "https://webwatch.live/test",
-            "enabled_notification_options": ["EMAIL"],
-            "enabled": True,
         },
     )
     assert response.status_code == 401

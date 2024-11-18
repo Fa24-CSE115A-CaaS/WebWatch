@@ -7,6 +7,14 @@ import usePopup from "../../hooks/usePopup";
 import { TasksPageContext } from "../../pages/Tasks";
 // Types
 import { TaskComponent } from "./types";
+// Constants
+import {
+  SECONDS_IN_YEAR,
+  SECONDS_IN_MONTH,
+  SECONDS_IN_DAYS,
+  SECONDS_IN_HOURS,
+  SECONDS_IN_MINUTES,
+} from "../../constants/time";
 // Util
 import { axios } from "../../config";
 
@@ -60,6 +68,28 @@ const Task: TaskComponent = ({ task, onEditModalOpen }) => {
     }
   };
 
+  const computeIntervalString = (seconds: number) => {
+    const years = Math.floor(seconds / SECONDS_IN_YEAR);
+    seconds = seconds % SECONDS_IN_YEAR;
+    const months = Math.floor(seconds / SECONDS_IN_MONTH);
+    seconds = seconds % SECONDS_IN_MONTH;
+    const days = Math.floor(seconds / SECONDS_IN_DAYS);
+    seconds = seconds % SECONDS_IN_DAYS;
+    const hours = Math.floor(seconds / SECONDS_IN_HOURS);
+    seconds = seconds % SECONDS_IN_HOURS;
+    const minutes = Math.floor(seconds / SECONDS_IN_MINUTES);
+    seconds = seconds % SECONDS_IN_MINUTES;
+
+    const values = [years, months, days, hours, minutes, seconds];
+    const prefixes = ["y", "mo", "d", "h", "m", "s"];
+    return prefixes.reduce((prev, cur, i) => {
+      if (values[i] <= 0) {
+        return prev;
+      }
+      return `${prev} ${values[i]}${cur}`;
+    }, "");
+  };
+
   const dropdownButtonStyles =
     "block w-full border-b-[1px] border-border px-4 py-2 text-left hover:bg-primary bg-secondary";
 
@@ -78,7 +108,7 @@ const Task: TaskComponent = ({ task, onEditModalOpen }) => {
           </div>
         </td> 
       */}
-      <td>1d 5h 18m</td>
+      <td>{computeIntervalString(task.interval)}</td>
       <td className="overflow-visible">
         <div className="flex items-center justify-between">
           10:49

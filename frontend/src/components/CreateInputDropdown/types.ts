@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction } from "react";
 
 export interface FormState {
   name: string;
-  seconds: number;
+  interval: number;
 }
 
 export interface FormState {
