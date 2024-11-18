@@ -28,4 +28,9 @@ jobs:
     # Run pytest
     - name: Run tests
       working-directory: backend
+      env:
+        ACCESS_SECRET_KEY: ${{ secrets.ACCESS_SECRET_KEY }}
+        REFRESH_SECRET_KEY: ${{ secrets.REFRESH_SECRET_KEY }}
+        ACCESS_TOKEN_EXPIRE_MINUTES: ${{ vars.ACCESS_TOKEN_EXPIRE_MINUTES }}
+        REFRESH_TOKEN_EXPIRE_MINUTES: ${{ vars.REFRESH_TOKEN_EXPIRE_MINUTES }}
       run: pytest
