@@ -23,6 +23,7 @@ class TaskBase(SQLModel):
     content: str | None = Field(default=None, sa_column=Column(String(length=10000)))
     url: str
     discord_url: str | None = None
+    interval: int = Field(ge=30)
     enabled_notification_options: NotificationOptions = Field(
         default=["EMAIL"], sa_column=Column(JSON())
     )
@@ -58,7 +59,7 @@ class TaskBase(SQLModel):
                 await loop.run_in_executor(None, self.scan)
             except Exception as e:
                 logging.error(f"Error during scan: {e}")
-            await asyncio.sleep(30)
+            await asyncio.sleep(self.interval)
 
 
 class Task(TaskBase, table=True):
@@ -152,6 +153,7 @@ class TaskUpdate(TaskBase):
     content: str | None = Field(default=None, sa_column=Column(String(length=10000)))
     url: str | None = None
     discord_url: str | None = None
+    interval: int | None = Field(default=None, ge=30)
     enabled_notification_options: NotificationOptions | None = Field(
         default=None, sa_column=Column(JSON())
     )
