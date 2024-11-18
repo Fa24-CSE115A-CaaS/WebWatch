@@ -45,7 +45,7 @@ const CreateInput = () => {
     if (isNaN(interval)) {
       errors.interval = "Please provide an interval";
     } else if (interval < MINIMUM_INTERVAL_SECONDS) {
-      errors.interval = "Interval can not be less than 30 seconds";
+      errors.interval = `Interval can not be less than ${MINIMUM_INTERVAL_SECONDS} seconds`;
     } else if (interval > MAXIMUM_INTERVAL_SECONDS) {
       errors.interval = "Interval is too large";
     }
