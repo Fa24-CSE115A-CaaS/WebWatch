@@ -31,9 +31,6 @@ def test_user_login_fail():
                 "grant_type": "password",
                 "username": "test@webwatch.live",
                 "password": "WrongPassword1233!!",
-                "scope": "",
-                "client_id": "string",
-                "client_secret": "string",
             },
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
@@ -52,9 +49,6 @@ def test_user_login_success():
             "grant_type": "password",
             "username": "test@webwatch.live",
             "password": "Password1233!",
-            "scope": "",
-            "client_id": "string",
-            "client_secret": "string",
         },
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
@@ -69,9 +63,6 @@ def test_user_verify():
             "grant_type": "password",
             "username": "test@webwatch.live",
             "password": "Password1233!",
-            "scope": "",
-            "client_id": "string",
-            "client_secret": "string",
         },
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
@@ -91,9 +82,6 @@ def test_user_me():
             "grant_type": "password",
             "username": "test@webwatch.live",
             "password": "Password1233!",
-            "scope": "",
-            "client_id": "string",
-            "client_secret": "string",
         },
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
