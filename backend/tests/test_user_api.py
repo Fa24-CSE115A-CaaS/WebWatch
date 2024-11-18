@@ -11,10 +11,15 @@ def test_user_register_success():
     assert response.status_code == 201
 """
 
+
 def test_user_register_fail_duplicate():
     # Test user registration with duplicate username
-    response = client.post("/users/register", json={"email": "test@webwatch.live", "password": "Password1233!!!"})
+    response = client.post(
+        "/users/register",
+        json={"email": "test@webwatch.live", "password": "Password1233!!!"},
+    )
     assert response.status_code == 409
+
 
 def test_user_login_fail():
     # Test user login with wrong password
@@ -27,15 +32,16 @@ def test_user_login_fail():
                 "password": "WrongPassword1233!!",
                 "scope": "",
                 "client_id": "string",
-                "client_secret": "string"
+                "client_secret": "string",
             },
-            headers={"Content-Type": "application/x-www-form-urlencoded"}
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
         assert response.status_code == 400
     except argon2.exceptions.VerifyMismatchError:
         pass  # This is expected
     else:
         assert False, "Expected VerifyMismatchError was not raised"
+
 
 def test_user_login_success():
     # Test user login with correct password
@@ -47,11 +53,12 @@ def test_user_login_success():
             "password": "Password1233!",
             "scope": "",
             "client_id": "string",
-            "client_secret": "string"
+            "client_secret": "string",
         },
-        headers={"Content-Type": "application/x-www-form-urlencoded"}
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
     assert response.status_code == 200
+
 
 def test_user_verify():
     # Test user verification
@@ -63,9 +70,9 @@ def test_user_verify():
             "password": "Password1233!",
             "scope": "",
             "client_id": "string",
-            "client_secret": "string"
+            "client_secret": "string",
         },
-        headers={"Content-Type": "application/x-www-form-urlencoded"}
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
     assert response.status_code == 200
     access_token = response.json()["access_token"]
@@ -73,6 +80,12 @@ def test_user_verify():
     response = client.get(f"/users/verify?token={access_token}")
     assert response.status_code == 200
     assert response.json() == {"email": "test@webwatch.live"}
+
+
+"""
+def test_user_me():
+    # Test user me
+"""
 
 """
 def test_user_logout():
