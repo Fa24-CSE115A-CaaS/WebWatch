@@ -78,24 +78,24 @@ class Task(TaskBase, table=True):
                 new_content = scraper.scrape_all_text(self.url)
         except Exception as e:
             logging.error(f"An error occurred while scraping {self.name}: {e}")
-            '''
+            """
             send_mail(
                 f"Error scraping {self.name}",
                 f"An error occurred while scraping {self.name}.",
                 [get_user_from_id(self.user_id).email],
             )
-            '''
+            """
             return
 
         if new_content is None:
             logging.error(f"An error occurred while scraping {self.name}.")
-            '''
+            """
             send_mail(
                 f"Error scraping {self.name}",
                 f"An error occurred while scraping {self.name}.",
                 [get_user_from_id(self.user_id).email],
             )
-            '''
+            """
             return
 
         # If stored content is None (such as on the first scan), store the new content
@@ -123,7 +123,7 @@ class Task(TaskBase, table=True):
                 update_content_in_db(self.id, new_content)
                 self.content = new_content
                 subject = "WebWatch Change Report"
-                '''
+                """
                 send_mail(
                     subject,
                     f"Changes have been detected on {self.url}.\n\n {diff}",
@@ -131,7 +131,7 @@ class Task(TaskBase, table=True):
                         get_user_from_id(self.user_id).email
                     ],  # Send email to user's address
                 )
-                '''
+                """
             except Exception as e:
                 logging.error(f"Failed to update content in DB or send email: {e}")
         else:
