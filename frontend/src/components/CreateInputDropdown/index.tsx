@@ -29,13 +29,13 @@ const CreateInputDropdown = <T extends FormState>({
           onChange: (e) => {
             setFormState({
               ...formState,
-              seconds: parseInt(e.target.value),
+              interval: parseInt(e.target.value),
             });
           },
-          value: isNaN(formState.seconds) ? "" : formState.seconds,
+          value: isNaN(formState.interval) ? "" : formState.interval,
           placeholder: "Enter an interval in seconds",
         }}
-        error={formState.errors.seconds}
+        error={formState.errors.interval}
       />
     </div>
   );

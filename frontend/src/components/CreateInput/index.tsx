@@ -9,6 +9,11 @@ import { IoSearch } from "react-icons/io5";
 // Types
 import { TaskResponse } from "../../types";
 import { FormState } from "./types";
+// Constants
+import {
+  MAXIMUM_INTERVAL_SECONDS,
+  MINIMUM_INTERVAL_SECONDS,
+} from "../../constants/tasks";
 // Util
 import { axios } from "../../config";
 import { TasksPageContext } from "../../pages/Tasks";
@@ -16,7 +21,7 @@ import { TasksPageContext } from "../../pages/Tasks";
 const defaultState: FormState = {
   url: "",
   name: "",
-  seconds: NaN,
+  interval: NaN,
   errors: {},
 };
 
@@ -26,7 +31,7 @@ const CreateInput = () => {
   const [formState, setFormState] = useState<FormState>(defaultState);
 
   const isFormValid = () => {
-    const { url, name, seconds } = formState;
+    const { url, name, interval } = formState;
     let errors: typeof formState.errors = {};
 
     if (url.trim().length <= 0) {
@@ -37,10 +42,12 @@ const CreateInput = () => {
       errors.name = "Please provide a name";
     }
 
-    if (isNaN(seconds)) {
-      errors.seconds = "Please provide an interval";
-    } else if (seconds < 1) {
-      errors.seconds = "Interval can not be less than 1 second";
+    if (isNaN(interval)) {
+      errors.interval = "Please provide an interval";
+    } else if (interval < MINIMUM_INTERVAL_SECONDS) {
+      errors.interval = "Interval can not be less than 30 seconds";
+    } else if (interval > MAXIMUM_INTERVAL_SECONDS) {
+      errors.interval = "Interval is too large";
     }
 
     if (Object.keys(errors).length > 0) {
@@ -61,6 +68,7 @@ const CreateInput = () => {
         {
           url: formState.url,
           name: formState.name,
+          interval: formState.interval,
         },
         {
           headers: {
@@ -81,6 +89,7 @@ const CreateInput = () => {
             content: data.content,
             url: data.url,
             discordUrl: data.discord_url,
+            interval: data.interval,
             enabledNotificationOptions: data.enabled_notification_options,
             enabled: data.enabled,
           },

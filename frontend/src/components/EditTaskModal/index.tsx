@@ -9,6 +9,11 @@ import { Task } from "../../types";
 import { EditTaskModalComponent, FormState } from "./types";
 // Icons
 import { RxCross2 } from "react-icons/rx";
+// Constants
+import {
+  MAXIMUM_INTERVAL_SECONDS,
+  MINIMUM_INTERVAL_SECONDS,
+} from "../../constants/tasks";
 
 const NOTIFICATION_OPTS = ["EMAIL", "DISCORD", "SLACK"];
 
@@ -20,7 +25,7 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
     notificationOptions: task.enabledNotificationOptions,
     discordUrl: task.discordUrl || "",
     slackUrl: "",
-    interval: NaN,
+    interval: task.interval,
     errors: {},
   });
 
@@ -41,8 +46,10 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
 
     if (isNaN(interval)) {
       errors.interval = "Please provide an interval";
-    } else if (interval < 1) {
+    } else if (interval < MINIMUM_INTERVAL_SECONDS) {
       errors.interval = "Interval can not be less than 1 second";
+    } else if (interval > MAXIMUM_INTERVAL_SECONDS) {
+      errors.interval = "Interval is too large";
     }
 
     if (notificationOptions.length <= 0) {
@@ -94,6 +101,7 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
             name,
             url,
             enabledNotificationOptions: notificationOptions,
+            interval,
             discordUrl,
           } as Task;
         }),
