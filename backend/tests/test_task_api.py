@@ -8,6 +8,7 @@ def test_task_retrieve_list():
     response = client.get("/tasks")
     assert response.status_code == 200
 
+def test_task_create():
     # Test task creation
     response = client.post(
         "/tasks",
