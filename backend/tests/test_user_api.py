@@ -4,7 +4,8 @@ import argon2
 
 client = TestClient(app)
 
-""" Removed until user delete is implemented
+"""
+# Removed until user delete is implemented?
 def test_user_register_success():
     # Test user registration
     response = client.post("/users/register", json={"email": "test@webwatch.live", "password": "Password1233!"})
@@ -82,13 +83,8 @@ def test_user_verify():
     assert response.json() == {"email": "test@webwatch.live"}
 
 
-"""
 def test_user_me():
     # Test user me
-"""
-
-"""
-def test_user_logout():
     response = client.post(
         "/users/login",
         data={
@@ -97,14 +93,22 @@ def test_user_logout():
             "password": "Password1233!",
             "scope": "",
             "client_id": "string",
-            "client_secret": "string"
+            "client_secret": "string",
         },
-        headers={"Content-Type": "application/x-www-form-urlencoded"}
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
     assert response.status_code == 200
-    
     access_token = response.json()["access_token"]
-    response = client.post("/users/logout", json={"email": "test@webwatch.live", "token": access_token})
+
+    response = client.get(
+        "/users/me", headers={"Authorization": "Bearer " + access_token}
+    )
     assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
-"""
+    assert response.json()["email"] == "test@webwatch.live"
+
+
+def test_user_me_no_auth():
+    # Test user me without auth
+    response = client.get("/users/me")
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Not authenticated"}
