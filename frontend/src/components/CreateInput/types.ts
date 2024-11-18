@@ -1,6 +1,6 @@
-import { FormState as CronFormState } from "../CronDropdown/types";
+import { FormState as CreateInputFormState } from "../CreateInputDropdown/types";
 
-export interface FormState extends CronFormState {
+export interface FormState extends CreateInputFormState {
   url: string;
 }
 

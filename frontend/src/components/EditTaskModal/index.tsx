@@ -1,15 +1,14 @@
 import { FormEventHandler, useContext, useState } from "react";
+import { axios } from "../../config";
+import { TasksPageContext } from "../../pages/Tasks";
 // Components
 import Input from "../Input";
 import EditCheckbox from "./EditCheckbox";
-import CronDropdown from "../CronDropdown";
 // Types
+import { Task } from "../../types";
 import { EditTaskModalComponent, FormState } from "./types";
 // Icons
 import { RxCross2 } from "react-icons/rx";
-import { axios } from "../../config";
-import { TasksPageContext } from "../../pages/Tasks";
-import { Task } from "../../types";
 
 const NOTIFICATION_OPTS = ["EMAIL", "DISCORD", "SLACK"];
 
@@ -21,12 +20,12 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
     notificationOptions: task.enabledNotificationOptions,
     discordUrl: task.discordUrl || "",
     slackUrl: "",
-    dayOfWeek: "",
-    month: "",
+    interval: NaN,
     errors: {},
   });
 
-  const { name, url, notificationOptions, discordUrl, slackUrl } = formState;
+  const { name, url, notificationOptions, discordUrl, slackUrl, interval } =
+    formState;
 
   const handleFormSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
@@ -38,6 +37,12 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
 
     if (url.trim().length <= 0) {
       errors.url = "Please enter a url";
+    }
+
+    if (isNaN(interval)) {
+      errors.interval = "Please provide an interval";
+    } else if (interval < 1) {
+      errors.interval = "Interval can not be less than 1 second";
     }
 
     if (notificationOptions.length <= 0) {
@@ -53,7 +58,7 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
     }
 
     if (notificationOptions.includes("SLACK") && slackUrl.trim().length <= 0) {
-      errors.discordUrl = "Please enter a Slack webhook url";
+      errors.slackUrl = "Please enter a Slack webhook url";
     }
 
     if (Object.keys(errors).length > 0) {
@@ -67,7 +72,9 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
         name,
         url,
         enabled_notification_options: notificationOptions,
+        interval,
         discord_url: discordUrl,
+        slack_url: slackUrl,
       },
       {
         headers: {
@@ -115,6 +122,7 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
         </button>
         <div className="grid grid-cols-2 gap-10 xxl:gap-14">
           <div>
+            <h3 className="mb-5 text-xl xxl:text-2xl">General Info</h3>
             <Input
               label="Task Name"
               containerClass="mb-3"
@@ -135,8 +143,24 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
               }}
               error={formState.errors.url}
             />
-            <div className="my-5">
-              <h3 className="mb-2 text-xl xxl:text-2xl">Notfication Options</h3>
+            <Input
+              label="Interval"
+              containerClass="mb-3"
+              inputAttrs={{
+                value: isNaN(interval) ? "" : interval,
+                onChange: (e) =>
+                  setFormState({
+                    ...formState,
+                    interval: parseInt(e.target.value),
+                  }),
+                placeholder: "Enter an interval in seconds",
+              }}
+              error={formState.errors.interval}
+            />
+          </div>
+          <div>
+            <h3 className="mb-5 text-xl xxl:text-2xl">Notfication Options</h3>
+            <div className="mb-5">
               {NOTIFICATION_OPTS.map((opt) => {
                 const notifOpt = notificationOptions;
                 const notifLoc = notifOpt.indexOf(opt);
@@ -188,16 +212,6 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
               }}
               error={formState.errors.slackUrl}
             />
-          </div>
-          <div>
-            <Input label="Formatted Schedule" containerClass="mb-3" />
-            <div className="mx-7 my-5 xxl:mx-10 xxl:my-7">
-              <CronDropdown<FormState>
-                formState={formState}
-                setFormState={setFormState}
-                setOpen={() => {}}
-              />
-            </div>
             <button
               className="w-full rounded-sm bg-accent py-3 text-center text-text-contrast transition-all
                 duration-100 ease-out hover:bg-accent-hover xxl:text-xl"
