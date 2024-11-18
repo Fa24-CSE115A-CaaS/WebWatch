@@ -14,6 +14,36 @@ const Task: TaskComponent = ({ task, onEditModalOpen }) => {
   const { tasks, setTasks } = useContext(TasksPageContext)!;
   const { open, setOpen, containerRef } = usePopup();
 
+  const toggleTask = async () => {
+    try {
+      const newEnabled = !task.enabled;
+      const response = await axios.put(
+        `/tasks/${task.id}`,
+        {
+          enabled: newEnabled,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        },
+      );
+      if (response.status === 200) {
+        setTasks(
+          tasks.map((t) => {
+            if (t.id === task.id) {
+              return { ...t, enabled: newEnabled };
+            }
+            return t;
+          }),
+        );
+      }
+    } catch (e) {
+      // TODO: Emit a global error
+      console.log(e);
+    }
+  };
+
   const deleteTask = async () => {
     try {
       const response = await axios.delete(`/tasks/${task.id}`, {
@@ -41,11 +71,13 @@ const Task: TaskComponent = ({ task, onEditModalOpen }) => {
           {task.url}
         </a>
       </td>
-      <td>
-        <div className="w-min rounded-full bg-info px-4 py-[2px] font-medium text-text-contrast">
-          Monitor
-        </div>
-      </td>
+      {/* NOTE: Archived Action Column for future usage
+        <td>
+          <div className="w-min rounded-full bg-info px-4 py-[2px] font-medium text-text-contrast">
+            Monitor
+          </div>
+        </td> 
+      */}
       <td>1d 5h 18m</td>
       <td className="overflow-visible">
         <div className="flex items-center justify-between">
@@ -70,7 +102,7 @@ const Task: TaskComponent = ({ task, onEditModalOpen }) => {
               >
                 Edit
               </button>
-              <button className={dropdownButtonStyles}>
+              <button className={dropdownButtonStyles} onClick={toggleTask}>
                 {task.enabled ? "Pause Task" : "Run Task"}
               </button>
               <button
