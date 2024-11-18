@@ -1,6 +1,7 @@
 import asyncio
 from routers.user import router as user_router
 from routers.task import router as task_router
+from routers.health import router as health_router
 from schemas.task import Task
 from fastapi import FastAPI, Depends
 from typing import Annotated
@@ -61,6 +62,7 @@ app.add_middleware(
 # Defining existing endpoints
 app.include_router(user_router)
 app.include_router(task_router)
+app.include_router(health_router)
 
 
 # NECESSARY FOR SWAGGER DOCS AUTHENTICATION SCHEMA
