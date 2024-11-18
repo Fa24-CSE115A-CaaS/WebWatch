@@ -13,7 +13,10 @@ NotificationOptions = List[Literal["EMAIL", "DISCORD", "SLACK"]]
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
-logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)  # Adjust SQLAlchemy log level to reduce noise
+logging.getLogger("sqlalchemy.engine").setLevel(
+    logging.WARNING
+)  # Adjust SQLAlchemy log level to reduce noise
+
 
 class TaskBase(SQLModel):
     name: str = Field(max_length=50)
@@ -56,6 +59,7 @@ class TaskBase(SQLModel):
             except Exception as e:
                 logging.error(f"Error during scan: {e}")
             await asyncio.sleep(10)
+
 
 class Task(TaskBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -108,7 +112,9 @@ class Task(TaskBase, table=True):
             return
 
         if diff:
-            logging.info(f"Change detected for task id: {self.id}. Writing to database and sending email.")
+            logging.info(
+                f"Change detected for task id: {self.id}. Writing to database and sending email."
+            )
             try:
                 update_content_in_db(self.id, new_content)
                 self.content = new_content
@@ -116,19 +122,24 @@ class Task(TaskBase, table=True):
                 send_mail(
                     subject,
                     f"Changes have been detected on {self.url}.\n\n {diff}",
-                    [get_user_from_id(self.user_id).email],  # Send email to user's address
+                    [
+                        get_user_from_id(self.user_id).email
+                    ],  # Send email to user's address
                 )
             except Exception as e:
                 logging.error(f"Failed to update content in DB or send email: {e}")
         else:
             logging.info(f"No change detected for task id: {self.id}.")
 
+
 class TaskGet(TaskBase):
     id: int
     user_id: int
 
+
 class TaskCreate(TaskBase):
     pass
+
 
 class TaskUpdate(TaskBase):
     name: str | None = Field(default=None, max_length=50)
