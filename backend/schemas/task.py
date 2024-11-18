@@ -8,6 +8,7 @@ import asyncio
 from schemas.user import User
 import os
 from utils.scan_helpers import compare_texts, get_user_from_id, update_content_in_db
+from constants.task import MIN_INTERVAL_SECONDS, MAX_INTERVAL_SECONDS
 
 NotificationOptions = List[Literal["EMAIL", "DISCORD", "SLACK"]]
 
@@ -23,7 +24,7 @@ class TaskBase(SQLModel):
     content: str | None = Field(default=None, sa_column=Column(String(length=10000)))
     url: str
     discord_url: str | None = None
-    interval: int = Field(ge=30)
+    interval: int = Field(ge=MIN_INTERVAL_SECONDS, le=MAX_INTERVAL_SECONDS)
     enabled_notification_options: NotificationOptions = Field(
         default=["EMAIL"], sa_column=Column(JSON())
     )
@@ -153,7 +154,9 @@ class TaskUpdate(TaskBase):
     content: str | None = Field(default=None, sa_column=Column(String(length=10000)))
     url: str | None = None
     discord_url: str | None = None
-    interval: int | None = Field(default=None, ge=30)
+    interval: int | None = Field(
+        default=None, ge=MIN_INTERVAL_SECONDS, le=MAX_INTERVAL_SECONDS
+    )
     enabled_notification_options: NotificationOptions | None = Field(
         default=None, sa_column=Column(JSON())
     )
