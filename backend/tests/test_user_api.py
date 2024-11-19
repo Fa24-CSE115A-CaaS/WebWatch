@@ -35,10 +35,10 @@ def test_user_login_fail():
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
         assert response.status_code == 400
-    except argon2.exceptions.VerifyMismatchError:
+    except ValueError:
         pass  # This is expected
     else:
-        assert False, "Expected VerifyMismatchError was not raised"
+        assert False, "Expected ValueError was not raised"
 
 
 def test_user_login_success():
