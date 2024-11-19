@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUserCircle } from "react-icons/fa";
 
+import { axios } from "../config";
+
 const Settings = () => {
   const { isTokenValid } = useAuth({ redirectToAuth: true });
   const [activeTab, setActiveTab] = useState("vertical-tab-1");
@@ -18,21 +20,25 @@ const Settings = () => {
     setActiveTab(tabId);
   };
 
-  const handlePasswordReset = () => {
-    let newPassword = (document.querySelector('input[name="password-reset-password"]') as HTMLInputElement).value;
-    let confirmPassword = (document.querySelector('input[name="password-reset-confirm-password"]') as HTMLInputElement).value;
-    if (newPassword !== confirmPassword) {
-      alert('Passwords do not match');
-      return;
-    }
+  const handlePasswordResetSubmission = () => {
+    const payload = {
+      new_password: (document.querySelector('input[name="password-reset-password"]') as HTMLInputElement).value,
+      confirm_password: (document.querySelector('input[name="password-reset-confirm-password"]') as HTMLInputElement).value,
+    };
 
+    axios.post("/users/reset_password", payload, {
+      headers: {
+        accept: "application/json",
+        "Authorization": "Bearer " + localStorage.getItem("access_token"),
+      },
+    });
   }
 
   const handlePasswordInputEvents = () => {
     {
-      let password_reset_password = document.querySelector('input[name="password-reset-password"]') as HTMLInputElement;
-      let password_reset_confirm_password = document.querySelector('input[name="password-reset-confirm-password"]') as HTMLInputElement;
-      let password_reset_error_message = document.getElementById('password-reset-error-message') as HTMLParagraphElement;
+      const password_reset_password = document.querySelector('input[name="password-reset-password"]') as HTMLInputElement;
+      const password_reset_confirm_password = document.querySelector('input[name="password-reset-confirm-password"]') as HTMLInputElement;
+      const password_reset_error_message = document.getElementById('password-reset-error-message') as HTMLParagraphElement;
       if (password_reset_password.value !== password_reset_confirm_password.value) {
         password_reset_password.classList.add("border-error");
         password_reset_confirm_password.classList.add("border-error");
@@ -167,7 +173,7 @@ const Settings = () => {
                     onChange={handlePasswordInputEvents}
                   />
                   <p id="password-reset-error-message" className="text-error"></p>
-                  <button className="mt-4 rounded-lg bg-accent p-2 px-16 text-text-contrast hover:bg-accent-hover" onClick={handlePasswordReset}>
+                  <button className="mt-4 rounded-lg bg-accent p-2 px-16 text-text-contrast hover:bg-accent-hover" type="button" onClick={handlePasswordResetSubmission}>
                     Save
                   </button>
                 </form>
