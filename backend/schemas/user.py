@@ -70,17 +70,18 @@ class Token(BaseModel):
 class PasswordReset(BaseModel):
     email: EmailStr
 
+
 class PasswordResetRequest(BaseModel):
     new_password: str
     confirm_password: str
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def passwords_match(cls, values):
         new_password = values.new_password
         confirm_password = values.confirm_password
         if new_password != confirm_password:
             raise ValueError("Passwords do not match")
-        validate_password(new_password)  
+        validate_password(new_password)
         return values
 
 
