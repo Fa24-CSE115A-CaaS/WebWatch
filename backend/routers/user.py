@@ -2,6 +2,7 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlmodel import select, Session
 from schemas.user import UserRegister, UserUpdate, UserOutput, User, Token
+from schemas.task import Task
 from auth_password import get_hashed_password, verify_password
 from auth_token import (
     create_access_token,
@@ -11,6 +12,8 @@ from auth_token import (
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 from database import Database
+from scheduler import Scheduler, get_scheduler
+from routers.task import tasks_delete
 import os
 
 db = Database(mode=os.getenv("ENV"))
@@ -21,6 +24,8 @@ router = APIRouter(
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/login")
 
 DbSession = Annotated[Session, Depends(db.get_session)]
+SchedulerDep = Annotated[Scheduler, Depends(get_scheduler)]
+UserData = Annotated[User, Depends(get_current_user)]
 
 
 @router.post(
@@ -145,10 +150,17 @@ async def users_update(
         raise HTTPException(status_code=500, detail="Internal server error")
     return user
 
-
 @router.delete("/delete")
-async def delete_user(session: DbSession, current_user=Depends(get_current_user)):
+async def delete_user(session: DbSession, current_user: UserData, scheduler: SchedulerDep):
     user = session.get(User, current_user.id)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    # Query and delete all tasks associated with the user
+    tasks = session.exec(select(Task).where(Task.user_id == user.id)).all()
+    for task in tasks:
+        await tasks_delete(task.id, session, scheduler)
+
     try:
         session.delete(user)
         session.commit()
@@ -158,4 +170,4 @@ async def delete_user(session: DbSession, current_user=Depends(get_current_user)
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error deleting user",
         )
-    return {"detail": "User deleted successfully"}
+    return {"detail": "User and associated tasks deleted successfully"}
