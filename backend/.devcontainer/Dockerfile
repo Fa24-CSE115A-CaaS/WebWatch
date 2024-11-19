@@ -1,1 +1,1 @@
-FROM python:3.13.0-bookworm
+FROM --platform=linux/amd64 python:3.13.0-bookworm
