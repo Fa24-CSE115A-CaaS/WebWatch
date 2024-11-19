@@ -26,11 +26,20 @@ const Settings = () => {
       confirm_password: (document.querySelector('input[name="password-reset-confirm-password"]') as HTMLInputElement).value,
     };
 
+    const password_reset_error_message = document.getElementById('password-reset-error-message') as HTMLParagraphElement;
+
     axios.post("/users/reset_password", payload, {
       headers: {
         accept: "application/json",
         "Authorization": "Bearer " + localStorage.getItem("access_token"),
       },
+    }).then((response) => {
+      if (response.status === 200) {
+        password_reset_error_message.innerText = "Password reset successfully";
+      }
+    }
+    ).catch(() => {
+      password_reset_error_message.innerText = "Password reset failed";
     });
   }
 
