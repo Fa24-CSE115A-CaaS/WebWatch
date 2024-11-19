@@ -10,6 +10,7 @@ import Guide from "./pages/Guide";
 import Settings from "./pages/Settings";
 import Tasks from "./pages/Tasks";
 import EmailAuth from "./components/EmailAuth";
+import Test from "./pages/Test";
 
 const router = createBrowserRouter([
   {
@@ -45,7 +46,7 @@ const router = createBrowserRouter([
       <>
         <NavBar />
         <EmailAuth />
-      </> 
+      </>
     ),
   },
   // Auth protected route
