@@ -29,60 +29,86 @@ const Settings = () => {
     }
 
     const payload = {
-      new_password: (document.querySelector('input[name="password-reset-password"]') as HTMLInputElement).value,
-      confirm_password: (document.querySelector('input[name="password-reset-confirm-password"]') as HTMLInputElement).value,
+      new_password: (
+        document.querySelector(
+          'input[name="password-reset-password"]',
+        ) as HTMLInputElement
+      ).value,
+      confirm_password: (
+        document.querySelector(
+          'input[name="password-reset-confirm-password"]',
+        ) as HTMLInputElement
+      ).value,
     };
 
-    const password_reset_error_message = document.getElementById('password-reset-error-message') as HTMLParagraphElement;
+    const password_reset_error_message = document.getElementById(
+      "password-reset-error-message",
+    ) as HTMLParagraphElement;
 
-    axios.post("/users/reset_password", payload, {
-      headers: {
-        accept: "application/json",
-        "Authorization": "Bearer " + localStorage.getItem("access_token"),
-      },
-    }).then((response) => {
-      if (response.status === 200) {
-        password_reset_error_message.innerText = "Password reset successfully";
-      }
-    }
-    ).catch(() => {
-      password_reset_error_message.innerText = "Password reset failed";
-    });
-  }
+    axios
+      .post("/users/reset_password", payload, {
+        headers: {
+          accept: "application/json",
+          Authorization: "Bearer " + localStorage.getItem("access_token"),
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          password_reset_error_message.innerText =
+            "Password reset successfully";
+        }
+      })
+      .catch(() => {
+        password_reset_error_message.innerText = "Password reset failed";
+      });
+  };
 
   const handlePasswordInputEvents = () => {
     {
-      const password_reset_password = document.querySelector('input[name="password-reset-password"]') as HTMLInputElement;
-      const password_reset_confirm_password = document.querySelector('input[name="password-reset-confirm-password"]') as HTMLInputElement;
-      const password_reset_error_message = document.getElementById('password-reset-error-message') as HTMLParagraphElement;
+      const password_reset_password = document.querySelector(
+        'input[name="password-reset-password"]',
+      ) as HTMLInputElement;
+      const password_reset_confirm_password = document.querySelector(
+        'input[name="password-reset-confirm-password"]',
+      ) as HTMLInputElement;
+      const password_reset_error_message = document.getElementById(
+        "password-reset-error-message",
+      ) as HTMLParagraphElement;
       const status_changer_error = (message: string) => {
         password_reset_password.classList.add("border-error");
         password_reset_confirm_password.classList.add("border-error");
         password_reset_error_message.innerText = message;
         canSubmit = false;
-      }
+      };
 
-      if (password_reset_password.value !== password_reset_confirm_password.value) {
+      if (
+        password_reset_password.value !== password_reset_confirm_password.value
+      ) {
         status_changer_error("Passwords do not match");
       } else if (password_reset_password.value.length < 8) {
         status_changer_error("Password must be at least 8 characters long");
       } else if (!password_reset_confirm_password.value.match(/[0-9]/)) {
         status_changer_error("Password must contain at least one number");
       } else if (!password_reset_confirm_password.value.match(/[a-z]/)) {
-        status_changer_error("Password must contain at least one lowercase letter");
+        status_changer_error(
+          "Password must contain at least one lowercase letter",
+        );
       } else if (!password_reset_confirm_password.value.match(/[A-Z]/)) {
-        status_changer_error("Password must contain at least one uppercase letter");
+        status_changer_error(
+          "Password must contain at least one uppercase letter",
+        );
       } else if (!password_reset_confirm_password.value.match(/[A-Za-z0-9]/)) {
-        status_changer_error("Password must contain at least one special character");
-      }
-      else {
+        status_changer_error(
+          "Password must contain at least one special character",
+        );
+      } else {
         password_reset_password.classList.remove("border-error");
         password_reset_confirm_password.classList.remove("border-error");
         password_reset_error_message.innerText = "";
         canSubmit = true;
       }
     }
-  }
+  };
 
   return (
     <div className="mx-auto mt-8 min-h-screen w-1/2 rounded text-text">
@@ -184,8 +210,15 @@ const Settings = () => {
                     className="mb-4 w-full rounded-lg border border-border bg-secondary p-2 outline-none"
                     onChange={handlePasswordInputEvents}
                   />
-                  <p id="password-reset-error-message" className="text-error"></p>
-                  <button className="mt-4 rounded-lg bg-accent p-2 px-16 text-text-contrast hover:bg-accent-hover" type="button" onClick={handlePasswordResetSubmission}>
+                  <p
+                    id="password-reset-error-message"
+                    className="text-error"
+                  ></p>
+                  <button
+                    className="mt-4 rounded-lg bg-accent p-2 px-16 text-text-contrast hover:bg-accent-hover"
+                    type="button"
+                    onClick={handlePasswordResetSubmission}
+                  >
                     Save
                   </button>
                 </form>

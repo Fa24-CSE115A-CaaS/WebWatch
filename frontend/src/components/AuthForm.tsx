@@ -75,10 +75,10 @@ const AuthForm = ({ isLogin: initialIsLogin }: AuthFormProps) => {
         { email },
         {
           headers: {
-            "accept": "application/json",
+            accept: "application/json",
             "Content-Type": "application/json",
           },
-        }
+        },
       );
       setError("A login link has been sent to your email.");
     } catch (error) {
@@ -224,7 +224,7 @@ const AuthForm = ({ isLogin: initialIsLogin }: AuthFormProps) => {
                   </div>
                   <button
                     type="button"
-                    className="w-full rounded-lg bg-accent p-2 text-text-contrast hover:bg-secondary-hover"
+                    className="hover:bg-secondary-hover w-full rounded-lg bg-accent p-2 text-text-contrast"
                     onClick={() => handleLoginLink(email)}
                     disabled={loading}
                   >
