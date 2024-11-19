@@ -7,7 +7,7 @@ from auth_token import (
     create_access_token,
     decode_access_token,
     get_current_user,
-)  
+)
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 from database import Database
@@ -25,6 +25,7 @@ DbSession = Annotated[Session, Depends(db.get_session)]
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
+
 
 @router.post(
     "/register",
@@ -116,7 +117,7 @@ async def login(session: DbSession, form_data: OAuth2PasswordRequestForm = Depen
 async def verify(token: str, session: DbSession):
     """
     Verify a user's token.
-    """ 
+    """
 
     logging.info(f"Verifying token")
     payload = decode_access_token(token)
@@ -158,7 +159,9 @@ async def users_update(
     logging.info(f"Updating user {user_id}")
     # Ensure the user is updating their own information
     if user_id != current_user.id:
-        logging.warning(f"User {current_user.id} not authorized to update user {user_id}")
+        logging.warning(
+            f"User {current_user.id} not authorized to update user {user_id}"
+        )
         raise HTTPException(
             status_code=403, detail="Not authorized to update this user"
         )

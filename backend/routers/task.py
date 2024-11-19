@@ -25,6 +25,7 @@ TaskData = Annotated[Task, Depends(get_task)]
 
 logging.basicConfig(level=logging.INFO)
 
+
 # Create a new task
 @router.post("", response_model=TaskGet, status_code=status.HTTP_201_CREATED)
 async def tasks_create(
