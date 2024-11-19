@@ -178,10 +178,11 @@ async def reset_password(
                 detail="New password and confirm password do not match",
             )
 
-        current_user.password_hash = get_hashed_password(reset_request.new_password)
-        session.add(current_user)
+        user = session.exec(select(User).where(User.token_uuid == current_user.token_uuid)).first()
+        user.password_hash = get_hashed_password(reset_request.new_password)
+        session.add(user)
         session.commit()
-        session.refresh(current_user)
+        session.refresh(user)
         return {"detail": "Password reset successful"}
     except Exception as e:
         session.rollback()
