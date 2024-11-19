@@ -146,21 +146,16 @@ async def users_update(
     return user
 
 
-"""
-# Delete a user by id
-@router.delete("{user_id}")
-async def users_delete(user_id: int):
-    with db.get_session() as session:
-        user = session.get(User, user_id)
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        # Delete all tasks associated with the user
-        tasks = session.exec(select(Task).where(Task.user_id == user_id)).all()
-        for task in tasks:
-            session.delete(task)
-
+@router.delete("/delete")
+async def delete_user(session: DbSession, current_user=Depends(get_current_user)):
+    user = session.get(User, current_user.id)
+    try:
         session.delete(user)
         session.commit()
-    return Response(status_code=204)
-"""
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error deleting user",
+        )
+    return {"detail": "User deleted successfully"}
