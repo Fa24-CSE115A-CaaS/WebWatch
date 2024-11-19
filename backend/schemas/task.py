@@ -71,33 +71,53 @@ class Task(TaskBase, table=True):
         # Returns the task_id
         return self.id
 
+    def notify(self, message: dict):
+        from utils.notifications import send_mail, send_discord_msg
+        subject = message["subject"]
+        body = message["body"]
+
+        # Notify the user based on the enabled notification options
+        if "EMAIL" in self.enabled_notification_options:
+            '''
+            try:    
+                send_mail(
+                    subject,
+                    body,
+                    [get_user_from_id(self.user_id).email],
+                )
+            except Exception as e:
+                logging.error(f"Failed to send email: {e}")
+            '''
+            pass    
+        if "DISCORD" in self.enabled_notification_options:
+            # send discord message
+            try:
+                send_discord_msg(self.discord_url, body)
+            except Exception as e:
+                logging.error(f"Failed to send discord message: {e}")
+            pass
+        if "SLACK" in self.enabled_notification_options:
+            # send slack message
+            pass
+
     def scan(self):
         from scrape import WebScraper
-        from utils.notifications import send_mail
 
+        error_message = {
+            "subject": f"An error occurred while scraping {self.url}",
+            "body": f"An error occurred while scraping {self.url}. Please modify your task to include a valid URL.",
+        }
         try:
             with WebScraper() as scraper:
                 new_content = scraper.scrape_all_text(self.url)
         except Exception as e:
-            logging.error(f"An error occurred while scraping {self.name}: {e}")
-            """
-            send_mail(
-                f"Error scraping {self.name}",
-                f"An error occurred while scraping {self.name}.",
-                [get_user_from_id(self.user_id).email],
-            )
-            """
+            logging.error(f"Task {self.id} encountered an error while scraping {self.url}: {e}")
+            self.notify(error_message)
             return
 
         if new_content is None:
             logging.error(f"An error occurred while scraping {self.name}.")
-            """
-            send_mail(
-                f"Error scraping {self.name}",
-                f"An error occurred while scraping {self.name}.",
-                [get_user_from_id(self.user_id).email],
-            )
-            """
+            self.notify(error_message)
             return
 
         # If stored content is None (such as on the first scan), store the new content
@@ -124,18 +144,11 @@ class Task(TaskBase, table=True):
             try:
                 update_content_in_db(self.id, new_content)
                 self.content = new_content
-                subject = "WebWatch Change Report"
-                """
-                send_mail(
-                    subject,
-                    f"Changes have been detected on {self.url}.\n\n {diff}",
-                    [
-                        get_user_from_id(self.user_id).email
-                    ],  # Send email to user's address
-                )
-                """
             except Exception as e:
-                logging.error(f"Failed to update content in DB or send email: {e}")
+                logging.error(f"Failed to update content in DB: {e}")
+            
+            message = {"subject":"WebWatch Change Report", "body":f"Changes have been detected on {self.url}.\n\n {diff}"}
+            self.notify(message)
         else:
             logging.info(f"No change detected for task id: {self.id}.")
 
