@@ -36,6 +36,7 @@ def test_user_login_fail():
     assert response.status_code == 400
     assert response.json() == {"detail": "Incorrect email or password"}
 
+
 def test_user_login_success():
     # Test user login with correct password
     response = client.post(
