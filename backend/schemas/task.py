@@ -73,13 +73,14 @@ class Task(TaskBase, table=True):
 
     def notify(self, message: dict):
         from utils.notifications import send_mail, send_discord_msg
+
         subject = message["subject"]
         body = message["body"]
 
         # Notify the user based on the enabled notification options
         if "EMAIL" in self.enabled_notification_options:
-            '''
-            try:    
+            """
+            try:
                 send_mail(
                     subject,
                     body,
@@ -87,8 +88,8 @@ class Task(TaskBase, table=True):
                 )
             except Exception as e:
                 logging.error(f"Failed to send email: {e}")
-            '''
-            pass    
+            """
+            pass
         if "DISCORD" in self.enabled_notification_options:
             # send discord message
             try:
@@ -111,7 +112,9 @@ class Task(TaskBase, table=True):
             with WebScraper() as scraper:
                 new_content = scraper.scrape_all_text(self.url)
         except Exception as e:
-            logging.error(f"Task {self.id} encountered an error while scraping {self.url}: {e}")
+            logging.error(
+                f"Task {self.id} encountered an error while scraping {self.url}: {e}"
+            )
             self.notify(error_message)
             return
 
@@ -146,8 +149,11 @@ class Task(TaskBase, table=True):
                 self.content = new_content
             except Exception as e:
                 logging.error(f"Failed to update content in DB: {e}")
-            
-            message = {"subject":"WebWatch Change Report", "body":f"Changes have been detected on {self.url}.\n\n {diff}"}
+
+            message = {
+                "subject": "WebWatch Change Report",
+                "body": f"Changes have been detected on {self.url}.\n\n {diff}",
+            }
             self.notify(message)
         else:
             logging.info(f"No change detected for task id: {self.id}.")
