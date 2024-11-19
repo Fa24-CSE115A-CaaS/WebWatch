@@ -20,7 +20,14 @@ const Settings = () => {
     setActiveTab(tabId);
   };
 
+  let canSubmit = false;
+
   const handlePasswordResetSubmission = () => {
+    if (!canSubmit) {
+      handlePasswordInputEvents();
+      return;
+    }
+
     const payload = {
       new_password: (document.querySelector('input[name="password-reset-password"]') as HTMLInputElement).value,
       confirm_password: (document.querySelector('input[name="password-reset-confirm-password"]') as HTMLInputElement).value,
@@ -52,6 +59,7 @@ const Settings = () => {
         password_reset_password.classList.add("border-error");
         password_reset_confirm_password.classList.add("border-error");
         password_reset_error_message.innerText = message;
+        canSubmit = false;
       }
 
       if (password_reset_password.value !== password_reset_confirm_password.value) {
@@ -71,6 +79,7 @@ const Settings = () => {
         password_reset_password.classList.remove("border-error");
         password_reset_confirm_password.classList.remove("border-error");
         password_reset_error_message.innerText = "";
+        canSubmit = true;
       }
     }
   }
