@@ -43,7 +43,14 @@ const useAuth = ({ redirectToAuth = true }: UseAuthOptions = {}) => {
     checkTokenValidity();
   }, [navigate, redirectToAuth]);
 
-  return { user, isTokenValid };
+  const logout = () => {
+    setUser(null);
+    setIsTokenValid(false);
+    localStorage.removeItem("access_token");
+    navigate("/auth/login");
+  };
+
+  return { user, isTokenValid, logout };
 };
 
 export default useAuth;

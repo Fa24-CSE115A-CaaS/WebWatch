@@ -2,7 +2,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 // Components
 import NavBar from "./components/NavBar";
 // Hooks
-import { useTheme } from "./hooks/useTheme";
+import useTheme from "./hooks/useTheme";
 // Pages
 import Auth from "./pages/Auth";
 import Home from "./pages/Home";
@@ -74,6 +74,15 @@ const router = createBrowserRouter([
       <>
         <NavBar />
         <Tasks />
+      </>
+    ),
+  },
+  {
+    path: "/test",
+    element: (
+      <>
+        <NavBar />
+        <Test />
       </>
     ),
   },

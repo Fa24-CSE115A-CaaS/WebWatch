@@ -1,14 +1,14 @@
 import { FunctionComponent } from "react";
 // Types
 import { Task } from "../../types";
-import { FormState as CronDropdownFormState } from "../CronDropdown/types";
 
-export interface FormState extends CronDropdownFormState {
+export interface FormState {
   name: string;
   url: string;
   notificationOptions: string[];
   discordUrl: string;
   slackUrl: string;
+  interval: number;
 }
 
 export interface FormState {
