@@ -38,6 +38,12 @@ const NavBar = () => {
               >
                 Account
               </a>
+              <a
+                href="/test"
+                className={`${location.pathname == "/test" && "text-accent"}`}
+              >
+                Test
+              </a>
             </div>
           )}
           <div className="flex items-center gap-4">

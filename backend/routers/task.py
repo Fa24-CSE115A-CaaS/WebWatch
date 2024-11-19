@@ -6,6 +6,7 @@ from database import Database
 from schemas.user import User
 from auth_token import get_current_user
 from dependencies.task import get_task
+from scheduler import Scheduler, get_scheduler
 import os
 import logging
 
@@ -18,30 +19,22 @@ router = APIRouter(
 db = Database(mode=os.getenv("ENV"))
 
 DbSession = Annotated[Session, Depends(db.get_session)]
+SchedulerDep = Annotated[Scheduler, Depends(get_scheduler)]
 UserData = Annotated[User, Depends(get_current_user)]
 TaskData = Annotated[Task, Depends(get_task)]
 
 logging.basicConfig(level=logging.INFO)
 
 # Create a new task
-@router.post("", response_model=TaskGet, status_code=status.HTTP_201_CREATED)
-async def tasks_create(task_create: TaskCreate, session: DbSession, user: UserData):
-    """
-    Create a new task.
-
-    Args:
-        task_create (TaskCreate): The task creation details.
-        session (DbSession): The database session.
-        user (UserData): The current logged-in user.
-
-    Returns:
-        TaskGet: The newly created task.
-    """
-    logging.info(f"Creating task for user {user.id}")
+@router.post("", response_model=TaskGet, status_code=201)
+async def tasks_create(
+    task_create: TaskCreate, session: DbSession, scheduler: SchedulerDep, user: UserData
+):
     task = Task(**task_create.model_dump(), user_id=user.id)
     session.add(task)
     session.commit()
     session.refresh(task)
+    await scheduler.add_task(task)
     return task
 
 
@@ -66,24 +59,12 @@ async def tasks_list(session: DbSession, user: UserData):
 # Update task details by id
 @router.put("/{task_id}", response_model=TaskGet)
 async def tasks_update(
+    task_id: TaskData,
     task_update: TaskUpdate,
     session: DbSession,
-    task: TaskData,
-    task_id: int = Path(..., description="The ID of the task to update"),
+    scheduler: SchedulerDep,
 ):
-    """
-    Update task details by ID.
-
-    Args:
-        task_id (int): The ID of the task to update.
-        task_update (TaskUpdate): The updated task details.
-        session (DbSession): The database session.
-        task (TaskData): The task to update.
-
-    Returns:
-        TaskGet: The updated task.
-    """
-    logging.info(f"Updating task {task_id}")
+    task = session.get(Task, task_id)
     update_data = task_update.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(task, key, value)
@@ -91,27 +72,14 @@ async def tasks_update(
     session.add(task)
     session.commit()
     session.refresh(task)
+    await scheduler.restart_task(task)
     return task
 
 
 # Delete task by id
-@router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def tasks_delete(
-    session: DbSession,
-    task: TaskData,
-    task_id: int = Path(..., description="The ID of the task to delete"),
-):
-    """
-    Delete a task by ID.
-
-    Args:
-        task_id (int): The ID of the task to delete.
-        session (DbSession): The database session.
-        task (TaskData): The task to delete.
-
-    Returns:
-        None: A response with status code 204.
-    """
-    logging.info(f"Deleting task {task_id}")
+@router.delete("/{task_id}", status_code=204)
+async def tasks_delete(task_id: TaskData, session: DbSession, scheduler: SchedulerDep):
+    task = session.get(Task, task_id)
     session.delete(task)
     session.commit()
+    await scheduler.remove_task(task)

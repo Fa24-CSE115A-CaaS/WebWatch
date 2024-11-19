@@ -1,14 +1,19 @@
 import { useContext, useState } from "react";
 // Components
-import CronDropdown from "../CronDropdown";
+import CreateInputDropdown from "../CreateInputDropdown";
 // Hooks
 import usePopup from "../../hooks/usePopup";
 // Icons
 import { FaRegBell } from "react-icons/fa";
-import { IoSearch, IoSettingsOutline } from "react-icons/io5";
+import { IoSearch } from "react-icons/io5";
 // Types
 import { TaskResponse } from "../../types";
 import { FormState } from "./types";
+// Constants
+import {
+  MAXIMUM_INTERVAL_SECONDS,
+  MINIMUM_INTERVAL_SECONDS,
+} from "../../constants/tasks";
 // Util
 import { axios } from "../../config";
 import { TasksPageContext } from "../../pages/Tasks";
@@ -16,8 +21,7 @@ import { TasksPageContext } from "../../pages/Tasks";
 const defaultState: FormState = {
   url: "",
   name: "",
-  month: "",
-  dayOfWeek: "",
+  interval: NaN,
   errors: {},
 };
 
@@ -26,13 +30,45 @@ const CreateInput = () => {
   const { open, setOpen, containerRef } = usePopup();
   const [formState, setFormState] = useState<FormState>(defaultState);
 
+  const isFormValid = () => {
+    const { url, name, interval } = formState;
+    let errors: typeof formState.errors = {};
+
+    if (url.trim().length <= 0) {
+      errors.url = "Please provide a url";
+    }
+
+    if (name.trim().length <= 0) {
+      errors.name = "Please provide a name";
+    }
+
+    if (isNaN(interval)) {
+      errors.interval = "Please provide an interval";
+    } else if (interval < MINIMUM_INTERVAL_SECONDS) {
+      errors.interval = `Interval can not be less than ${MINIMUM_INTERVAL_SECONDS} seconds`;
+    } else if (interval > MAXIMUM_INTERVAL_SECONDS) {
+      errors.interval = "Interval is too large";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormState({ ...formState, errors });
+      return false;
+    }
+    return true;
+  };
+
   const onSubmit = async () => {
+    if (!isFormValid()) {
+      return;
+    }
+
     try {
       const res = await axios.post(
         "/tasks",
         {
           url: formState.url,
           name: formState.name,
+          interval: formState.interval,
         },
         {
           headers: {
@@ -44,6 +80,7 @@ const CreateInput = () => {
       if (res.status === 201) {
         const data = res.data as TaskResponse;
         setFormState({ ...defaultState });
+        setOpen(false);
         setTasks([
           ...tasks,
           {
@@ -52,6 +89,7 @@ const CreateInput = () => {
             content: data.content,
             url: data.url,
             discordUrl: data.discord_url,
+            interval: data.interval,
             enabledNotificationOptions: data.enabled_notification_options,
             enabled: data.enabled,
           },
@@ -62,6 +100,7 @@ const CreateInput = () => {
 
   return (
     <div
+      ref={containerRef}
       className="mx-auto my-10 flex h-12 w-[800px] items-center rounded-full border-[1px]
         border-border bg-primary pl-5 text-text xxl:h-16 xxl:border-2 xxl:text-xl"
     >
@@ -71,23 +110,13 @@ const CreateInput = () => {
         placeholder="Enter a website..."
         value={formState.url}
         onChange={(e) => setFormState({ ...formState, url: e.target.value })}
+        onFocus={() => setOpen(true)}
       />
-      <div
-        className="relative flex items-center justify-center px-5 xxl:px-6"
-        onClick={() => setOpen(!open)}
-        ref={containerRef}
-      >
-        <button className="flex items-center justify-center gap-2">
-          <IoSettingsOutline className="h-5 w-5 xxl:h-6 xxl:w-6" />
-          {formState.name && <p>{formState.name}</p>}
-        </button>
-
+      <div className="relative flex items-center justify-center px-5 xxl:px-6">
         {open && (
-          <div className="absolute right-0 top-12 w-80 xxl:top-16 xxl:w-96">
-            <CronDropdown
-              setOpen={setOpen}
+          <div className="absolute right-0 top-8 w-80 xxl:top-16 xxl:w-96">
+            <CreateInputDropdown
               formState={formState}
-              showNameField={true}
               setFormState={setFormState}
             />
           </div>

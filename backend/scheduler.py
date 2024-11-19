@@ -5,14 +5,28 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
 
 class Scheduler:
+    _instance = None
+
+    # Singleton pattern to ensure only one instance of the scheduler is created
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(Scheduler, cls).__new__(cls)
+            cls._instance.__init__()
+        return cls._instance
+
     def __init__(self):
-        self.executor = ProcessPoolExecutor()
-        self.loop = asyncio.new_event_loop()
-        self.running_tasks = dict()
+        if not hasattr(self, "executor"):
+            self.executor = ProcessPoolExecutor()
+            self.loop = asyncio.new_event_loop()
+            self.running_tasks = dict()
 
     async def shutdown(self):
-        for _, task in self.running_tasks:
+        for task in self.running_tasks.values():
             task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
 
     async def status(self, task: Task) -> str:
         if task.get_id() in self.running_tasks:
@@ -23,26 +37,43 @@ class Scheduler:
     async def add_task(self, task: Task):
         # Spawns task in a new process
         if self.running_tasks.get(task.get_id()):
-            logging.warning(f"{task.get_id()} is already running")
+            logging.warning(f"Task {task.get_id()} is already running")
         else:
-            self.running_tasks[task.get_id()] = self.loop.run_in_executor(
-                self.executor, task.proc_init
+            logging.info(f"Creating async task for {task.get_id()}")
+            async_task = asyncio.create_task(task.run())
+            self.running_tasks[task.get_id()] = async_task
+            logging.info(
+                f"Task {task.get_id()} is now running and added to running_tasks"
             )
-            logging.info(f"{task.get_id()} is now running")
 
     async def remove_task(self, task: Task):
         # Kills task based on id passed
         async_task = self.running_tasks.get(task.get_id())
         if async_task:
+            logging.info(f"Attempting to cancel task {task.get_id()}")
             async_task.cancel()
-            logging.info(f"{task.get_id()} is now stopped")
+            try:
+                await async_task
+            except asyncio.CancelledError:
+                logging.info(f"Task {task.get_id()} has been cancelled")
+            del self.running_tasks[task.get_id()]
+            logging.info(f"Task {task.get_id()} removed from running_tasks")
         else:
-            logging.warning(f"{task.get_id()} is already stopped")
+            logging.warning(
+                f"Task {task.get_id()} is already stopped or not found in running_tasks"
+            )
 
     async def restart_task(self, task: Task):
         # Mapping to stopping then starting
-        self.remove_task(task)
-        self.add_task(task)
+        await self.remove_task(task)
+        await self.add_task(task)
+
+
+scheduler_instance = Scheduler()
+
+
+def get_scheduler():
+    return scheduler_instance
 
 
 # # TESTING CODE

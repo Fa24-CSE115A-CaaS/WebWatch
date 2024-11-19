@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import Guide from "./pages/Guide";
 import Settings from "./pages/Settings";
 import Tasks from "./pages/Tasks";
+import Test from "./pages/Test";
 
 const router = createBrowserRouter([
   {
@@ -66,6 +67,15 @@ const router = createBrowserRouter([
       <>
         <NavBar />
         <Tasks />
+      </>
+    ),
+  },
+  {
+    path: "/test",
+    element: (
+      <>
+        <NavBar />
+        <Test />
       </>
     ),
   },
