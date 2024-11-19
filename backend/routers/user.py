@@ -21,6 +21,7 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from utils.notifications import send_password_reset_email
 
 from database import Database
+import logging
 import os
 
 db = Database(mode=os.getenv("ENV"))
@@ -186,21 +187,17 @@ async def reset_password(
     current_user=Depends(get_current_user),
 ):
     try:
-        if reset_request.new_password != reset_request.confirm_password:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="New password and confirm password do not match",
-            )
-
         user = session.exec(
             select(User).where(User.token_uuid == current_user.token_uuid)
         ).first()
+
         user.password_hash = get_hashed_password(reset_request.new_password)
         session.add(user)
         session.commit()
         session.refresh(user)
         return {"detail": "Password reset successful"}
     except Exception as e:
+        logging.error(e)
         session.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
