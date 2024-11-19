@@ -37,18 +37,9 @@ logging.basicConfig(level=logging.INFO)
 )
 async def create_user(user: UserRegister, session: DbSession):
     """
-    Register a new user.
-
-    Args:
-        user (UserRegister): The user registration details.
-        session (DbSession): The database session.
-
-    Returns:
-        Token: The access token for the newly registered user.
-
-    Raises:
-        HTTPException: If the email is already registered or an internal server error occurs.
+    Register a new user by providing an email and password.
     """
+
     logging.info(f"Registering user with email {user.email}")
     # Check if user already exists
     existing_user = session.exec(select(User).where(User.email == user.email)).first()
@@ -93,17 +84,7 @@ async def create_user(user: UserRegister, session: DbSession):
 )
 async def login(session: DbSession, form_data: OAuth2PasswordRequestForm = Depends()):
     """
-    Log in a user.
-
-    Args:
-        session (DbSession): The database session.
-        form_data (OAuth2PasswordRequestForm): The login form data.
-
-    Returns:
-        Token: The access token for the logged-in user.
-
-    Raises:
-        HTTPException: If the email or password is incorrect or an internal server error occurs.
+    Log in an already registered user by providing an email and password.
     """
     logging.info(f"User login attempt with email {form_data.username}")
     # Query the user based on email
@@ -135,17 +116,8 @@ async def login(session: DbSession, form_data: OAuth2PasswordRequestForm = Depen
 async def verify(token: str, session: DbSession):
     """
     Verify a user's token.
+    """ 
 
-    Args:
-        token (str): The access token.
-        session (DbSession): The database session.
-
-    Returns:
-        dict: The user's email.
-
-    Raises:
-        HTTPException: If the user is not found.
-    """
     logging.info(f"Verifying token")
     payload = decode_access_token(token)
     uuid = payload.get("id")
@@ -163,14 +135,9 @@ async def verify(token: str, session: DbSession):
 @router.get("/me", response_model=UserOutput)
 async def read_users_me(current_user: User = Depends(get_current_user)):
     """
-    Get the current logged-in user's details.
-
-    Args:
-        current_user (User): The current logged-in user.
-
-    Returns:
-        UserOutput: The current user's details.
+    Get the currently authenticated user's details using their access token.
     """
+
     logging.info(f"Fetching current user {current_user.id}")
     return current_user
 
@@ -186,19 +153,7 @@ async def users_update(
     user_id: int = Path(..., description="The ID of the user to update"),
 ):
     """
-    Update a user's details.
-
-    Args:
-        user_id (int): The ID of the user to update.
-        user_update (UserUpdate): The updated user details.
-        session (DbSession): The database session.
-        current_user (User): The current logged-in user.
-
-    Returns:
-        UserOutput: The updated user's details.
-
-    Raises:
-        HTTPException: If the user is not authorized to update the details or if the user is not found.
+    Update a user's account global variables, including Discord and Slack webhooks.
     """
     logging.info(f"Updating user {user_id}")
     # Ensure the user is updating their own information
@@ -238,15 +193,6 @@ async def users_delete(user_id: int = Path(..., description="The ID of the user 
 """
 """
     Delete a user by ID.
-
-    Args:
-        user_id (int): The ID of the user to delete.
-
-    Returns:
-        Response: A response with status code 204.
-
-    Raises:
-        HTTPException: If the user is not found.
 """
 
 """

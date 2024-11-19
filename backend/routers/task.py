@@ -26,10 +26,15 @@ TaskData = Annotated[Task, Depends(get_task)]
 logging.basicConfig(level=logging.INFO)
 
 # Create a new task
-@router.post("", response_model=TaskGet, status_code=201)
+@router.post("", response_model=TaskGet, status_code=status.HTTP_201_CREATED)
 async def tasks_create(
     task_create: TaskCreate, session: DbSession, scheduler: SchedulerDep, user: UserData
 ):
+    """
+    Create a new task for the currently authenticated user.
+    """
+    logging.info(f"Creating task for user {user.id}")
+
     task = Task(**task_create.model_dump(), user_id=user.id)
     session.add(task)
     session.commit()
@@ -42,15 +47,9 @@ async def tasks_create(
 @router.get("", response_model=List[TaskGet])
 async def tasks_list(session: DbSession, user: UserData):
     """
-    List all tasks for the current user.
-
-    Args:
-        session (DbSession): The database session.
-        user (UserData): The current logged-in user.
-
-    Returns:
-        List[TaskGet]: A list of tasks for the current user.
+    List all tasks for the currently authenticated user.
     """
+
     logging.info(f"Listing tasks for user {user.id}")
     tasks = session.exec(select(Task).where(Task.user_id == user.id)).all()
     return tasks
@@ -64,6 +63,11 @@ async def tasks_update(
     session: DbSession,
     scheduler: SchedulerDep,
 ):
+    """
+    Update a task by ID which belongs to the currently authenticated user.
+    """
+    logging.info(f"Updating task {task_id}")
+
     task = session.get(Task, task_id)
     update_data = task_update.model_dump(exclude_unset=True)
     for key, value in update_data.items():
@@ -79,6 +83,10 @@ async def tasks_update(
 # Delete task by id
 @router.delete("/{task_id}", status_code=204)
 async def tasks_delete(task_id: TaskData, session: DbSession, scheduler: SchedulerDep):
+    """
+    Delete a task by ID which belongs to the currently authenticated user.
+    """
+
     task = session.get(Task, task_id)
     session.delete(task)
     session.commit()
