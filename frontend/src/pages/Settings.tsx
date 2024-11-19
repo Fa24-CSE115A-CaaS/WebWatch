@@ -48,30 +48,24 @@ const Settings = () => {
       const password_reset_password = document.querySelector('input[name="password-reset-password"]') as HTMLInputElement;
       const password_reset_confirm_password = document.querySelector('input[name="password-reset-confirm-password"]') as HTMLInputElement;
       const password_reset_error_message = document.getElementById('password-reset-error-message') as HTMLParagraphElement;
+      const status_changer_error = (message: string) => {
+        password_reset_password.classList.add("border-error");
+        password_reset_confirm_password.classList.add("border-error");
+        password_reset_error_message.innerText = message;
+      }
+
       if (password_reset_password.value !== password_reset_confirm_password.value) {
-        password_reset_password.classList.add("border-error");
-        password_reset_confirm_password.classList.add("border-error");
-        password_reset_error_message.innerText = "Passwords do not match";
+        status_changer_error("Passwords do not match");
       } else if (password_reset_password.value.length < 8) {
-        password_reset_password.classList.add("border-error");
-        password_reset_confirm_password.classList.add("border-error");
-        password_reset_error_message.innerText = "Password must be at least 8 characters";
+        status_changer_error("Password must be at least 8 characters long");
       } else if (!password_reset_confirm_password.value.match(/[0-9]/)) {
-        password_reset_password.classList.add("border-error");
-        password_reset_confirm_password.classList.add("border-error");
-        password_reset_error_message.innerText = "Password must contain at least one number";
+        status_changer_error("Password must contain at least one number");
       } else if (!password_reset_confirm_password.value.match(/[a-z]/)) {
-        password_reset_password.classList.add("border-error");
-        password_reset_confirm_password.classList.add("border-error");
-        password_reset_error_message.innerText = "Password must contain at least one lowercase letter";
+        status_changer_error("Password must contain at least one lowercase letter");
       } else if (!password_reset_confirm_password.value.match(/[A-Z]/)) {
-        password_reset_password.classList.add("border-error");
-        password_reset_confirm_password.classList.add("border-error");
-        password_reset_error_message.innerText = "Password must contain at least one uppercase letter";
+        status_changer_error("Password must contain at least one uppercase letter");
       } else if (!password_reset_confirm_password.value.match(/[A-Za-z0-9]/)) {
-        password_reset_password.classList.add("border-error");
-        password_reset_confirm_password.classList.add("border-error");
-        password_reset_error_message.innerText = "Password must contain at least one special character";
+        status_changer_error("Password must contain at least one special character");
       }
       else {
         password_reset_password.classList.remove("border-error");
