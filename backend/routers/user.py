@@ -156,11 +156,7 @@ async def delete_user(
     session: DbSession, current_user: UserData, scheduler: SchedulerDep
 ):
     user = session.get(User, current_user.id)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
-
+    
     # Query and delete all tasks associated with the user
     tasks = session.exec(select(Task).where(Task.user_id == user.id)).all()
     for task in tasks:
