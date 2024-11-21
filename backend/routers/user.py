@@ -116,39 +116,24 @@ async def verify(token: str, session: DbSession):
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
-
-<<<<<<< HEAD
-@router.put(
-    "/{user_id}",
-    response_model=UserOutput,
-)
 async def users_update(
     user_id: int,
     user_update: UserUpdate,
     session: DbSession,
     current_user=Depends(get_current_user),
 ):
-    # Ensure the user is updating their own information
     if user_id != current_user.id:
         raise HTTPException(
             status_code=403, detail="Not authorized to update this user"
         )
-=======
-        # Update fields that are provided in the request
-        update_data = user_update.dict(exclude_unset=True)
-        for key, value in update_data.items():
-            setattr(user, key, value)
->>>>>>> 3ecfa4e568e047a03ce9f8d48a4a582dbe391747
 
-    # Query the user again within the same session
     user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Update fields that are provided in the request
     update_data = user_update.model_dump(
         exclude_unset=True
-    )  # Exclude fields that weren't provided
+    )  
     for key, value in update_data.items():
         setattr(user, key, value)
     try:
@@ -160,25 +145,17 @@ async def users_update(
         raise HTTPException(status_code=500, detail="Internal server error")
     return user
 
-
-<<<<<<< HEAD
-=======
 @router.post("/forgot_password", status_code=status.HTTP_200_OK)
 async def forgot_password(user_email: PasswordReset):
     try:
         with db.get_session() as session:
-            # Look up the user by email
             user = session.exec(select(User).where(User.email == user_email.email)).first()
             if not user:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-            # Generate a password reset token using the user's UUID
             reset_token = create_access_token(data={"id": user.token_uuid})
-
-            # Construct the reset link
+            
             reset_link = f"http://localhost:8001/reset-password?token={reset_token}"
-
-            # Send the reset link via email
             send_password_reset_email(user_email.email, reset_link)
 
         return {"detail": "Password reset email sent successfully"}
@@ -200,14 +177,12 @@ async def reset_password(reset_request: PasswordResetRequest):
                 detail="Invalid or expired reset link"
             )
 
-        # Ensure new password and confirm password match
         if reset_request.new_password != reset_request.confirm_password:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="New password and confirm password do not match"
             )
 
-        # Get user by UUID from token payload
         email = payload.get("email")
         with db.get_session() as session:
             user = session.exec(select(User).where(User.email == email)).first()
@@ -217,7 +192,6 @@ async def reset_password(reset_request: PasswordResetRequest):
                     detail="User not found"
                 )
 
-            # Update user's password
             user.password_hash = get_hashed_password(reset_request.new_password)
             session.add(user)
             session.commit()
@@ -230,7 +204,6 @@ async def reset_password(reset_request: PasswordResetRequest):
             detail="An unexpected error occurred"
         )
 
->>>>>>> 3ecfa4e568e047a03ce9f8d48a4a582dbe391747
 """
 # Delete a user by id
 @router.delete("{user_id}")
@@ -249,7 +222,3 @@ async def users_delete(user_id: int):
         session.commit()
     return Response(status_code=204)
 """
-<<<<<<< HEAD
-=======
-
->>>>>>> 3ecfa4e568e047a03ce9f8d48a4a582dbe391747
