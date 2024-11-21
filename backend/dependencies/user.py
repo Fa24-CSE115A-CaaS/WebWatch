@@ -25,7 +25,6 @@ async def get_user(session: DbSession, token: str = Depends(oauth2_scheme)):
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    print(f"{token} token \n\n")
     try:
         payload = decode_access_token(token)
         print(f"{payload} token \n\n")
@@ -34,7 +33,6 @@ async def get_user(session: DbSession, token: str = Depends(oauth2_scheme)):
             raise credentials_exception
         
         user = session.exec(select(User).where(User.token_uuid == token_uuid)).first()
-        print(f"{user}\n\n")
         if user is None:
             raise credentials_exception
 

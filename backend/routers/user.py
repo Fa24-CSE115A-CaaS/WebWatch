@@ -1,34 +1,41 @@
-<<<<<<< HEAD
+# Third-party imports
 from typing import Annotated
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlmodel import select, Session
-from schemas.user import UserRegister, UserUpdate, UserOutput, User, Token
-=======
-from fastapi import APIRouter, HTTPException, status, Depends, Cookie
-from sqlmodel import SQLModel, select, Session
-from schemas.user import UserRegister, UserLogin, UserUpdate, UserOutput, User, Token, PasswordReset, PasswordResetRequest
->>>>>>> 3ecfa4e568e047a03ce9f8d48a4a582dbe391747
+
+# Local module imports
+from schemas.user import (
+    UserRegister,
+    UserUpdate,
+    UserOutput,
+    User,
+    Token,
+    PasswordResetSchema,
+    PasswordResetReq,
+    DeleteAccountReq,
+)
 from auth_password import get_hashed_password, verify_password
-from utils.notifications import send_password_reset_email
 from auth_token import (
     create_access_token,
     decode_access_token,
-    get_current_user,
-    verify_reset_token,
-)  # , create_refresh_token
+)
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-
+from utils.notifications import send_password_reset_email
 from database import Database
+from dependencies.user import get_user
 import os
+
+### USER ENDPOINTS ###
 
 db = Database(mode=os.getenv("ENV"))
 
 router = APIRouter(
     prefix="/users",
 )
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/login")
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/login")
 DbSession = Annotated[Session, Depends(db.get_session)]
+UserData = Annotated[User, Depends(get_user)]
 
 
 @router.post(
@@ -41,14 +48,13 @@ DbSession = Annotated[Session, Depends(db.get_session)]
     },
 )
 async def create_user(user: UserRegister, session: DbSession):
-    # Check if user already exists
+
     existing_user = session.exec(select(User).where(User.email == user.email)).first()
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="Email already registered"
         )
 
-    # Hash the password and create a new user
     hashed_password = get_hashed_password(user.password)
     new_user = User(email=user.email, password_hash=hashed_password)
 
@@ -63,7 +69,6 @@ async def create_user(user: UserRegister, session: DbSession):
             detail="Internal server error",
         )
 
-    # Generate token to sign in user
     user = session.exec(select(User).where(User.email == user.email)).first()
     access_token = create_access_token(
         data={"id": user.token_uuid},
@@ -71,7 +76,6 @@ async def create_user(user: UserRegister, session: DbSession):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-# Authenticates existing user
 @router.post(
     "/login",
     status_code=status.HTTP_200_OK,
@@ -113,27 +117,34 @@ async def verify(token: str, session: DbSession):
 
 
 @router.get("/me", response_model=UserOutput)
-async def read_users_me(current_user: User = Depends(get_current_user)):
-    return current_user
+async def read_users_me(current_user_id: UserData, session: DbSession):
+    user = session.exec(select(User).where(User.id == current_user_id)).first()
+    return user
 
+
+@router.put(
+    "/{user_id}",
+    response_model=UserOutput,
+)
 async def users_update(
     user_id: int,
     user_update: UserUpdate,
     session: DbSession,
-    current_user=Depends(get_current_user),
+    current_user_id = UserData,
 ):
+    # Ensure the user is updating their own information
     if user_id != current_user.id:
         raise HTTPException(
             status_code=403, detail="Not authorized to update this user"
         )
 
+    # Query the user again within the same session
     user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    update_data = user_update.model_dump(
-        exclude_unset=True
-    )  
+    # Update fields that are provided in the request
+    update_data = user_update.model_dump(xclude_unset=True) 
     for key, value in update_data.items():
         setattr(user, key, value)
     try:
@@ -145,80 +156,54 @@ async def users_update(
         raise HTTPException(status_code=500, detail="Internal server error")
     return user
 
-@router.post("/forgot_password", status_code=status.HTTP_200_OK)
-async def forgot_password(user_email: PasswordReset):
+# Sends an email with a login link for password reset
+@router.post("/email_auth", status_code=status.HTTP_200_OK)
+async def email_auth(user_email: PasswordResetSchema, session: DbSession):
     try:
-        with db.get_session() as session:
-            user = session.exec(select(User).where(User.email == user_email.email)).first()
-            if not user:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        user = session.exec(select(User).where(User.email == user_email.email)).first()
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            )
 
-            reset_token = create_access_token(data={"id": user.token_uuid})
-            
-            reset_link = f"http://localhost:8001/reset-password?token={reset_token}"
-            send_password_reset_email(user_email.email, reset_link)
-
-        return {"detail": "Password reset email sent successfully"}
+        reset_token = create_access_token(
+            data={"id": user.token_uuid}
+        )  # Generate a password reset token
+        reset_link = f"{os.getenv("FRONTEND_URL")}/auth/email_auth?token={reset_token}"
+        send_password_reset_email(user_email.email, reset_link)
+        return {"detail": "Email login link sent successfully"}
     except Exception as e:
+        session.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred while sending the password reset email"
+            detail="An unexpected error occurred while sending the password reset email",
         )
-         
-@router.post("/reset-password", status_code=status.HTTP_200_OK)
-async def reset_password(reset_request: PasswordResetRequest):
+
+
+# Resets the user's password after validating the request.
+@router.post("/reset_password", status_code=status.HTTP_200_OK)
+async def reset_password(reset_request: PasswordResetReq, session: DbSession, current_user_id: UserData):
+    if reset_request.new_password != reset_request.confirm_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password and confirm password do not match",
+        )
+
+    user = session.get(User, current_user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
     try:
-        payload = verify_reset_token(token=reset_request.reset_token)
-        print(payload + "\n\n")
-
-        if payload is None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid or expired reset link"
-            )
-
-        if reset_request.new_password != reset_request.confirm_password:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="New password and confirm password do not match"
-            )
-
-        email = payload.get("email")
-        with db.get_session() as session:
-            user = session.exec(select(User).where(User.email == email)).first()
-            if not user:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, 
-                    detail="User not found"
-                )
-
-            user.password_hash = get_hashed_password(reset_request.new_password)
-            session.add(user)
-            session.commit()
-            session.refresh(user)
-
+        user.password_hash = get_hashed_password(reset_request.new_password)
+        session.add(user)
+        session.commit()
+        session.refresh(user)
         return {"detail": "Password reset successful"}
     except Exception as e:
+        session.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
+            detail="An unexpected error occurred",
         )
-
-"""
-# Delete a user by id
-@router.delete("{user_id}")
-async def users_delete(user_id: int):
-    with db.get_session() as session:
-        user = session.get(User, user_id)
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        # Delete all tasks associated with the user
-        tasks = session.exec(select(Task).where(Task.user_id == user_id)).all()
-        for task in tasks:
-            session.delete(task)
-
-        session.delete(user)
-        session.commit()
-    return Response(status_code=204)
-"""
