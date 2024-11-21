@@ -42,6 +42,16 @@ def decode_access_token(token: str) -> dict:
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+# Function to verify the token
+def verify_reset_token(token: str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+        if user_token_uuid is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        return user_token_uuid
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Token has expired or is invalid")
 
 # Used with FastAPI Depends to get the current user and protect other routes
 async def get_current_user(session: DbSession, token: str = Depends(oauth2_scheme)):
