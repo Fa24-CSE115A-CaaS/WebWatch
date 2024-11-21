@@ -140,8 +140,6 @@ async def users_update(
 
     # Query the user again within the same session
     user = session.get(User, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
 
     # Update fields that are provided in the request
     update_data = user_update.model_dump(xclude_unset=True) 
@@ -168,7 +166,7 @@ async def email_auth(user_email: PasswordResetSchema, session: DbSession):
 
         reset_token = create_access_token(
             data={"id": user.token_uuid}
-        )  # Generate a password reset token
+        )  
         reset_link = f"{os.getenv("FRONTEND_URL")}/auth/email_auth?token={reset_token}"
         send_password_reset_email(user_email.email, reset_link)
         return {"detail": "Email login link sent successfully"}
@@ -190,10 +188,6 @@ async def reset_password(reset_request: PasswordResetReq, session: DbSession, cu
         )
 
     user = session.get(User, current_user_id)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
 
     try:
         user.password_hash = get_hashed_password(reset_request.new_password)
