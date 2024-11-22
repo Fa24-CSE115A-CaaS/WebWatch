@@ -48,7 +48,7 @@ def send_discord_msg(webhook_url, message):
                     "url": "https://webwatch.live",
                 },
                 "description": message,
-                "color": 0x00b0f4,
+                "color": 0x00B0F4,
                 "footer": {"text": "WebWatch.live"},
                 "timestamp": datetime.utcnow().isoformat(),
             }
@@ -105,4 +105,3 @@ def send_password_reset_email(recipient_email: str, reset_link: str):
         print("Email login link sent successfully.")
     except Exception as e:
         print(f"Error sending email login link: {e}")
-        
