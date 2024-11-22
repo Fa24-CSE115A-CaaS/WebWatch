@@ -161,6 +161,7 @@ async def users_update(
         raise HTTPException(status_code=500, detail="Internal server error")
     return user
 
+
 @router.delete("/delete")
 async def delete_user(
     session: DbSession, current_user: UserData, scheduler: SchedulerDep
@@ -181,7 +182,8 @@ async def delete_user(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error deleting user",
         )
-    return {"detail": "User and associated tasks deleted successfully"} 
+    return {"detail": "User and associated tasks deleted successfully"}
+
 
 @router.post("/email_auth", status_code=status.HTTP_200_OK)
 async def email_auth(user_email: PasswordReset, session: DbSession):
