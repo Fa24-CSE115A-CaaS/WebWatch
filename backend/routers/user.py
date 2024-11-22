@@ -11,6 +11,7 @@ from schemas.user import (
     PasswordResetRequest,
     DeleteAccountRequest,
 )
+from schemas.task import Task
 from auth_password import get_hashed_password, verify_password
 from auth_token import (
     create_access_token,
@@ -22,6 +23,8 @@ from utils.notifications import send_password_reset_email
 
 from database import Database
 import logging
+from scheduler import Scheduler, get_scheduler
+from routers.task import tasks_delete
 import os
 
 db = Database(mode=os.getenv("ENV"))
@@ -32,6 +35,8 @@ router = APIRouter(
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/login")
 
 DbSession = Annotated[Session, Depends(db.get_session)]
+SchedulerDep = Annotated[Scheduler, Depends(get_scheduler)]
+UserData = Annotated[User, Depends(get_current_user)]
 
 
 @router.post(
@@ -156,6 +161,27 @@ async def users_update(
         raise HTTPException(status_code=500, detail="Internal server error")
     return user
 
+@router.delete("/delete")
+async def delete_user(
+    session: DbSession, current_user: UserData, scheduler: SchedulerDep
+):
+    user = session.get(User, current_user.id)
+
+    # Query and delete all tasks associated with the user
+    tasks = session.exec(select(Task).where(Task.user_id == user.id)).all()
+    for task in tasks:
+        await tasks_delete(task.id, session, scheduler)
+
+    try:
+        session.delete(user)
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error deleting user",
+        )
+    return {"detail": "User and associated tasks deleted successfully"} 
 
 @router.post("/email_auth", status_code=status.HTTP_200_OK)
 async def email_auth(user_email: PasswordReset, session: DbSession):
@@ -203,17 +229,3 @@ async def reset_password(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred",
         )
-
-
-@router.delete("/delete")
-async def delete_user(session: DbSession, current_user=Depends(get_current_user)):
-    try:
-        session.delete(current_user)
-        session.commit()
-    except Exception as e:
-        session.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error deleting user",
-        )
-    return {"detail": "User deleted successfully"}
