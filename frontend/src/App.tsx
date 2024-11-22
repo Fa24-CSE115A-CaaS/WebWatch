@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import Guide from "./pages/Guide";
 import Settings from "./pages/Settings";
 import Tasks from "./pages/Tasks";
+import EmailAuth from "./components/EmailAuth";
 import Test from "./pages/Test";
 
 const router = createBrowserRouter([
@@ -21,7 +22,6 @@ const router = createBrowserRouter([
       </>
     ),
   },
-  // Auth protected route
   {
     path: "/auth/login",
     element: (
@@ -31,13 +31,21 @@ const router = createBrowserRouter([
       </>
     ),
   },
-  // Auth protected route
   {
     path: "/auth/register",
     element: (
       <>
         <NavBar />
         <Auth isLogin={false} />
+      </>
+    ),
+  },
+  {
+    path: "/auth/email_auth",
+    element: (
+      <>
+        <NavBar />
+        <EmailAuth />
       </>
     ),
   },
