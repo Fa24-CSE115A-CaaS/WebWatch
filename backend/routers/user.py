@@ -205,8 +205,6 @@ async def reset_password(reset_request: PasswordResetReq, session: DbSession, cu
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred",
         )
-<<<<<<< HEAD
-
 
 """ @router.put(
     "/{user_id}",
@@ -240,5 +238,3 @@ async def users_update(
         raise HTTPException(status_code=500, detail="Internal server error")
     return user
  """
-=======
->>>>>>> de65cd570fb9e2420d7815d745216112764f00c7
