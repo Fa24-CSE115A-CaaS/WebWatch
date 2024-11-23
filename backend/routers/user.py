@@ -133,13 +133,13 @@ async def users_update(
     current_user_id = UserData,
 ):
     # Ensure the user is updating their own information
-    if user_id != current_user.id:
+    if user_id != current_user_id:
         raise HTTPException(
             status_code=403, detail="Not authorized to update this user"
         )
 
     # Query the user again within the same session
-    user = session.get(User, user_id)
+    user = session.get(User, current_user_id)
 
     # Update fields that are provided in the request
     update_data = user_update.model_dump(xclude_unset=True) 
@@ -153,6 +153,7 @@ async def users_update(
         session.rollback()
         raise HTTPException(status_code=500, detail="Internal server error")
     return user
+
 
 # Sends an email with a login link for password reset
 @router.post("/email_auth", status_code=status.HTTP_200_OK)
