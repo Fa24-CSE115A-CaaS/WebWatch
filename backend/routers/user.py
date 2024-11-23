@@ -129,6 +129,7 @@ async def read_users_me(current_user_id: UserData, session: DbSession):
     return user
 
 
+# Sends an email with a login link for password reset
 @router.post("/email_auth", status_code=status.HTTP_200_OK)
 async def email_auth(user_email: PasswordReset, session: DbSession):
     try:
@@ -175,7 +176,6 @@ async def reset_password(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred",
         )
-
 
 @router.delete("/delete")
 async def delete_user(
