@@ -1,7 +1,7 @@
 import useAuth from "../hooks/useAuth";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaUserCircle } from "react-icons/fa";
+// import { FaUserCircle } from "react-icons/fa";
 
 import { axios } from "../config";
 
