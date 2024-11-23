@@ -154,6 +154,7 @@ async def users_update(
         raise HTTPException(status_code=500, detail="Internal server error")
     return user
 
+
 # Sends an email with a login link for password reset
 @router.post("/email_auth", status_code=status.HTTP_200_OK)
 async def email_auth(user_email: PasswordResetSchema, session: DbSession):
