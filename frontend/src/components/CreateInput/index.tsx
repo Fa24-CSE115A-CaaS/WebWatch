@@ -17,6 +17,8 @@ import {
 // Util
 import { axios } from "../../config";
 import { TasksPageContext } from "../../pages/Tasks";
+// Context
+import { NotificationContext } from "../../hooks/useNotification";
 
 const defaultState: FormState = {
   url: "",
@@ -29,6 +31,7 @@ const CreateInput = () => {
   const { tasks, setTasks } = useContext(TasksPageContext)!;
   const { open, setOpen, containerRef } = usePopup();
   const [formState, setFormState] = useState<FormState>(defaultState);
+  const addNotification = useContext(NotificationContext);
 
   const isFormValid = () => {
     const { url, name, interval } = formState;
@@ -36,6 +39,10 @@ const CreateInput = () => {
 
     if (url.trim().length <= 0) {
       errors.url = "Please provide a url";
+      addNotification({
+        type: "ERROR",
+        message: errors.url,
+      });
     }
 
     if (name.trim().length <= 0) {
@@ -81,6 +88,10 @@ const CreateInput = () => {
         const data = res.data as TaskResponse;
         setFormState({ ...defaultState });
         setOpen(false);
+        addNotification({
+          type: "SUCCESS",
+          message: "Created a new task",
+        });
         setTasks([
           ...tasks,
           {
@@ -95,7 +106,12 @@ const CreateInput = () => {
           },
         ]);
       }
-    } catch {}
+    } catch {
+      addNotification({
+        type: "ERROR",
+        message: "An unexpected error occurred. Please try again later.",
+      });
+    }
   };
 
   return (

@@ -14,6 +14,8 @@ import {
   MAXIMUM_INTERVAL_SECONDS,
   MINIMUM_INTERVAL_SECONDS,
 } from "../../constants/tasks";
+// Context
+import { NotificationContext } from "../../hooks/useNotification";
 
 const NOTIFICATION_OPTS = ["EMAIL", "DISCORD", "SLACK"];
 
@@ -28,6 +30,7 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
     interval: task.interval,
     errors: {},
   });
+  const addNotification = useContext(NotificationContext);
 
   const { name, url, notificationOptions, discordUrl, slackUrl, interval } =
     formState;
@@ -73,40 +76,51 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
       return;
     }
 
-    const response = await axios.put(
-      `/tasks/${task.id}`,
-      {
-        name,
-        url,
-        enabled_notification_options: notificationOptions,
-        interval,
-        discord_url: discordUrl,
-        slack_url: slackUrl,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+    try {
+      const response = await axios.put(
+        `/tasks/${task.id}`,
+        {
+          name,
+          url,
+          enabled_notification_options: notificationOptions,
+          interval,
+          discord_url: discordUrl,
+          slack_url: slackUrl,
         },
-      },
-    );
-
-    if (response.status === 200) {
-      setTasks(
-        tasks.map((t) => {
-          if (t.id !== task.id) {
-            return t;
-          }
-          return {
-            ...t,
-            name,
-            url,
-            enabledNotificationOptions: notificationOptions,
-            interval,
-            discordUrl,
-          } as Task;
-        }),
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        },
       );
-      closeModal();
+
+      if (response.status === 200) {
+        setTasks(
+          tasks.map((t) => {
+            if (t.id !== task.id) {
+              return t;
+            }
+            return {
+              ...t,
+              name,
+              url,
+              enabledNotificationOptions: notificationOptions,
+              interval,
+              discordUrl,
+            } as Task;
+          }),
+        );
+        closeModal();
+        addNotification({
+          type: "SUCCESS",
+          message: `Modified task: ${task.name}`,
+        });
+      }
+    } catch {
+      addNotification({
+        type: "ERROR",
+        message: "An unexpected error occurred. Please try again later.",
+      });
     }
   };
 
@@ -197,7 +211,9 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
                 );
               })}
               {formState.errors.notificationOptions && (
-                <p>{formState.errors.notificationOptions}</p>
+                <p className="text-sm text-error">
+                  {formState.errors.notificationOptions}
+                </p>
               )}
             </div>
             <Input

@@ -19,6 +19,8 @@ export default {
         border: "var(--border)",
         error: "var(--error)",
         info: "var(--info)",
+        success: "var(--success)",
+        warning: "var(--warning)",
         text: "var(--text)",
         "text-contrast": "var(--text-contrast)",
       },
