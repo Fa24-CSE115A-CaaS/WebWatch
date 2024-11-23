@@ -121,9 +121,6 @@ async def read_users_me(current_user_id: UserData, session: DbSession):
     user = session.exec(select(User).where(User.id == current_user_id)).first()
     return user
 
-
-<<<<<<< HEAD
-=======
 @router.put(
     "/{user_id}",
     response_model=UserOutput,
