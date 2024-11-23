@@ -48,7 +48,6 @@ UserData = Annotated[User, Depends(get_user)]
     },
 )
 async def create_user(user: UserRegister, session: DbSession):
-
     existing_user = session.exec(select(User).where(User.email == user.email)).first()
     if existing_user:
         raise HTTPException(
@@ -122,42 +121,6 @@ async def read_users_me(current_user_id: UserData, session: DbSession):
     return user
 
 
-<<<<<<< HEAD
-=======
-@router.put(
-    "/{user_id}",
-    response_model=UserOutput,
-)
-async def users_update(
-    user_id: int,
-    user_update: UserUpdate,
-    session: DbSession,
-    current_user_id = UserData,
-):
-    # Ensure the user is updating their own information
-    if user_id != current_user_id:
-        raise HTTPException(
-            status_code=403, detail="Not authorized to update this user"
-        )
-
-    # Query the user again within the same session
-    user = session.get(User, current_user_id)
-
-    # Update fields that are provided in the request
-    update_data = user_update.model_dump(xclude_unset=True) 
-    for key, value in update_data.items():
-        setattr(user, key, value)
-    try:
-        session.add(user)
-        session.commit()
-        session.refresh(user)
-    except Exception as e:
-        session.rollback()
-        raise HTTPException(status_code=500, detail="Internal server error")
-    return user
-
-
->>>>>>> de65cd570fb9e2420d7815d745216112764f00c7
 # Sends an email with a login link for password reset
 @router.post("/email_auth", status_code=status.HTTP_200_OK)
 async def email_auth(user_email: PasswordResetSchema, session: DbSession):
@@ -205,7 +168,6 @@ async def reset_password(reset_request: PasswordResetReq, session: DbSession, cu
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred",
         )
-<<<<<<< HEAD
 
 
 """ @router.put(
@@ -240,5 +202,3 @@ async def users_update(
         raise HTTPException(status_code=500, detail="Internal server error")
     return user
  """
-=======
->>>>>>> de65cd570fb9e2420d7815d745216112764f00c7
