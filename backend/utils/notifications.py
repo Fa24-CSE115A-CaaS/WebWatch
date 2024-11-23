@@ -38,6 +38,7 @@ def send_mail(subject: str, message: str, recipients: list[str]):
 def send_discord_msg(webhook_url, message):
     requests.post(webhook_url, data={"content": message})
 
+
 def send_password_reset_email(recipient_email: str, reset_link: str):
     load_dotenv()
 

@@ -153,7 +153,6 @@ async def email_auth(user_email: PasswordReset, session: DbSession):
         )
 
 
-
 # Resets the user's password after validating the request.
 @router.post("/reset_password", status_code=status.HTTP_200_OK)
 async def reset_password(
@@ -177,6 +176,7 @@ async def reset_password(
             detail="An unexpected error occurred",
         )
 
+
 @router.delete("/delete")
 async def delete_user(
     session: DbSession, current_user: UserData, scheduler: SchedulerDep
@@ -198,6 +198,7 @@ async def delete_user(
             detail="Error deleting user",
         )
     return {"detail": "User and associated tasks deleted successfully"}
+
 
 """ @router.put(
     "/{user_id}",
