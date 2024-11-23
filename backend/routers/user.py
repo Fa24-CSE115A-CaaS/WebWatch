@@ -199,7 +199,7 @@ async def delete_user(
         )
     return {"detail": "User and associated tasks deleted successfully"}
 
-@router.put(
+""" @router.put(
     "/{user_id}",
     response_model=UserOutput,
 )
@@ -234,3 +234,4 @@ async def users_update(
         session.rollback()
         raise HTTPException(status_code=500, detail="Internal server error")
     return user
+ """
