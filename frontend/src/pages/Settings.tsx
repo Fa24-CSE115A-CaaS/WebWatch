@@ -19,13 +19,16 @@ const Settings = () => {
   };
 
   return (
-<div className="mx-auto mt-8 min-h-screen w-full lg:w-1/2 rounded text-text">
-  <div className="flex flex-col lg:flex-row">
-    {/* Column 1 - Sidebar*/}
+<div className="mx-auto mt-8 min-h-screen w-full rounded text-text">
+  <div
+    className="flex lg:flex-row flex-nowrap overflow-x-auto"
+    style={{ minWidth: "100%" }} // Ensure content stays side-by-side
+  >
+    {/* Column 1 - Sidebar */}
     <nav
-      className="min-h-screen w-full lg:w-1/4 overflow-hidden rounded-l-xl border-2 border-solid
+      className="min-h-screen w-full lg:w-[20%] overflow-hidden rounded-l-xl border-2 border-solid
         border-border bg-secondary text-left"
-      style={{ minWidth: "200px" }} // Minimum width for sidebar
+      style={{ minWidth: "180px" }} // Adjusted minimum width for the sidebar
     >
       <div
         className="rounded-tl-xl"
@@ -77,7 +80,8 @@ const Settings = () => {
 
     {/* Column 2 */}
     <div
-      className="w-full lg:w-3/4 rounded-r-xl border-y-2 border-r-2 border-solid border-border bg-primary"
+      className="w-full lg:w-[75%] rounded-r-xl border-y-2 border-r-2 border-solid border-border bg-primary overflow-x-auto"
+      style={{ minWidth: "300px" }} // Prevent column 2 from shrinking below a certain width
     >
       <div className="m-5 px-10 py-6">
         {activeTab === "vertical-tab-1" && (
@@ -142,6 +146,8 @@ const Settings = () => {
     </div>
   </div>
 </div>
+
+
 
   );
 };
