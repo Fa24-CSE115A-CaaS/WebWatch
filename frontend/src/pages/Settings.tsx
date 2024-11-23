@@ -110,6 +110,22 @@ const Settings = () => {
     }
   };
 
+  const handleAccountDeletionSubmission = () => {
+    axios.delete("/users/delete", {
+      headers: {
+        accept: "application/json",
+        "Authorization": "Bearer " + localStorage.getItem("access_token"),
+      },
+    }).then((response) => {
+      if (response.status === 200) {
+        localStorage.removeItem("access_token");
+        navigate("/auth/login");
+      }
+    }).catch(() => {
+      alert("Account deletion failed");
+    })
+  }
+
   return (
     <div className="mx-auto mt-8 min-h-screen w-1/2 rounded text-text">
       <div className="flex">
@@ -223,7 +239,7 @@ const Settings = () => {
                   </button>
                 </form>
                 <h2 className="my-8 mb-4 text-2xl">Danger Zone</h2>
-                <button className="rounded-lg bg-error px-3 py-2">
+                <button className="rounded-lg bg-error px-3 py-2" type="button" onClick={handleAccountDeletionSubmission}>
                   Delete my account
                 </button>
               </>
@@ -250,3 +266,4 @@ const Settings = () => {
 };
 
 export default Settings;
+
