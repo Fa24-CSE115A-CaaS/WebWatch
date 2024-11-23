@@ -17,10 +17,13 @@ import {
 } from "../../constants/time";
 // Util
 import { axios } from "../../config";
+// Context
+import { NotificationContext } from "../../hooks/useNotification";
 
 const Task: TaskComponent = ({ task, onEditModalOpen }) => {
   const { tasks, setTasks } = useContext(TasksPageContext)!;
   const { open, setOpen, containerRef } = usePopup();
+  const addNotification = useContext(NotificationContext);
 
   const toggleTask = async () => {
     try {
@@ -45,10 +48,16 @@ const Task: TaskComponent = ({ task, onEditModalOpen }) => {
             return t;
           }),
         );
+        addNotification({
+          type: "SUCCESS",
+          message: `${newEnabled ? "Started" : "Paused"} task: ${task.name}`,
+        });
       }
-    } catch (e) {
-      // TODO: Emit a global error
-      console.log(e);
+    } catch {
+      addNotification({
+        type: "ERROR",
+        message: "An unexpected error occurred. Please try again later.",
+      });
     }
   };
 
@@ -61,10 +70,16 @@ const Task: TaskComponent = ({ task, onEditModalOpen }) => {
       });
       if (response.status === 204) {
         setTasks([...tasks.filter((t) => t.id !== task.id)]);
+        addNotification({
+          type: "SUCCESS",
+          message: `Successfully deleted task`,
+        });
       }
-    } catch (e) {
-      // TODO: Emit a global error
-      console.log(e);
+    } catch {
+      addNotification({
+        type: "ERROR",
+        message: "An unexpected error occurred. Please try again later.",
+      });
     }
   };
 

@@ -31,7 +31,10 @@
   --accent: #7564d1;
   --accent-hover: #504492;
   --border: #cdcdcd;
+  --error: #ad2d2d;
+  --success: #3aab4e;
   --info: #5697d4;
+  --warning: #b5ab24;
   --text: #222222;
   --text-contrast: #eeeeee;
 }
@@ -44,7 +47,9 @@
   --accent-hover: #9488db;
   --border: #5d585f;
   --error: #e45050;
+  --success: #47cc60;
   --info: #abcbe9;
+  --warning: #d1ca49;
   --text: #eeeeee;
   --text-contrast: #222222;
 }
