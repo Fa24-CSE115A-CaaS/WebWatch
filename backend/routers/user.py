@@ -10,10 +10,11 @@ from schemas.user import (
     UserOutput,
     User,
     Token,
-    PasswordResetSchema,
-    PasswordResetReq,
-    DeleteAccountReq,
+    PasswordReset,
+    PasswordResetRequest,
+    DeleteAccountRequest,
 )
+from schemas.task import Task
 from auth_password import get_hashed_password, verify_password
 from auth_token import (
     create_access_token,
@@ -23,6 +24,12 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from utils.notifications import send_password_reset_email
 from database import Database
 from dependencies.user import get_user
+from routers.task import tasks_delete
+
+from database import Database
+import logging
+from scheduler import Scheduler, get_scheduler
+from routers.task import tasks_delete
 import os
 
 ### USER ENDPOINTS ###
@@ -36,6 +43,7 @@ router = APIRouter(
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/login")
 DbSession = Annotated[Session, Depends(db.get_session)]
 UserData = Annotated[User, Depends(get_user)]
+SchedulerDep = Annotated[Scheduler, Depends(get_scheduler)]
 
 
 @router.post(
@@ -121,9 +129,8 @@ async def read_users_me(current_user_id: UserData, session: DbSession):
     return user
 
 
-# Sends an email with a login link for password reset
 @router.post("/email_auth", status_code=status.HTTP_200_OK)
-async def email_auth(user_email: PasswordResetSchema, session: DbSession):
+async def email_auth(user_email: PasswordReset, session: DbSession):
     try:
         user = session.exec(select(User).where(User.email == user_email.email)).first()
         if not user:
@@ -133,7 +140,7 @@ async def email_auth(user_email: PasswordResetSchema, session: DbSession):
 
         reset_token = create_access_token(
             data={"id": user.token_uuid}
-        )  
+        )  # Generate a password reset token
         reset_link = f"{os.getenv("FRONTEND_URL")}/auth/email_auth?token={reset_token}"
         send_password_reset_email(user_email.email, reset_link)
         return {"detail": "Email login link sent successfully"}
@@ -145,24 +152,24 @@ async def email_auth(user_email: PasswordResetSchema, session: DbSession):
         )
 
 
+
 # Resets the user's password after validating the request.
 @router.post("/reset_password", status_code=status.HTTP_200_OK)
-async def reset_password(reset_request: PasswordResetReq, session: DbSession, current_user_id: UserData):
-    if reset_request.new_password != reset_request.confirm_password:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="New password and confirm password do not match",
-        )
-
-    user = session.get(User, current_user_id)
-
+async def reset_password(
+    reset_request: PasswordResetRequest,
+    session: DbSession,
+    current_user_id: UserData,
+):
     try:
+        user = session.get(User, current_user_id)
+
         user.password_hash = get_hashed_password(reset_request.new_password)
         session.add(user)
         session.commit()
         session.refresh(user)
         return {"detail": "Password reset successful"}
     except Exception as e:
+        logging.error(e)
         session.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -170,35 +177,25 @@ async def reset_password(reset_request: PasswordResetReq, session: DbSession, cu
         )
 
 
-""" @router.put(
-    "/{user_id}",
-    response_model=UserOutput,
-)
-async def users_update(
-    user_id: int,
-    user_update: UserUpdate,
-    session: DbSession,
-    current_user_id = UserData,
+@router.delete("/delete")
+async def delete_user(
+    session: DbSession, current_user: UserData, scheduler: SchedulerDep
 ):
-    # Ensure the user is updating their own information
-    if user_id != current_user_id:
-        raise HTTPException(
-            status_code=403, detail="Not authorized to update this user"
-        )
+    user = session.get(User, current_user)
 
-    # Query the user again within the same session
-    user = session.get(User, current_user_id)
+    # Query and delete all tasks associated with the user
+    tasks = session.exec(select(Task).where(Task.user_id == user.id)).all()
+    for task in tasks:
+        await tasks_delete(task.id, session, scheduler)
 
-    # Update fields that are provided in the request
-    update_data = user_update.model_dump(xclude_unset=True) 
-    for key, value in update_data.items():
-        setattr(user, key, value)
     try:
-        session.add(user)
+        session.delete(user)
         session.commit()
-        session.refresh(user)
     except Exception as e:
         session.rollback()
-        raise HTTPException(status_code=500, detail="Internal server error")
-    return user
- """
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error deleting user",
+        )
+    return {"detail": "User and associated tasks deleted successfully"}
+
