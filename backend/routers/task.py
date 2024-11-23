@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, HTTPException, status, Depends
 from schemas.task import Task, TaskCreate, TaskUpdate, TaskGet
 from sqlmodel import Session, select
 from typing import Annotated, List
@@ -38,10 +38,22 @@ async def tasks_list(session: DbSession, user: UserData):
     return tasks
 
 
-# Update task details by id
 @router.put("/{task_id}", response_model=TaskGet)
-async def tasks_update(task_id: TaskData, task_update: TaskUpdate, session: DbSession):
+async def tasks_update(
+    task_id: int, task_update: TaskUpdate, session: DbSession, user: UserData
+):
     task = session.get(Task, task_id)
+
+    if not task:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Task not found"
+        )
+    if task.user_id != user:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to update this task",
+        )
+
     update_data = task_update.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(task, key, value)

@@ -139,9 +139,7 @@ async def email_auth(user_email: PasswordReset, session: DbSession):
                 status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
 
-        reset_token = create_access_token(
-            data={"id": user.token_uuid}
-        )  # Generate a password reset token
+        reset_token = create_access_token(data={"id": user.token_uuid})
         reset_link = f"{os.getenv("FRONTEND_URL")}/auth/email_auth?token={reset_token}"
         send_password_reset_email(user_email.email, reset_link)
         return {"detail": "Email login link sent successfully"}
@@ -162,7 +160,6 @@ async def reset_password(
 ):
     try:
         user = session.get(User, current_user_id)
-
         user.password_hash = get_hashed_password(reset_request.new_password)
         session.add(user)
         session.commit()
