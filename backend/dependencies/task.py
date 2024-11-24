@@ -3,7 +3,7 @@ from typing import Annotated
 from sqlmodel import Session
 
 # Dependencies
-from auth_token import get_current_user
+from dependencies.user import get_user
 
 # Schemas
 from database import Database
@@ -14,7 +14,7 @@ import os
 db = Database(os.getenv("ENV"))
 
 DbSession = Annotated[Session, Depends(db.get_session)]
-UserData = Annotated[User, Depends(get_current_user)]
+UserData = Annotated[User, Depends(get_user)]
 
 
 async def get_task(user: UserData, session: DbSession, task_id: int = Path()):
@@ -23,7 +23,7 @@ async def get_task(user: UserData, session: DbSession, task_id: int = Path()):
     if not task:
         raise HTTPException(status_code=404, detail="No task found with the given id")
 
-    if task.user_id != user.id:
+    if task.user_id != user:
         raise HTTPException(
             status_code=403, detail="You do not have permission to access this task"
         )
