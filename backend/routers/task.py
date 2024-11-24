@@ -25,7 +25,9 @@ TaskData = Annotated[Task, Depends(get_task)]
 
 # Create a new task
 @router.post("", response_model=TaskGet, status_code=201)
-async def tasks_create(task_create: TaskCreate, session: DbSession, scheduler: SchedulerDep, user: UserData):
+async def tasks_create(
+    task_create: TaskCreate, session: DbSession, scheduler: SchedulerDep, user: UserData
+):
     task = Task(**task_create.model_dump(), user_id=user)
     session.add(task)
     session.commit()
@@ -43,7 +45,11 @@ async def tasks_list(session: DbSession, user: UserData):
 
 @router.put("/{task_id}", response_model=TaskGet)
 async def tasks_update(
-    task_id: int, task_update: TaskUpdate, session: DbSession, user: UserData, scheduler: SchedulerDep
+    task_id: int,
+    task_update: TaskUpdate,
+    session: DbSession,
+    user: UserData,
+    scheduler: SchedulerDep,
 ):
     task = session.get(Task, task_id)
 
