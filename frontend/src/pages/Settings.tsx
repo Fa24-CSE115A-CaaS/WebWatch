@@ -1,7 +1,7 @@
 import useAuth from "../hooks/useAuth";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaUserCircle } from "react-icons/fa";
+// import { FaUserCircle } from "react-icons/fa";
 
 import { axios } from "../config";
 
@@ -193,7 +193,7 @@ const Settings = () => {
               <>
                 <h1 className="mb-4 text-3xl">Account</h1>
                 <p className="mb-4">Change your account information</p>
-                <div className="mt-4 flex pb-4">
+                {/* <div className="mt-4 flex pb-4">
                   <FaUserCircle className="max-h-40 w-auto flex-shrink-0 rounded-full text-9xl" />
                   <div className="my-auto ml-4">
                     <h2 className="mb-2 text-xl">Profile Picture</h2>
@@ -207,7 +207,7 @@ const Settings = () => {
                       Remove
                     </button>
                   </div>
-                </div>
+                </div> */}
                 <form className="pb-4">
                   <label className="mb-2 block text-lg">Email</label>
                   <input
