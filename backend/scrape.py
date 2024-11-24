@@ -54,14 +54,13 @@ class WebScraper:
         # Add other necessary Chrome options
         options.add_argument("--no-sandbox")
         options.add_argument("--headless")
-        options.add_argument("--disable-dev-shm-usage")
-        options.add_argument("--disable-gpu")
-        options.add_argument("--disable-software-rasterizer")
-        options.add_argument("--disable-features=NetworkService")
-        options.add_argument("--disable-usb")
 
-        # Optional: Run in headless mode (can remove for debugging)
-        # options.add_argument("--headless")
+        # Disable images and videos
+        prefs = {
+            "profile.managed_default_content_settings.images": 2,
+            "profile.managed_default_content_settings.video": 2,
+        }
+        options.add_experimental_option("prefs", prefs)
 
         # Initialize WebDriver
         service = Service(self.webdriver_path)
@@ -70,11 +69,10 @@ class WebScraper:
 
     def load_page(self, url):
         self.driver.get(url)
-        time.sleep(3)  # Initial wait for the page to load
 
         # Wait until the <body> tag is present (ensure the page content is fully loaded)
         try:
-            WebDriverWait(self.driver, 10).until(
+            WebDriverWait(self.driver, 10).until(  # Timeout counter
                 EC.presence_of_element_located((By.TAG_NAME, "body"))
             )
             print("Page content loaded.")
@@ -83,29 +81,59 @@ class WebScraper:
 
     def scrape_all_text(self, url):
         try:
+            start_time = time.time()
+
             # Load the page
+            load_start_time = time.time()
             self.load_page(url)
+            load_end_time = time.time()
+            load_time_log = (
+                f"Time to load page: {load_end_time - load_start_time:.5f} seconds\n"
+            )
 
             # Get the page source and parse it with BeautifulSoup
+            parse_start_time = time.time()
             page_source = self.driver.page_source
             soup = BeautifulSoup(page_source, "html.parser")
+            parse_end_time = time.time()
+            parse_time_log = (
+                f"Time to parse page: {parse_end_time - parse_start_time:.5f} seconds\n"
+            )
 
             # Extract all visible text from the page
+            extract_start_time = time.time()
             page_text = soup.get_text(
                 separator="\n", strip=True
             )  # Separate text by new lines
+            extract_end_time = time.time()
+            extract_time_log = f"Time to extract text: {extract_end_time - extract_start_time:.5f} seconds\n"
+
+            end_time = time.time()
+            total_time_log = (
+                f"Total time for scrape_all_text: {end_time - start_time:.5f} seconds\n"
+            )
+
+            # Append log messages to page_text
+            log_text = (
+                f"\n{load_time_log}{parse_time_log}{extract_time_log}{total_time_log}"
+            )
+
+            """ Write timing log
+            with open("timing_log.txt", "w", encoding="utf-8") as f:
+                f.write(log_text)
+            """
+
             return page_text
 
         except Exception as e:
-            print(f"An error occurred: {e}")
-            return None
+            return f"An error occurred: {e}"
 
     def scrape_to_file(self, url):
         page_text = self.scrape_all_text(url)
 
         # Generate filename using website name and timestamp
         website_name = urllib.parse.urlparse(url).netloc.replace(".", "_")
-        timestamp = int(time.time())
+        page_text = self.scrape_all_text(url)
         filename = f"scraper-linux64/scrapes/{website_name}-{timestamp}.txt"
 
         if not os.path.exists("scraper-linux64/scrapes"):
