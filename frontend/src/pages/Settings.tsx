@@ -9,11 +9,31 @@ const Settings = () => {
   const { isTokenValid } = useAuth({ redirectToAuth: true });
   const [activeTab, setActiveTab] = useState("vertical-tab-1");
   const navigate = useNavigate();
+  const [discordWebhook, setDiscordWebhook] = useState("");
+  const [slackWebhook, setSlackWebhook] = useState("");
+  const [notificationMessage, setNotificationMessage] = useState("");
 
   useEffect(() => {
     if (!isTokenValid) {
       return;
     }
+
+    axios
+      .get("/users/notifications", {
+        headers: {
+          accept: "application/json",
+          Authorization: "Bearer " + localStorage.getItem("access_token"),
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          setDiscordWebhook(response.data.discord_default_webhook);
+          setSlackWebhook(response.data.slack_default_webhook);
+        }
+      })
+      .catch(() => {
+        console.error("Failed to fetch notification settings");
+      });
   }, [isTokenValid, navigate]);
 
   const handleTabClick = (tabId: string) => {
@@ -28,17 +48,20 @@ const Settings = () => {
       return;
     }
 
+    const passwordInput = document.querySelector(
+      'input[name="password-reset-password"]',
+    ) as HTMLInputElement;
+    const confirmPasswordInput = document.querySelector(
+      'input[name="password-reset-confirm-password"]',
+    ) as HTMLInputElement;
+
+    if (!passwordInput || !confirmPasswordInput) {
+      return;
+    }
+
     const payload = {
-      new_password: (
-        document.querySelector(
-          'input[name="password-reset-password"]',
-        ) as HTMLInputElement
-      ).value,
-      confirm_password: (
-        document.querySelector(
-          'input[name="password-reset-confirm-password"]',
-        ) as HTMLInputElement
-      ).value,
+      new_password: passwordInput.value,
+      confirm_password: confirmPasswordInput.value,
     };
 
     const password_reset_error_message = document.getElementById(
@@ -64,49 +87,52 @@ const Settings = () => {
   };
 
   const handlePasswordInputEvents = () => {
-    {
-      const password_reset_password = document.querySelector(
-        'input[name="password-reset-password"]',
-      ) as HTMLInputElement;
-      const password_reset_confirm_password = document.querySelector(
-        'input[name="password-reset-confirm-password"]',
-      ) as HTMLInputElement;
-      const password_reset_error_message = document.getElementById(
-        "password-reset-error-message",
-      ) as HTMLParagraphElement;
-      const status_changer_error = (message: string) => {
-        password_reset_password.classList.add("border-error");
-        password_reset_confirm_password.classList.add("border-error");
-        password_reset_error_message.innerText = message;
-        canSubmit = false;
-      };
+    const password_reset_password = document.querySelector(
+      'input[name="password-reset-password"]',
+    ) as HTMLInputElement;
+    const password_reset_confirm_password = document.querySelector(
+      'input[name="password-reset-confirm-password"]',
+    ) as HTMLInputElement;
+    const password_reset_error_message = document.getElementById(
+      "password-reset-error-message",
+    ) as HTMLParagraphElement;
 
-      if (
-        password_reset_password.value !== password_reset_confirm_password.value
-      ) {
-        status_changer_error("Passwords do not match");
-      } else if (password_reset_password.value.length < 8) {
-        status_changer_error("Password must be at least 8 characters long");
-      } else if (!password_reset_confirm_password.value.match(/[0-9]/)) {
-        status_changer_error("Password must contain at least one number");
-      } else if (!password_reset_confirm_password.value.match(/[a-z]/)) {
-        status_changer_error(
-          "Password must contain at least one lowercase letter",
-        );
-      } else if (!password_reset_confirm_password.value.match(/[A-Z]/)) {
-        status_changer_error(
-          "Password must contain at least one uppercase letter",
-        );
-      } else if (!password_reset_confirm_password.value.match(/[A-Za-z0-9]/)) {
-        status_changer_error(
-          "Password must contain at least one special character",
-        );
-      } else {
-        password_reset_password.classList.remove("border-error");
-        password_reset_confirm_password.classList.remove("border-error");
-        password_reset_error_message.innerText = "";
-        canSubmit = true;
-      }
+    if (!password_reset_password || !password_reset_confirm_password) {
+      return;
+    }
+
+    const status_changer_error = (message: string) => {
+      password_reset_password.classList.add("border-error");
+      password_reset_confirm_password.classList.add("border-error");
+      password_reset_error_message.innerText = message;
+      canSubmit = false;
+    };
+
+    if (
+      password_reset_password.value !== password_reset_confirm_password.value
+    ) {
+      status_changer_error("Passwords do not match");
+    } else if (password_reset_password.value.length < 8) {
+      status_changer_error("Password must be at least 8 characters long");
+    } else if (!password_reset_confirm_password.value.match(/[0-9]/)) {
+      status_changer_error("Password must contain at least one number");
+    } else if (!password_reset_confirm_password.value.match(/[a-z]/)) {
+      status_changer_error(
+        "Password must contain at least one lowercase letter",
+      );
+    } else if (!password_reset_confirm_password.value.match(/[A-Z]/)) {
+      status_changer_error(
+        "Password must contain at least one uppercase letter",
+      );
+    } else if (!password_reset_confirm_password.value.match(/[A-Za-z0-9]/)) {
+      status_changer_error(
+        "Password must contain at least one special character",
+      );
+    } else {
+      password_reset_password.classList.remove("border-error");
+      password_reset_confirm_password.classList.remove("border-error");
+      password_reset_error_message.innerText = "";
+      canSubmit = true;
     }
   };
 
@@ -126,6 +152,29 @@ const Settings = () => {
       })
       .catch(() => {
         alert("Account deletion failed");
+      });
+  };
+
+  const handleNotificationSettingsSubmission = () => {
+    const payload = {
+      discord_default_webhook: discordWebhook,
+      slack_default_webhook: slackWebhook,
+    };
+
+    axios
+      .put("/users/notifications", payload, {
+        headers: {
+          accept: "application/json",
+          Authorization: "Bearer " + localStorage.getItem("access_token"),
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          setNotificationMessage("Notification settings updated successfully");
+        }
+      })
+      .catch(() => {
+        setNotificationMessage("Failed to update notification settings");
       });
   };
 
@@ -251,20 +300,48 @@ const Settings = () => {
                 </button>
               </>
             )}
+
             {/* Global variable settings */}
             {activeTab === "vertical-tab-2" && (
               <>
                 <h1 className="mb-4 text-3xl">Global Variables</h1>
-                <p>Manage your global variables here.</p>
+                <form className="pb-4">
+                  <p className="mb-4">Change default notification URLs</p>
+                  <label className="mb-2 block text-lg">Discord Webhook URL</label>
+                  <input
+                    name="default_discord_webhook"
+                    type="url"
+                    value={discordWebhook || ""}
+                    onChange={(e) => setDiscordWebhook(e.target.value)}
+                    className="mb-4 w-full rounded-lg border border-border bg-secondary p-2 outline-none"
+                  />
+                  <label className="mb-2 block text-lg">Slack Webhook URL</label>
+                  <input
+                    name="default_slack_webhook"
+                    type="url"
+                    value={slackWebhook || ""}
+                    onChange={(e) => setSlackWebhook(e.target.value)}
+                    className="mb-4 w-full rounded-lg border border-border bg-secondary p-2 outline-none"
+                  />
+                  <p className="text-error">{notificationMessage}</p>
+                  <button
+                    className="mt-4 rounded-lg bg-accent p-2 px-16 text-text-contrast hover:bg-accent-hover"
+                    type="button"
+                    onClick={handleNotificationSettingsSubmission}
+                  >
+                    Save
+                  </button>
+                </form>
               </>
             )}
+
             {/* Account linking settings */}
-            {activeTab === "vertical-tab-3" && (
+            {/*activeTab === "vertical-tab-3" && (
               <>
                 <h1 className="mb-4 text-3xl">Account Linking</h1>
                 <p>Link your account with other services.</p>
               </>
-            )}
+            )*/}
           </div>
         </div>
       </div>
