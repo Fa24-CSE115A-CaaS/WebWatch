@@ -218,6 +218,7 @@ const Settings = () => {
             >
               Global Variables
             </button>
+            {/*
             <button
               type="button"
               className={`w-full whitespace-nowrap p-4 text-left
@@ -231,6 +232,7 @@ const Settings = () => {
             >
               Account Linking
             </button>
+            */}
           </div>
         </nav>
 
