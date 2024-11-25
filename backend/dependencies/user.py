@@ -28,13 +28,13 @@ async def get_user(session: DbSession, token: str = Depends(oauth2_scheme)):
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     user_id = get_user_id(session, token)
     if user_id == None:
         raise credentials_exception
     return user_id
 
-    
+
 def get_user_id(session: DbSession, token):
     try:
         payload = decode_access_token(token)

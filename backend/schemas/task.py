@@ -2,11 +2,10 @@ from sqlalchemy import Column
 from typing import List, Literal
 from sqlalchemy.types import JSON, String, DateTime
 from pydantic import field_validator
-from sqlmodel import SQLModel, Field, select
+from sqlmodel import SQLModel, Field
 import logging
 import asyncio
-from schemas.user import User
-import os
+from task_websocket_manager import get_task_manager
 from utils.scan_helpers import compare_texts, get_user_from_id, update_task_field
 from constants.task import MIN_INTERVAL_SECONDS, MAX_INTERVAL_SECONDS
 from datetime import datetime, timezone, timedelta
@@ -18,6 +17,8 @@ logging.basicConfig(level=logging.INFO)
 logging.getLogger("sqlalchemy.engine").setLevel(
     logging.WARNING
 )  # Adjust SQLAlchemy log level to reduce noise
+
+manager = get_task_manager()
 
 
 class TaskBase(SQLModel):
@@ -117,6 +118,7 @@ class Task(TaskBase, table=True):
             "next_run",
             datetime.now(timezone.utc) + timedelta(seconds=self.interval),
         )
+        manager.notify_conections(self.user_id)
         try:
             with WebScraper() as scraper:
                 new_content = scraper.scrape_all_text(self.url)
