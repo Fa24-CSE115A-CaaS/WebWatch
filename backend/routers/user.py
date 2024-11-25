@@ -196,6 +196,44 @@ async def delete_user(
         )
     return {"detail": "User and associated tasks deleted successfully"}
 
+# Get default notification settings
+@router.get("/notifications")
+async def get_notifications(current_user_id: UserData, session: DbSession):
+    user = session.exec(select(User).where(User.id == current_user_id)).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
+    return {"discord_default_webhook": user.discord_default_webhook, "slack_default_webhook": user.slack_default_webhook}
+
+# Update default notification settings
+@router.put("/notifications")
+async def update_notifications(
+    current_user_id: UserData,
+    session: DbSession,
+    payload: dict
+):
+    user = session.get(User, current_user_id)
+    discord_default_webhook = payload.get("discord_default_webhook")
+    slack_default_webhook = payload.get("slack_default_webhook")
+
+    if discord_default_webhook:
+        user.discord_default_webhook = discord_default_webhook
+    if slack_default_webhook:
+        user.slack_default_webhook = slack_default_webhook
+
+    try:
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error updating user",
+        )
+    return {"discord_default_webhook": user.discord_default_webhook, "slack_default_webhook": user.slack_default_webhook}
 
 """ @router.put(
     "/{user_id}",
@@ -233,3 +271,4 @@ async def users_update(
         raise HTTPException(status_code=500, detail="Internal server error")
     return user
  """
+
