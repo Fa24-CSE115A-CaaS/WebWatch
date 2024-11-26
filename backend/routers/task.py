@@ -64,7 +64,7 @@ async def tasks_list(session: DbSession, user: UserData):
     List all tasks for the currently authenticated user.
     """
 
-    logging.info(f"Listing tasks for user {user.id}")
+    logging.info(f"Listing tasks for user {user}")
     tasks = session.exec(select(Task).where(Task.user_id == user)).all()
     return tasks
 
