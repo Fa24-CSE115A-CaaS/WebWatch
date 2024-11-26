@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect, useRef } from "react";
 // Icons
 import { HiDotsVertical } from "react-icons/hi";
 // Hooks
@@ -18,9 +18,29 @@ import { axios } from "../../config";
 // Context
 import { NotificationContext } from "../../hooks/useNotification";
 
-const Task: TaskComponent = ({ task, onEditModalOpen }) => {
+const Task: TaskComponent = ({ task, onEditModalOpen, sectionRef }) => {
   const { open, setOpen, containerRef } = usePopup();
   const addNotification = useContext(NotificationContext);
+  const rowRef = useRef<HTMLTableRowElement>(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (sectionRef.current && rowRef.current && containerRef.current) {
+        const { bottom } = rowRef.current.getBoundingClientRect();
+        const { right } = sectionRef.current.getBoundingClientRect();
+        containerRef.current.style.left = `${right - 150}px`;
+        containerRef.current.style.top = `${bottom}px`;
+      }
+    };
+
+    if (open) {
+      handleResize();
+      window.addEventListener("resize", handleResize);
+    }
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [open]);
 
   const toggleTask = async () => {
     try {
@@ -97,9 +117,9 @@ const Task: TaskComponent = ({ task, onEditModalOpen }) => {
     "block w-full border-b-[1px] border-border px-4 py-2 text-left hover:bg-primary bg-secondary";
 
   return (
-    <tr>
+    <tr ref={rowRef}>
       <td className="font-medium">{task.name}</td>
-      <td className="xxl:pr-10">
+      <td className="text-nwrap max-w-[500px] overflow-hidden text-ellipsis xxl:pr-10">
         <a className="underline" href={task.url}>
           {task.url}
         </a>
@@ -113,40 +133,39 @@ const Task: TaskComponent = ({ task, onEditModalOpen }) => {
       */}
       <td>{computeIntervalString(task.interval)}</td>
       <td className="overflow-visible">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           {task.nextRun.toLocaleString("en-US")}
           <HiDotsVertical
             className="cursor-pointer"
             onClick={() => setOpen(!open)}
           />
         </div>
-        <div className="relative" ref={containerRef}>
-          {open && (
-            <div
-              className="absolute right-0 top-3 w-max overflow-hidden rounded-md border-[1px]
-                border-border bg-secondary"
+        {open && (
+          <div
+            className="absolute right-0 top-3 w-max overflow-hidden rounded-md border-[1px]
+              border-border bg-secondary"
+            ref={containerRef}
+          >
+            <button
+              className={dropdownButtonStyles}
+              onClick={() => {
+                setOpen(false);
+                onEditModalOpen();
+              }}
             >
-              <button
-                className={dropdownButtonStyles}
-                onClick={() => {
-                  setOpen(false);
-                  onEditModalOpen();
-                }}
-              >
-                Edit
-              </button>
-              <button className={dropdownButtonStyles} onClick={toggleTask}>
-                {task.enabled ? "Pause Task" : "Run Task"}
-              </button>
-              <button
-                className={`${dropdownButtonStyles} border-b-[0px] text-error`}
-                onClick={deleteTask}
-              >
-                Delete Task
-              </button>
-            </div>
-          )}
-        </div>
+              Edit
+            </button>
+            <button className={dropdownButtonStyles} onClick={toggleTask}>
+              {task.enabled ? "Pause Task" : "Run Task"}
+            </button>
+            <button
+              className={`${dropdownButtonStyles} border-b-[0px] text-error`}
+              onClick={deleteTask}
+            >
+              Delete Task
+            </button>
+          </div>
+        )}
       </td>
     </tr>
   );

@@ -60,11 +60,11 @@ const Tasks = () => {
   return (
     <main className="text-text">
       <CreateInput />
-      <div className="mx-auto xl:w-[1200px] xxl:w-[1500px]">
+      <div className="mx-3 sm:mx-8 xl:mx-auto xl:w-[1200px] xxl:w-[1500px]">
         <h1 className="mb-5 text-2xl font-semibold">Running</h1>
         <TaskList tasks={tasks.filter((t) => t.enabled)} />
       </div>
-      <div className="mx-auto xl:w-[1200px] xxl:w-[1500px]">
+      <div className="mx-3 sm:mx-8 xl:mx-auto xl:w-[1200px] xxl:w-[1500px]">
         <h1 className="mb-5 text-2xl font-semibold">Paused</h1>
         <TaskList tasks={tasks.filter((t) => !t.enabled)} />
       </div>

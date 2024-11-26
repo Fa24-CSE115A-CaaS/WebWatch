@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 // Components
 import EditTaskModal from "./EditTaskModal";
 import TaskComponent from "./Task";
@@ -13,14 +13,19 @@ type TaskComponent = React.FunctionComponent<TaskListProps>;
 
 const TaskList: TaskComponent = ({ tasks }) => {
   const [editTask, setEditTask] = useState<Task | null>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
 
   return (
-    <section className="mx-auto mb-10 rounded-md border-[1px] border-border text-text xxl:border-2">
-      <table className="w-full table-fixed">
-        <thead className="bg-secondary text-left text-sm font-bold xxl:text-lg">
+    <section
+      className="mx-auto mb-10 overflow-x-auto rounded-md border-[1px] border-border text-text
+        xxl:border-2"
+      ref={sectionRef}
+    >
+      <table className="w-full">
+        <thead className="text-nowrap bg-secondary text-left text-sm font-bold xxl:text-lg">
           <tr>
             <th className="w-1/5 rounded-tl-md xxl:w-[15%]">NAME</th>
-            <th>WEBSITE</th>
+            <th className="w-1/5">WEBSITE</th>
             {/* NOTE: Archived Action Column for future usage 
               <th className="w-[15%]">ACTION</th> 
             */}
@@ -33,6 +38,7 @@ const TaskList: TaskComponent = ({ tasks }) => {
             <TaskComponent
               task={task}
               key={task.id}
+              sectionRef={sectionRef}
               onEditModalOpen={() => setEditTask(task)}
             />
           ))}

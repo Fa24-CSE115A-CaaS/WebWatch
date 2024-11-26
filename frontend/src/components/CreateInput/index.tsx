@@ -100,10 +100,11 @@ const CreateInput = () => {
   return (
     <div
       ref={containerRef}
-      className="mx-auto my-10 flex h-12 w-[800px] items-center rounded-full border-[1px]
-        border-border bg-primary pl-5 text-text xxl:h-16 xxl:border-2 xxl:text-xl"
+      className="mx-3 my-10 flex h-12 items-center rounded-full border-[1px] border-border
+        bg-primary pl-5 text-text sm:mx-8 lg:mx-auto lg:w-[800px] xxl:h-16 xxl:border-2
+        xxl:text-xl"
     >
-      <IoSearch className="h-5 w-5 xxl:h-6 xxl:w-6" />
+      <IoSearch className="h-5 w-5 flex-shrink-0 xxl:h-6 xxl:w-6" />
       <input
         className="h-full flex-1 border-0 bg-transparent pl-5 text-text outline-none"
         placeholder="Enter a website..."
