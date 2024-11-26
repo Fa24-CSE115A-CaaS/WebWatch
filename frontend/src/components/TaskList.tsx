@@ -25,7 +25,7 @@ const TaskList: TaskComponent = ({ tasks }) => {
               <th className="w-[15%]">ACTION</th> 
             */}
             <th className="w-[15%]">INTERVAL</th>
-            <th className="w-[15%] rounded-tr-md">NEXT CHECK</th>
+            <th className="w-[20%] rounded-tr-md">NEXT CHECK</th>
           </tr>
         </thead>
         <tbody className="xxl:text-xl">

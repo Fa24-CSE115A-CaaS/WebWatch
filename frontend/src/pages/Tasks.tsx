@@ -1,22 +1,11 @@
+import { useEffect, useState } from "react";
+// Components
 import TaskList from "../components/TaskList";
 import CreateInput from "../components/CreateInput";
-import {
-  createContext,
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useState,
-} from "react";
-import { Task, TaskResponse } from "../types";
-import { axios } from "../config";
+// Hooks
 import useAuth from "../hooks/useAuth";
-
-interface TaskPageContext {
-  tasks: Task[];
-  setTasks: Dispatch<SetStateAction<Task[]>>;
-}
-
-export const TasksPageContext = createContext<TaskPageContext | null>(null);
+// Types
+import { Task, TaskResponse } from "../types";
 
 const Tasks = () => {
   const { user, isTokenValid } = useAuth({ redirectToAuth: true });
@@ -26,32 +15,41 @@ const Tasks = () => {
     if (!isTokenValid) return;
 
     let valid = true;
-    const fetchTasks = async () => {
-      const response = await axios.get("/tasks", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-      });
+    const token = localStorage.getItem("access_token");
+    const baseUrl = import.meta.env.VITE_ROOT_API;
+    const socket = new WebSocket(`${baseUrl}/tasks/ws?token=${token}`);
 
-      if (response.status === 200 && valid) {
-        const tasks: Task[] = response.data.map((data: TaskResponse) => {
-          return {
-            id: data.id,
-            name: data.name,
-            content: data.content,
-            url: data.url,
-            discordUrl: data.discord_url,
-            interval: data.interval,
-            enabledNotificationOptions: data.enabled_notification_options,
-            enabled: data.enabled,
-          } as Task;
-        });
-        setTasks(tasks);
+    socket.addEventListener("message", (e) => {
+      if (!valid) {
+        return;
       }
-    };
-    fetchTasks();
+
+      const taskResponse = JSON.parse(e.data);
+      const now = new Date();
+      const offset = -now.getTimezoneOffset();
+
+      const tasks: Task[] = taskResponse.map((data: TaskResponse) => {
+        const nextRunMs = Date.parse(data.next_run);
+        const nextRun = new Date(nextRunMs + offset * 60_000);
+
+        return {
+          id: data.id,
+          name: data.name,
+          content: data.content,
+          url: data.url,
+          discordUrl: data.discord_url,
+          interval: data.interval,
+          enabledNotificationOptions: data.enabled_notification_options,
+          enabled: data.enabled,
+          nextRun,
+        } as Task;
+      });
+      setTasks(tasks);
+    });
+
     return () => {
       valid = false;
+      socket.close();
     };
   }, [isTokenValid]);
 
@@ -60,20 +58,18 @@ const Tasks = () => {
   }
 
   return (
-    <TasksPageContext.Provider value={{ tasks, setTasks }}>
-      <main className="text-text">
-        <CreateInput />
-        <div className="mx-auto xl:w-[1200px] xxl:w-[1500px]">
-          <h1 className="mb-5 text-2xl font-semibold">Running</h1>
-          <TaskList tasks={tasks.filter((t) => t.enabled)} />
-        </div>
-        <div className="mx-auto xl:w-[1200px] xxl:w-[1500px]">
-          <h1 className="mb-5 text-2xl font-semibold">Paused</h1>
-          <TaskList tasks={tasks.filter((t) => !t.enabled)} />
-        </div>
-        {user && <p className="mt-4 text-center">Logged in as: {user.email}</p>}
-      </main>
-    </TasksPageContext.Provider>
+    <main className="text-text">
+      <CreateInput />
+      <div className="mx-auto xl:w-[1200px] xxl:w-[1500px]">
+        <h1 className="mb-5 text-2xl font-semibold">Running</h1>
+        <TaskList tasks={tasks.filter((t) => t.enabled)} />
+      </div>
+      <div className="mx-auto xl:w-[1200px] xxl:w-[1500px]">
+        <h1 className="mb-5 text-2xl font-semibold">Paused</h1>
+        <TaskList tasks={tasks.filter((t) => !t.enabled)} />
+      </div>
+      {user && <p className="mt-4 text-center">Logged in as: {user.email}</p>}
+    </main>
   );
 };
 

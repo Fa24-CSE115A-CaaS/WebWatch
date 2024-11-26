@@ -24,7 +24,7 @@ def get_user_from_id(user_id: int):
     return result
 
 
-def update_content_in_db(task_id: int, new_content: str):
+def update_task_field(task_id: int, fieldname: str, value):
     from database import Database
     from schemas.task import Task
 
@@ -32,7 +32,7 @@ def update_content_in_db(task_id: int, new_content: str):
     with next(db.get_session()) as session:
         task = session.exec(select(Task).where(Task.id == task_id)).first()
         if task:
-            task.content = new_content
+            setattr(task, fieldname, value)
             session.add(task)
             session.commit()
             session.refresh(task)
