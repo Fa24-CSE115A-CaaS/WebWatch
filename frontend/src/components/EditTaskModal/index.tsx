@@ -1,11 +1,9 @@
 import { FormEventHandler, useContext, useState } from "react";
 import { axios } from "../../config";
-import { TasksPageContext } from "../../pages/Tasks";
 // Components
 import Input from "../Input";
 import EditCheckbox from "./EditCheckbox";
 // Types
-import { Task } from "../../types";
 import { EditTaskModalComponent, FormState } from "./types";
 // Icons
 import { RxCross2 } from "react-icons/rx";
@@ -20,7 +18,6 @@ import { NotificationContext } from "../../hooks/useNotification";
 const NOTIFICATION_OPTS = ["EMAIL", "DISCORD", "SLACK"];
 
 const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
-  const { tasks, setTasks } = useContext(TasksPageContext)!;
   const [formState, setFormState] = useState<FormState>({
     name: task.name,
     url: task.url,
@@ -95,21 +92,6 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
       );
 
       if (response.status === 200) {
-        setTasks(
-          tasks.map((t) => {
-            if (t.id !== task.id) {
-              return t;
-            }
-            return {
-              ...t,
-              name,
-              url,
-              enabledNotificationOptions: notificationOptions,
-              interval,
-              discordUrl,
-            } as Task;
-          }),
-        );
         closeModal();
         addNotification({
           type: "SUCCESS",

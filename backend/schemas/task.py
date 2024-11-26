@@ -1,14 +1,14 @@
 from sqlalchemy import Column
 from typing import List, Literal
-from sqlalchemy.types import JSON, String
+from sqlalchemy.types import JSON, String, DateTime
 from pydantic import field_validator
-from sqlmodel import SQLModel, Field, select
+from sqlmodel import SQLModel, Field
 import logging
 import asyncio
-from schemas.user import User
-import os
-from utils.scan_helpers import compare_texts, get_user_from_id, update_content_in_db
+from task_websocket_manager import get_task_manager
+from utils.scan_helpers import compare_texts, get_user_from_id, update_task_field
 from constants.task import MIN_INTERVAL_SECONDS, MAX_INTERVAL_SECONDS
+from datetime import datetime, timezone, timedelta
 
 NotificationOptions = List[Literal["EMAIL", "DISCORD", "SLACK"]]
 
@@ -17,6 +17,8 @@ logging.basicConfig(level=logging.INFO)
 logging.getLogger("sqlalchemy.engine").setLevel(
     logging.WARNING
 )  # Adjust SQLAlchemy log level to reduce noise
+
+manager = get_task_manager()
 
 
 class TaskBase(SQLModel):
@@ -66,6 +68,9 @@ class TaskBase(SQLModel):
 class Task(TaskBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="user.id")
+    next_run: datetime | None = Field(
+        sa_column=Column(DateTime(), nullable=True, default=None)
+    )
 
     def get_id(self):
         # Returns the task_id
@@ -108,6 +113,12 @@ class Task(TaskBase, table=True):
             "subject": f"An error occurred while scraping {self.url}",
             "body": f"An error occurred while scraping {self.url}. Please modify your task to include a valid URL.",
         }
+        update_task_field(
+            self.id,
+            "next_run",
+            datetime.now(timezone.utc) + timedelta(seconds=self.interval),
+        )
+        manager.notify_conections(self.user_id)
         try:
             with WebScraper() as scraper:
                 new_content = scraper.scrape_all_text(self.url)
@@ -127,7 +138,7 @@ class Task(TaskBase, table=True):
         if self.content is None:
             logging.info(f"Initial scan for task id: {self.id}. Writing to database.")
             try:
-                update_content_in_db(self.id, new_content)
+                update_task_field(self.id, "content", new_content)
                 self.content = new_content
             except Exception as e:
                 logging.error(f"Failed to update content in DB: {e}")
@@ -145,7 +156,7 @@ class Task(TaskBase, table=True):
                 f"Change detected for task id: {self.id}. Writing to database and sending email."
             )
             try:
-                update_content_in_db(self.id, new_content)
+                update_task_field(self.id, "content", new_content)
                 self.content = new_content
             except Exception as e:
                 logging.error(f"Failed to update content in DB: {e}")
@@ -162,6 +173,9 @@ class Task(TaskBase, table=True):
 class TaskGet(TaskBase):
     id: int
     user_id: int
+    next_run: datetime | None = Field(
+        sa_column=Column(DateTime(), nullable=True, default=None)
+    )
 
 
 class TaskCreate(TaskBase):

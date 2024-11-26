@@ -24,21 +24,17 @@ def test_user_register_fail_duplicate():
 
 def test_user_login_fail():
     # Test user login with wrong password
-    try:
-        response = client.post(
-            "/users/login",
-            data={
-                "grant_type": "password",
-                "username": "test@webwatch.live",
-                "password": "WrongPassword1233!!",
-            },
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-        )
-        assert response.status_code == 400
-    except argon2.exceptions.VerifyMismatchError:
-        pass  # This is expected
-    else:
-        assert False, "Expected VerifyMismatchError was not raised"
+    response = client.post(
+        "/users/login",
+        data={
+            "grant_type": "password",
+            "username": "test@webwatch.live",
+            "password": "WrongPassword1233!!",
+        },
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+    )
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Incorrect email or password"}
 
 
 def test_user_login_success():
