@@ -1,14 +1,14 @@
 from sqlalchemy import Column
 from typing import List, Literal
-from sqlalchemy.types import JSON, String
+from sqlalchemy.types import JSON, String, DateTime
 from pydantic import field_validator
-from sqlmodel import SQLModel, Field, select
+from sqlmodel import SQLModel, Field
 import logging
 import asyncio
-from schemas.user import User
-import os
-from utils.scan_helpers import compare_texts, get_user_from_id, update_content_in_db
+from task_websocket_manager import get_task_manager
+from utils.scan_helpers import compare_texts, get_user_from_id, update_task_field
 from constants.task import MIN_INTERVAL_SECONDS, MAX_INTERVAL_SECONDS
+from datetime import datetime, timezone, timedelta
 
 NotificationOptions = List[Literal["EMAIL", "DISCORD", "SLACK"]]
 
@@ -17,6 +17,8 @@ logging.basicConfig(level=logging.INFO)
 logging.getLogger("sqlalchemy.engine").setLevel(
     logging.WARNING
 )  # Adjust SQLAlchemy log level to reduce noise
+
+manager = get_task_manager()
 
 
 class TaskBase(SQLModel):
@@ -66,45 +68,77 @@ class TaskBase(SQLModel):
 class Task(TaskBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="user.id")
+    next_run: datetime | None = Field(
+        sa_column=Column(DateTime(), nullable=True, default=None)
+    )
 
     def get_id(self):
         # Returns the task_id
         return self.id
 
+    def notify(self, message: dict):
+        from utils.notifications import send_mail, send_discord_msg
+
+        subject = message["subject"]
+        body = message["body"]
+
+        # Notify the user based on the enabled notification options
+        if "EMAIL" in self.enabled_notification_options:
+            """
+            try:
+                send_mail(
+                    subject,
+                    body,
+                    [get_user_from_id(self.user_id).email],
+                )
+            except Exception as e:
+                logging.error(f"Failed to send email: {e}")
+            """
+            pass
+        if "DISCORD" in self.enabled_notification_options:
+            # send discord message
+            try:
+                send_discord_msg(self.discord_url, body)
+            except Exception as e:
+                logging.error(f"Failed to send discord message: {e}")
+            pass
+        if "SLACK" in self.enabled_notification_options:
+            # send slack message
+            pass
+
     def scan(self):
         from scrape import WebScraper
-        from utils.notifications import send_mail
 
+        error_message = {
+            "subject": f"An error occurred while scraping {self.url}",
+            "body": f"An error occurred while scraping {self.url}. Please modify your task to include a valid URL.",
+        }
+        update_task_field(
+            self.id,
+            "next_run",
+            datetime.now(timezone.utc) + timedelta(seconds=self.interval),
+        )
+        manager.notify_conections(self.user_id)
         try:
             with WebScraper() as scraper:
                 new_content = scraper.scrape_all_text(self.url)
         except Exception as e:
-            logging.error(f"An error occurred while scraping {self.name}: {e}")
-            """
-            send_mail(
-                f"Error scraping {self.name}",
-                f"An error occurred while scraping {self.name}.",
-                [get_user_from_id(self.user_id).email],
+            logging.error(
+                f"Task {self.id} encountered an error while scraping {self.url}: {e}"
             )
-            """
+            self.notify(error_message)
             return
 
         if new_content is None:
             logging.error(f"An error occurred while scraping {self.name}.")
-            """
-            send_mail(
-                f"Error scraping {self.name}",
-                f"An error occurred while scraping {self.name}.",
-                [get_user_from_id(self.user_id).email],
-            )
-            """
+            self.notify(error_message)
             return
 
         # If stored content is None (such as on the first scan), store the new content
         if self.content is None:
             logging.info(f"Initial scan for task id: {self.id}. Writing to database.")
             try:
-                update_content_in_db(self.id, new_content)
+                update_task_field(self.id, "content", new_content)
                 self.content = new_content
             except Exception as e:
                 logging.error(f"Failed to update content in DB: {e}")
@@ -122,20 +156,16 @@ class Task(TaskBase, table=True):
                 f"Change detected for task id: {self.id}. Writing to database and sending email."
             )
             try:
-                update_content_in_db(self.id, new_content)
+                update_task_field(self.id, "content", new_content)
                 self.content = new_content
-                subject = "WebWatch Change Report"
-                """
-                send_mail(
-                    subject,
-                    f"Changes have been detected on {self.url}.\n\n {diff}",
-                    [
-                        get_user_from_id(self.user_id).email
-                    ],  # Send email to user's address
-                )
-                """
             except Exception as e:
-                logging.error(f"Failed to update content in DB or send email: {e}")
+                logging.error(f"Failed to update content in DB: {e}")
+
+            message = {
+                "subject": "WebWatch Change Report",
+                "body": f"Changes have been detected on {self.url}.\n\n {diff}",
+            }
+            self.notify(message)
         else:
             logging.info(f"No change detected for task id: {self.id}.")
 
@@ -143,6 +173,9 @@ class Task(TaskBase, table=True):
 class TaskGet(TaskBase):
     id: int
     user_id: int
+    next_run: datetime | None = Field(
+        sa_column=Column(DateTime(), nullable=True, default=None)
+    )
 
 
 class TaskCreate(TaskBase):

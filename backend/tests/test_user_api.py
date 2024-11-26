@@ -96,3 +96,52 @@ def test_user_me_no_auth():
     response = client.get("/users/me")
     assert response.status_code == 401
     assert response.json() == {"detail": "Not authenticated"}
+
+
+def test_user_reset_password_success():
+    # Test password reset
+    response = client.post(
+        "/users/login",
+        data={
+            "username": "test@webwatch.live",
+            "password": "Password1233!",
+        },
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+    )
+    assert response.status_code == 200
+    access_token = response.json()["access_token"]
+    response = client.post(
+        "/users/reset_password",
+        json={
+            "new_password": "NewPassword1233!!",
+            "confirm_password": "NewPassword1233!!",
+        },
+        headers={"Authorization": "Bearer " + access_token},
+    )
+
+    assert response.status_code == 200
+
+
+def test_user_reset_password_mismatch():
+    # Test password reset with mismatched passwords
+    response = client.post(
+        "/users/login",
+        data={
+            "username": "test@webwatch.live",
+            "password": "NewPassword1233!!",
+        },
+    )
+    headers = ({"Content-Type": "application/x-www-form-urlencoded"},)
+    assert response.status_code == 200
+    access_token = response.json()["access_token"]
+
+    response = client.post(
+        "/users/reset_password",
+        json={
+            "new_password": "NewPassword1233!!",
+            "confirm_password": "MismatchedPassword1233!!",
+        },
+        headers={"Authorization": "Bearer " + access_token},
+    )
+
+    assert response.status_code == 422

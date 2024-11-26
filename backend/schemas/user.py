@@ -1,10 +1,25 @@
 from sqlmodel import SQLModel, Field
-from pydantic import BaseModel, validator, EmailStr
+from pydantic import BaseModel, validator, model_validator, EmailStr
 from datetime import datetime
 from typing import Optional
 from uuid import uuid4
 import re
 import os
+
+
+def validate_password(value: str) -> str:
+    if os.getenv("ENV") != "development":
+        if len(value) < 8:
+            raise ValueError("Password must be at least 8 characters long")
+        if not re.search(r"[A-Z]", value):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not re.search(r"[a-z]", value):
+            raise ValueError("Password must contain at least one lowercase letter")
+        if not re.search(r"[0-9]", value):
+            raise ValueError("Password must contain at least one digit")
+        if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", value):
+            raise ValueError("Password must contain at least one special character")
+    return value
 
 
 class UserBase(SQLModel):
@@ -26,42 +41,13 @@ class UserRegister(BaseModel):
     password: str
 
     @validator("password")
-    def validate_password(cls, value):
-        if os.getenv("ENV") != "development":
-            if len(value) < 8:
-                raise ValueError("Password must be at least 8 characters long")
-            if not re.search(r"[A-Z]", value):
-                raise ValueError("Password must contain at least one uppercase letter")
-            if not re.search(r"[a-z]", value):
-                raise ValueError("Password must contain at least one lowercase letter")
-            if not re.search(r"[0-9]", value):
-                raise ValueError("Password must contain at least one digit")
-            if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", value):
-                raise ValueError("Password must contain at least one special character")
-        return value
+    def password_validation(cls, value):
+        return validate_password(value)
 
 
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
-
-
-"""
-class UserGet(UserBase):
-    id: int
-
-    class Config:
-        orm_mode = True
-"""
-
-"""
-class UserDelete(BaseModel):
-    pass
-
-class UserReset(BaseModel):
-    email: EmailStr
-    password: str
-"""
 
 
 class UserUpdate(BaseModel):
@@ -79,3 +65,25 @@ class UserOutput(BaseModel):
 
 class Token(BaseModel):
     access_token: str
+
+
+class PasswordReset(BaseModel):
+    email: EmailStr
+
+
+class PasswordResetRequest(BaseModel):
+    new_password: str
+    confirm_password: str
+
+    @model_validator(mode="after")
+    def passwords_match(cls, values):
+        new_password = values.new_password
+        confirm_password = values.confirm_password
+        if new_password != confirm_password:
+            raise ValueError("Passwords do not match")
+        validate_password(new_password)
+        return values
+
+
+class DeleteAccountRequest(BaseModel):
+    password: str

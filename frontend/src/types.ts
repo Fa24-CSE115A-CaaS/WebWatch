@@ -7,6 +7,7 @@ export interface TaskResponse {
   interval: number;
   enabled_notification_options: string[];
   enabled: boolean;
+  next_run: string;
 }
 
 export interface Task {
@@ -18,4 +19,5 @@ export interface Task {
   interval: number;
   enabledNotificationOptions: string[];
   enabled: boolean;
+  nextRun: Date;
 }

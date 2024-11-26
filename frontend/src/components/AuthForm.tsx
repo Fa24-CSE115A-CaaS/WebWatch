@@ -67,6 +67,27 @@ const AuthForm = ({ isLogin: initialIsLogin }: AuthFormProps) => {
     }
   };
 
+  const handleLoginLink = async (email: string) => {
+    try {
+      setLoading(true);
+      await axios.post(
+        "/users/email_auth",
+        { email },
+        {
+          headers: {
+            accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      setError("A login link has been sent to your email.");
+    } catch (error) {
+      handleError(error, "Failed to send login link. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleError = (error: unknown, defaultMessage: string) => {
     const axiosError = error as AxiosError;
     if (axiosError.response) {
@@ -205,6 +226,23 @@ const AuthForm = ({ isLogin: initialIsLogin }: AuthFormProps) => {
                     ? "Login"
                     : "Create Account"}
               </button>
+              {isLogin && (
+                <>
+                  <div className="my-4 flex items-center">
+                    <hr className="flex-grow border-t border-border" />
+                    <span className="mx-4 text-gray-500">or</span>
+                    <hr className="flex-grow border-t border-border" />
+                  </div>
+                  <button
+                    type="button"
+                    className="hover:bg-secondary-hover w-full rounded-lg bg-accent p-2 text-text-contrast"
+                    onClick={() => handleLoginLink(email)}
+                    disabled={loading}
+                  >
+                    Send login link to email
+                  </button>
+                </>
+              )}
             </form>
           </div>
         </div>

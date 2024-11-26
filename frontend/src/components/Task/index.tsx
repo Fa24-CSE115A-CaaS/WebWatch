@@ -3,8 +3,6 @@ import { useContext } from "react";
 import { HiDotsVertical } from "react-icons/hi";
 // Hooks
 import usePopup from "../../hooks/usePopup";
-// Context
-import { TasksPageContext } from "../../pages/Tasks";
 // Types
 import { TaskComponent } from "./types";
 // Constants
@@ -17,10 +15,12 @@ import {
 } from "../../constants/time";
 // Util
 import { axios } from "../../config";
+// Context
+import { NotificationContext } from "../../hooks/useNotification";
 
 const Task: TaskComponent = ({ task, onEditModalOpen }) => {
-  const { tasks, setTasks } = useContext(TasksPageContext)!;
   const { open, setOpen, containerRef } = usePopup();
+  const addNotification = useContext(NotificationContext);
 
   const toggleTask = async () => {
     try {
@@ -37,18 +37,16 @@ const Task: TaskComponent = ({ task, onEditModalOpen }) => {
         },
       );
       if (response.status === 200) {
-        setTasks(
-          tasks.map((t) => {
-            if (t.id === task.id) {
-              return { ...t, enabled: newEnabled };
-            }
-            return t;
-          }),
-        );
+        addNotification({
+          type: "SUCCESS",
+          message: `${newEnabled ? "Started" : "Paused"} task: ${task.name}`,
+        });
       }
-    } catch (e) {
-      // TODO: Emit a global error
-      console.log(e);
+    } catch {
+      addNotification({
+        type: "ERROR",
+        message: "An unexpected error occurred. Please try again later.",
+      });
     }
   };
 
@@ -60,11 +58,16 @@ const Task: TaskComponent = ({ task, onEditModalOpen }) => {
         },
       });
       if (response.status === 204) {
-        setTasks([...tasks.filter((t) => t.id !== task.id)]);
+        addNotification({
+          type: "SUCCESS",
+          message: `Successfully deleted task`,
+        });
       }
-    } catch (e) {
-      // TODO: Emit a global error
-      console.log(e);
+    } catch {
+      addNotification({
+        type: "ERROR",
+        message: "An unexpected error occurred. Please try again later.",
+      });
     }
   };
 
@@ -111,7 +114,7 @@ const Task: TaskComponent = ({ task, onEditModalOpen }) => {
       <td>{computeIntervalString(task.interval)}</td>
       <td className="overflow-visible">
         <div className="flex items-center justify-between">
-          10:49
+          {task.nextRun.toLocaleString("en-US")}
           <HiDotsVertical
             className="cursor-pointer"
             onClick={() => setOpen(!open)}
