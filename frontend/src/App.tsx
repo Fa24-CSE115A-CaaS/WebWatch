@@ -1,4 +1,8 @@
-import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate,
+} from "react-router-dom";
 // Components
 import NavBar from "./components/NavBar";
 // Hooks
@@ -93,7 +97,7 @@ const router = createBrowserRouter([
   },
   {
     path: "*",
-    element: <Navigate to="/tasks"/>,
+    element: <Navigate to="/tasks" />,
   },
 ]);
 
