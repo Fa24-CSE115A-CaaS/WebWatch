@@ -1,6 +1,6 @@
 # Third-party imports
 from typing import Annotated
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Path
 from sqlmodel import select, Session
 
 # Local module imports
@@ -31,6 +31,7 @@ import logging
 from scheduler import Scheduler, get_scheduler
 from routers.task import tasks_delete
 import os
+import logging
 
 ### USER ENDPOINTS ###
 
@@ -45,6 +46,9 @@ DbSession = Annotated[Session, Depends(db.get_session)]
 UserData = Annotated[User, Depends(get_user)]
 SchedulerDep = Annotated[Scheduler, Depends(get_scheduler)]
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+
 
 @router.post(
     "/register",
@@ -56,8 +60,15 @@ SchedulerDep = Annotated[Scheduler, Depends(get_scheduler)]
     },
 )
 async def create_user(user: UserRegister, session: DbSession):
+    """
+    Register a new user by providing an email and password.
+    """
+
+    logging.info(f"Registering user with email {user.email}")
+    # Check if user already exists
     existing_user = session.exec(select(User).where(User.email == user.email)).first()
     if existing_user:
+        logging.warning(f"Email {user.email} already registered")
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="Email already registered"
         )
@@ -70,6 +81,7 @@ async def create_user(user: UserRegister, session: DbSession):
         session.commit()
         session.refresh(new_user)
     except Exception as e:
+        logging.error(f"Error creating user: {e}")
         session.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -93,9 +105,22 @@ async def create_user(user: UserRegister, session: DbSession):
     },
 )
 async def login(session: DbSession, form_data: OAuth2PasswordRequestForm = Depends()):
+    """
+    Log in an already registered user by providing an email and password.
+    """
+    logging.info(f"User login attempt with email {form_data.username}")
     # Query the user based on email
     user = session.exec(select(User).where(User.email == form_data.username)).first()
-    if not user or not verify_password(user.password_hash, form_data.password):
+    if not user:
+        logging.warning(f"Incorrect email or password for {form_data.username}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect email or password",
+        )
+    try:
+        verify_password(user.password_hash, form_data.password)
+    except ValueError:
+        logging.warning(f"Incorrect email or password for {form_data.username}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect email or password",
@@ -111,11 +136,17 @@ async def login(session: DbSession, form_data: OAuth2PasswordRequestForm = Depen
 
 @router.get("/verify")
 async def verify(token: str, session: DbSession):
+    """
+    Verify a user's token.
+    """
+
+    logging.info(f"Verifying token")
     payload = decode_access_token(token)
     uuid = payload.get("id")
 
     user = session.exec(select(User).where(User.token_uuid == uuid)).first()
     if not user:
+        logging.warning(f"User not found for token {token}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
@@ -125,6 +156,8 @@ async def verify(token: str, session: DbSession):
 
 @router.get("/me", response_model=UserOutput)
 async def read_users_me(current_user_id: UserData, session: DbSession):
+    # Get the currently authenticated user's details using their access token.
+    logging.info(f"Fetching current user {current_user_id}")
     user = session.exec(select(User).where(User.id == current_user_id)).first()
     return user
 
@@ -202,13 +235,18 @@ async def delete_user(
     response_model=UserOutput,
 )
 async def users_update(
-    user_id: int,
     user_update: UserUpdate,
     session: DbSession,
-    current_user=Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
+    user_id: int = Path(..., description="The ID of the user to update"),
 ):
+    # Update a user's account global variables, including Discord and Slack webhooks.
+    logging.info(f"Updating user {user_id}")
     # Ensure the user is updating their own information
     if user_id != current_user.id:
+        logging.warning(
+            f"User {current_user.id} not authorized to update user {user_id}"
+        )
         raise HTTPException(
             status_code=403, detail="Not authorized to update this user"
         )
@@ -216,6 +254,7 @@ async def users_update(
     # Query the user again within the same session
     user = session.get(User, user_id)
     if not user:
+        logging.warning(f"User {user_id} not found")
         raise HTTPException(status_code=404, detail="User not found")
 
     # Update fields that are provided in the request
@@ -229,6 +268,7 @@ async def users_update(
         session.commit()
         session.refresh(user)
     except Exception as e:
+        logging.error(f"Error updating user {user_id}: {e}")
         session.rollback()
         raise HTTPException(status_code=500, detail="Internal server error")
     return user

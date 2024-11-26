@@ -6,4 +6,7 @@ def get_hashed_password(plain_password: str) -> str:
 
 
 def verify_password(hashed_password: str, plain_password: str) -> bool:
-    return PasswordHasher().verify(hashed_password, plain_password)
+    try:
+        return PasswordHasher().verify(hashed_password, plain_password)
+    except:
+        raise ValueError("Incorrect password")
