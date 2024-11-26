@@ -216,11 +216,11 @@ async def email_auth(user_email: EmailResetRequest, session: DbSession):
     except Exception as e:
         session.rollback()
 
+
 @router.post("/reset_email", status_code=status.HTTP_200_OK)
 async def reset_email(
     reset_request: EmailResetRequest,
     session: DbSession,
-    current_user=Depends(get_current_user),
 ):
     try:
         user = session.exec(
@@ -239,8 +239,8 @@ async def reset_email(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred",
         )
-    
- 
+
+
 """@router.put(
     "/{user_id}",
     response_model=UserOutput,
@@ -249,7 +249,6 @@ async def users_update(
     user_id: int,
     user_update: UserUpdate,
     session: DbSession,
-    current_user=Depends(get_current_user),
 ):
     # Ensure the user is updating their own information
     if user_id != current_user.id:
