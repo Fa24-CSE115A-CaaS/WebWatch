@@ -30,7 +30,7 @@ const Test = () => {
             methods and intervals are set up correctly.
           </p>
         </section>
-        <p className="mb-4 text-2xl text-accent">
+        <p className="text-2xl text-accent">
           {currentTime.toLocaleString()}
         </p>
       </main>
