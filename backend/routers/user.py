@@ -217,7 +217,7 @@ async def delete_user(
     # Query and delete all tasks associated with the user
     tasks = session.exec(select(Task).where(Task.user_id == user.id)).all()
     for task in tasks:
-        await tasks_delete(task.id, session, scheduler)
+        await tasks_delete(task.id, session, scheduler, user.id)
 
     try:
         session.delete(user)
@@ -254,11 +254,10 @@ async def email_auth(user_email: EmailResetRequest, session: DbSession):
 async def reset_email(
     reset_request: EmailResetRequest,
     session: DbSession,
+    current_user_id: UserData,
 ):
     try:
-        user = session.exec(
-            select(User).where(User.token_uuid == current_user.token_uuid)
-        ).first()
+        user = session.get(User, current_user_id)
 
         user.email = reset_request.new_email
         session.add(user)
