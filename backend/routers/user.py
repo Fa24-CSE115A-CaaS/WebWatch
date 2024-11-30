@@ -208,7 +208,6 @@ async def reset_email(
         )
 
 
-
 # Resets the user's password after validating the request.
 @router.post("/reset_password", status_code=status.HTTP_200_OK)
 async def reset_password(
