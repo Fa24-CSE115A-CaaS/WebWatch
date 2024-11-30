@@ -19,7 +19,7 @@ access_token = register_user()
 TASK_DATA = {
     "name": "Test Task",
     "url": "https://webwatch.live/test",
-    "enabled_notification_options": ["EMAIL"],
+    "enabled_notification_options": ["DISCORD"],
     "interval": MIN_INTERVAL_SECONDS,
     "enabled": True,
 }
