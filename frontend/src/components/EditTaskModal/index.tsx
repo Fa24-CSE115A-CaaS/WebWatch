@@ -15,7 +15,7 @@ import {
 // Context
 import { NotificationContext } from "../../hooks/useNotification";
 
-const NOTIFICATION_OPTS = ["EMAIL", "DISCORD", "SLACK"];
+const NOTIFICATION_OPTS = ["DISCORD", "SLACK"];
 
 const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
   const [formState, setFormState] = useState<FormState>({

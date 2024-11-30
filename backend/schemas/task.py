@@ -10,7 +10,7 @@ from utils.scan_helpers import compare_texts, get_user_from_id, update_task_fiel
 from constants.task import MIN_INTERVAL_SECONDS, MAX_INTERVAL_SECONDS
 from datetime import datetime, timezone, timedelta
 
-NotificationOptions = List[Literal["EMAIL", "DISCORD", "SLACK"]]
+NotificationOptions = List[Literal["DISCORD", "SLACK"]]
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -28,7 +28,7 @@ class TaskBase(SQLModel):
     discord_url: str | None = None
     interval: int = Field(ge=MIN_INTERVAL_SECONDS, le=MAX_INTERVAL_SECONDS)
     enabled_notification_options: NotificationOptions = Field(
-        default=["EMAIL"], sa_column=Column(JSON())
+        default=["DISCORD"], sa_column=Column(JSON())
     )
     enabled: bool = True  # If the task is enabled then it should be running
 
@@ -77,14 +77,15 @@ class Task(TaskBase, table=True):
         return self.id
 
     def notify(self, message: dict):
-        from utils.notifications import send_mail, send_discord_msg
+        from utils.notifications import send_discord_msg #, send_mail
 
-        subject = message["subject"]
         body = message["body"]
 
+        # Removed due to lack of email abuse protection
+        """
+        subject = message["subject"]
         # Notify the user based on the enabled notification options
         if "EMAIL" in self.enabled_notification_options:
-            """
             try:
                 send_mail(
                     subject,
@@ -93,8 +94,9 @@ class Task(TaskBase, table=True):
                 )
             except Exception as e:
                 logging.error(f"Failed to send email: {e}")
-            """
             pass
+        """
+
         if "DISCORD" in self.enabled_notification_options:
             # send discord message
             try:
