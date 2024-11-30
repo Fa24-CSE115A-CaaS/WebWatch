@@ -77,7 +77,7 @@ class Task(TaskBase, table=True):
         return self.id
 
     def notify(self, message: dict):
-        from utils.notifications import send_discord_msg #, send_mail
+        from utils.notifications import send_discord_msg  # , send_mail
 
         body = message["body"]
 

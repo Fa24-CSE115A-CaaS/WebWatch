@@ -6,7 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 
 
-'''
+"""
 def send_mail(subject: str, message: str, recipients: list[str]):
     load_dotenv()
 
@@ -35,7 +35,7 @@ def send_mail(subject: str, message: str, recipients: list[str]):
         server.login(username, password)
         server.sendmail(sender_email, recipientsString, msg.as_string())
         server.quit()
-'''
+"""
 
 
 def send_discord_msg(webhook_url, message):
