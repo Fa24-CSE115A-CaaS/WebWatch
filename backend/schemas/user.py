@@ -67,6 +67,14 @@ class Token(BaseModel):
     access_token: str
 
 
+class EmailReset(BaseModel):
+    email: EmailStr
+
+
+class EmailResetRequest(BaseModel):
+    new_email: EmailStr
+
+
 class PasswordReset(BaseModel):
     email: EmailStr
 
