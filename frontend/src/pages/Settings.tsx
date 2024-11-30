@@ -112,8 +112,12 @@ const Settings = () => {
   };
 
   const handleEmailChangeEvents = () => {
-    const email = document.querySelector('input[type="email"]') as HTMLInputElement;
-    const email_error_message = document.getElementById("email-error-message") as HTMLParagraphElement;
+    const email = document.querySelector(
+      'input[type="email"]',
+    ) as HTMLInputElement;
+    const email_error_message = document.getElementById(
+      "email-error-message",
+    ) as HTMLParagraphElement;
     const status_changer_error = (message: string) => {
       email.classList.add("border-error");
       email_error_message.innerText = message;
@@ -127,36 +131,40 @@ const Settings = () => {
       email_error_message.innerText = "";
       canSubmitEmail = true;
     }
-  }
+  };
 
   const handleEmailChangeSubmission = () => {
     if (!canSubmitEmail) {
       handleEmailChangeEvents();
       return;
     }
-    const email_error_message = document.getElementById("email-error-message") as HTMLParagraphElement;
+    const email_error_message = document.getElementById(
+      "email-error-message",
+    ) as HTMLParagraphElement;
     const new_email = (
-          document.querySelector('input[type="email"]') as HTMLInputElement
-        ).value
-    axios.post(
-      "/users/reset_email",
-      {
-        new_email: new_email,
-      },
-      {
-        headers: {
-          accept: "application/json",
-          Authorization: "Bearer " + localStorage.getItem("access_token"),
+      document.querySelector('input[type="email"]') as HTMLInputElement
+    ).value;
+    axios
+      .post(
+        "/users/reset_email",
+        {
+          new_email: new_email,
         },
-      },
-    ).then((response) => {
-      if (response.status === 200) {
-        email_error_message.innerText = "Email changed successfully";
-      }
-    }
-    ).catch(() => {
-      email_error_message.innerText = "Email change failed";
-    });
+        {
+          headers: {
+            accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("access_token"),
+          },
+        },
+      )
+      .then((response) => {
+        if (response.status === 200) {
+          email_error_message.innerText = "Email changed successfully";
+        }
+      })
+      .catch(() => {
+        email_error_message.innerText = "Email change failed";
+      });
   };
 
   const handleAccountDeletionSubmission = () => {
@@ -264,7 +272,11 @@ const Settings = () => {
                     className="mb-4 w-full rounded-lg border border-border bg-secondary p-2 outline-none"
                     onChange={handleEmailChangeEvents}
                   />
-                  <button className="rounded-lg bg-accent p-2 px-16 text-text-contrast hover:bg-accent-hover" type="button" onClick={handleEmailChangeSubmission}>
+                  <button
+                    className="rounded-lg bg-accent p-2 px-16 text-text-contrast hover:bg-accent-hover"
+                    type="button"
+                    onClick={handleEmailChangeSubmission}
+                  >
                     Change Email
                   </button>
                   <p id="email-error-message" className="text-error"></p>
