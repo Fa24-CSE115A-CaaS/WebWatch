@@ -163,7 +163,7 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
             />
           </div>
           <div>
-            <h3 className="mb-5 text-xl xxl:text-2xl">Notfication Options</h3>
+            <h3 className="mb-5 text-xl xxl:text-2xl">Notification Options</h3>
             <div className="mb-5">
               {NOTIFICATION_OPTS.map((opt) => {
                 const notifOpt = notificationOptions;
