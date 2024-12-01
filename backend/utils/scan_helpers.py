@@ -9,9 +9,9 @@ def compare_texts(text1, text2):
     added = []
     removed = []
     for line in diff:
-        if line.startswith('+ '):
+        if line.startswith("+ "):
             added.append(line[2:])
-        elif line.startswith('- '):
+        elif line.startswith("- "):
             removed.append(line[2:])
     return "**Added:**\n" + "\n".join(added) + "\n\n**Removed:**\n" + "\n".join(removed)
 
