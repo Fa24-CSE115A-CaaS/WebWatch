@@ -98,7 +98,10 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
           message: `Modified task: ${task.name}`,
         });
       }
-    } catch (error) {
+    } catch (err) {
+      const error = err as {
+        response?: { status: number; data: { detail: any[] } };
+      };
       if (error.response && error.response.status === 422) {
         const errorDetails = error.response.data.detail;
         const errors: typeof formState.errors = {};
