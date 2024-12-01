@@ -34,7 +34,7 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
 
   const handleFormSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    let errors: typeof formState.errors = {};
+    const errors: typeof formState.errors = {};
 
     if (name.trim().length <= 0) {
       errors.name = "Please enter a name";
@@ -98,11 +98,28 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
           message: `Modified task: ${task.name}`,
         });
       }
-    } catch {
-      addNotification({
-        type: "ERROR",
-        message: "An unexpected error occurred. Please try again later.",
-      });
+    } catch (error) {
+      if (error.response && error.response.status === 422) {
+        const errorDetails = error.response.data.detail;
+        const errors: typeof formState.errors = {};
+        errorDetails.forEach((err: any) => {
+          if (err.loc.includes("url")) {
+            errors.url = err.msg;
+          }
+          if (err.loc.includes("discord_url")) {
+            errors.discordUrl = err.msg;
+          }
+          if (err.loc.includes("slack_url")) {
+            errors.slackUrl = err.msg;
+          }
+        });
+        setFormState({ ...formState, errors });
+      } else {
+        addNotification({
+          type: "ERROR",
+          message: "An unexpected error occurred. Please try again later.",
+        });
+      }
     }
   };
 
