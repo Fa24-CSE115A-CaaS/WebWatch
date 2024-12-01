@@ -1,5 +1,6 @@
 import sys
 import os
+import logging
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -9,7 +10,10 @@ from bs4 import BeautifulSoup
 import time
 import urllib.parse
 
-# TODO: Use logging instead of print statements for better debugging
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 
 class WebScraper:
@@ -54,7 +58,11 @@ class WebScraper:
         # Add other necessary Chrome options
         options.add_argument("--no-sandbox")
         options.add_argument("--headless")
-
+        options.add_argument("--single-process")  # Run Chrome in a single process
+        options.add_argument(
+            "--disable-software-rasterizer"
+        )  # Disable the software rasterizer
+        # DO NOT DISABLE GPU, SCRIPT NO LIKEY (idk why???)
         # Disable images and videos
         prefs = {
             "profile.managed_default_content_settings.images": 2,
@@ -67,17 +75,29 @@ class WebScraper:
         driver = webdriver.Chrome(service=service, options=options)
         return driver
 
-    def load_page(self, url):
-        self.driver.get(url)
+    def _reinitialize_driver(self):
+        if self.driver:
+            self.driver.quit()
+        self.driver = self._initialize_driver()
 
-        # Wait until the <body> tag is present (ensure the page content is fully loaded)
-        try:
-            WebDriverWait(self.driver, 10).until(  # Timeout counter
-                EC.presence_of_element_located((By.TAG_NAME, "body"))
-            )
-            print("Page content loaded.")
-        except Exception as e:
-            print(f"Error loading page: {e}")
+    def load_page(self, url, retries=5):
+        for attempt in range(retries):
+            try:
+                self.driver.get(url)
+                WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.TAG_NAME, "body"))
+                )
+                logging.info("Page content loaded.")
+                return
+            except Exception as e:
+                logging.error(f"Error loading page on attempt {attempt + 1}: {e}")
+                if "disconnected" in str(e):
+                    logging.info("Reinitializing driver due to disconnection.")
+                    self._reinitialize_driver()
+                if attempt < retries - 1:
+                    time.sleep(2)  # Wait before retrying
+                else:
+                    raise
 
     def scrape_all_text(self, url):
         try:
@@ -118,6 +138,11 @@ class WebScraper:
                 f"\n{load_time_log}{parse_time_log}{extract_time_log}{total_time_log}"
             )
 
+            logging.info(load_time_log.strip())
+            logging.info(parse_time_log.strip())
+            logging.info(extract_time_log.strip())
+            logging.info(total_time_log.strip())
+
             """ Write timing log
             with open("timing_log.txt", "w", encoding="utf-8") as f:
                 f.write(log_text)
@@ -126,24 +151,28 @@ class WebScraper:
             return page_text
 
         except Exception as e:
+            logging.error(f"An error occurred: {e}")
             return f"An error occurred: {e}"
 
     def scrape_to_file(self, url):
-        page_text = self.scrape_all_text(url)
+        try:
+            page_text = self.scrape_all_text(url)
 
-        # Generate filename using website name and timestamp
-        website_name = urllib.parse.urlparse(url).netloc.replace(".", "_")
-        page_text = self.scrape_all_text(url)
-        filename = f"scraper-linux64/scrapes/{website_name}-{timestamp}.txt"
+            # Generate filename using website name and timestamp
+            website_name = urllib.parse.urlparse(url).netloc.replace(".", "_")
+            page_text = self.scrape_all_text(url)
+            filename = f"scraper-linux64/scrapes/{website_name}-{timestamp}.txt"
 
-        if not os.path.exists("scraper-linux64/scrapes"):
-            os.makedirs("scraper-linux64/scrapes")
+            if not os.path.exists("scraper-linux64/scrapes"):
+                os.makedirs("scraper-linux64/scrapes")
 
-        # Save the extracted text content to a file
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(page_text)
+            # Save the extracted text content to a file
+            with open(filename, "w", encoding="utf-8") as f:
+                f.write(page_text)
 
-        print(f"Saved all visible text content to: {filename}")
+            logging.info(f"Saved all visible text content to: {filename}")
+        except Exception as e:
+            logging.error(f"Failed to scrape to file: {e}")
 
 
 # Main function to handle URL input or argument
@@ -157,4 +186,7 @@ if __name__ == "__main__":
         url = input("Please enter the URL: ")
 
     with WebScraper() as scraper:
-        scraper.scrape_to_file(url)
+        try:
+            scraper.scrape_to_file(url)
+        except Exception as e:
+            logging.error(f"Task encountered an error while scraping {url}: {e}")
