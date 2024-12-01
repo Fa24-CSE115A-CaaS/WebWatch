@@ -87,6 +87,10 @@ class WebScraper:
         for attempt in range(retries):
             try:
                 self.driver.get(url)
+                # Wait for the body element to be present
+                WebDriverWait(self.driver, 4).until(
+                    EC.presence_of_element_located((By.TAG_NAME, "body"))
+                )
                 logging.info("Page content loaded.")
                 return
             except Exception as e:
@@ -157,11 +161,13 @@ class WebScraper:
     def scrape_to_file(self, url):
         try:
             page_text = self.scrape_all_text(url)
+            print(page_text)
 
             # Generate filename using website name and timestamp
             website_name = urllib.parse.urlparse(url).netloc.replace(".", "_")
             page_text = self.scrape_all_text(url)
-            filename = f"scraper-linux64/scrapes/{website_name}-{timestamp}.txt"
+            print(page_text)
+            filename = f"scraper-linux64/scrapes/{website_name}-{int(time.time())}.txt"
 
             if not os.path.exists("scraper-linux64/scrapes"):
                 os.makedirs("scraper-linux64/scrapes")
