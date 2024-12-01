@@ -37,8 +37,8 @@ def send_mail(subject: str, message: str, recipients: list[str]):
         server.quit()
 
 
-def send_discord_msg(webhook_url, message):
-    message = str(message)
+def send_discord_msg(webhook_url, message, retries=5):
+    message = str(message)[:2048]  # Truncate message to 2048 characters
     payload = {
         "username": "WebWatch",
         "avatar_url": "https://cdn.discordapp.com/icons/1290530538226061385/5cc1bbbc655fa34f00b1d8c02bd1e9a4.webp?size=1024",
@@ -58,8 +58,17 @@ def send_discord_msg(webhook_url, message):
     }
 
     headers = {"Content-Type": "application/json"}
-    response = requests.post(webhook_url, data=json.dumps(payload), headers=headers)
-    response.raise_for_status()
+    for attempt in range(retries):
+        try:
+            response = requests.post(webhook_url, data=json.dumps(payload), headers=headers)
+            response.raise_for_status()
+            break
+        except requests.exceptions.RequestException as e:
+            if attempt < retries - 1:
+                print(f"Attempt {attempt + 1} failed: {e}. Retrying...")
+            else:
+                print(f"All {retries} attempts failed: {e}")
+                raise
 
 
 def send_password_reset_email(recipient_email: str, reset_link: str):
