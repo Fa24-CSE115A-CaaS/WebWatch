@@ -7,6 +7,7 @@ from datetime import datetime
 
 
 def send_mail(subject: str, message: str, recipients: list[str]):
+    message = str(message)
     load_dotenv()
 
     smtp_server = os.getenv("EMAIL_SERVER")
@@ -37,6 +38,7 @@ def send_mail(subject: str, message: str, recipients: list[str]):
 
 
 def send_discord_msg(webhook_url, message):
+    message = str(message)
     payload = {
         "username": "WebWatch",
         "avatar_url": "https://cdn.discordapp.com/icons/1290530538226061385/5cc1bbbc655fa34f00b1d8c02bd1e9a4.webp?size=1024",
@@ -61,6 +63,7 @@ def send_discord_msg(webhook_url, message):
 
 
 def send_password_reset_email(recipient_email: str, reset_link: str):
+    reset_link = str(reset_link)
     load_dotenv()
 
     smtp_server = os.getenv("EMAIL_SERVER")
