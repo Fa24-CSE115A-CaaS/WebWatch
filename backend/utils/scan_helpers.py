@@ -5,14 +5,15 @@ import os
 
 
 def compare_texts(text1, text2):
-    diff = difflib.unified_diff(
-        text1.splitlines(),
-        text2.splitlines(),
-        lineterm="",
-        fromfile="first_scrape",
-        tofile="second_scrape",
-    )
-    return "\n".join(diff)
+    diff = difflib.ndiff(text1.splitlines(), text2.splitlines())
+    added = []
+    removed = []
+    for line in diff:
+        if line.startswith('+ '):
+            added.append(line[2:])
+        elif line.startswith('- '):
+            removed.append(line[2:])
+    return "**Added:**\n" + "\n".join(added) + "\n\n**Removed:**\n" + "\n".join(removed)
 
 
 def get_user_from_id(user_id: int):
