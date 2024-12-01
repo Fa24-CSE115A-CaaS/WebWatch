@@ -20,6 +20,7 @@ logging.getLogger("sqlalchemy.engine").setLevel(
 
 manager = get_task_manager()
 
+
 class URLType(types.TypeDecorator):
     impl = types.String
 
@@ -28,6 +29,7 @@ class URLType(types.TypeDecorator):
 
     def process_result_value(self, value, dialect):
         return HttpUrl(value) if value else None
+
 
 class TaskBase(SQLModel):
     name: str = Field(max_length=50)
@@ -40,12 +42,12 @@ class TaskBase(SQLModel):
     )
     enabled: bool = True  # If the task is enabled then it should be running
 
-    @validator('url', 'discord_url')
+    @validator("url", "discord_url")
     def validate_url(cls, value):
         if value is None:
             return value
         if not value:
-            raise ValueError('URL cannot be empty')
+            raise ValueError("URL cannot be empty")
         return value
 
     @field_validator("enabled_notification_options")
