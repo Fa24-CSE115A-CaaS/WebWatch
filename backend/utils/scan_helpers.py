@@ -13,7 +13,17 @@ def compare_texts(text1, text2):
             added.append(line[2:])
         elif line.startswith("-"):
             removed.append(line[2:])
-    return "**Added:**\n" + "\n".join(added) + "\n\n**Removed:**\n" + "\n".join(removed)
+    
+    output = [""]
+    if added:
+        output.append("**Added:**\n")
+        output.append("\n".join(added))
+    if added and removed:
+        output.append("\n\n")
+    if removed:
+        output.append("**Removed:**\n")
+        output.append("\n".join(removed))
+    return "".join(output)
 
 
 def get_user_from_id(user_id: int):
