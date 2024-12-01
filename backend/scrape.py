@@ -59,10 +59,13 @@ class WebScraper:
         options.add_argument("--no-sandbox")
         options.add_argument("--headless")
         options.add_argument("--single-process")  # Run Chrome in a single process
-        options.add_argument(
-            "--disable-software-rasterizer"
-        )  # Disable the software rasterizer
-        # DO NOT DISABLE GPU, SCRIPT NO LIKEY (idk why???)
+        # options.add_argument("--disable-gpu")  # Disable GPU hardware acceleration DO NOT DISABLE
+        options.add_argument("--disable-extensions")  # Disable extensions
+        options.add_argument("--disable-infobars")  # Disable infobars
+        options.add_argument("--disable-popup-blocking")  # Disable popup blocking
+        options.add_argument("--disable-plugins-discovery")  # Disable plugins discovery
+        options.add_argument("--disable-notifications")  # Disable notifications
+
         # Disable images and videos
         prefs = {
             "profile.managed_default_content_settings.images": 2,
@@ -84,9 +87,6 @@ class WebScraper:
         for attempt in range(retries):
             try:
                 self.driver.get(url)
-                WebDriverWait(self.driver, 10).until(
-                    EC.presence_of_element_located((By.TAG_NAME, "body"))
-                )
                 logging.info("Page content loaded.")
                 return
             except Exception as e:
@@ -95,7 +95,7 @@ class WebScraper:
                     logging.info("Reinitializing driver due to disconnection.")
                     self._reinitialize_driver()
                 if attempt < retries - 1:
-                    time.sleep(2)  # Wait before retrying
+                    time.sleep(0.2)  # Wait before retrying
                 else:
                     raise
 
