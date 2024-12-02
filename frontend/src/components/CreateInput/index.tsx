@@ -89,11 +89,19 @@ const CreateInput = () => {
           message: "Created a new task",
         });
       }
-    } catch {
-      addNotification({
-        type: "ERROR",
-        message: "An unexpected error occurred. Please try again later.",
-      });
+    } catch (error: any) {
+      if (error.response && error.response.status === 422) {
+        const errorMsg = "Please enter a valid URL";
+        addNotification({
+          type: "ERROR",
+          message: `Validation error: ${errorMsg}`,
+        });
+      } else {
+        addNotification({
+          type: "ERROR",
+          message: "An unexpected error occurred. Please try again later.",
+        });
+      }
     }
   };
 
