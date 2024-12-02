@@ -7,7 +7,6 @@ import usePopup from "../../hooks/usePopup";
 import { FaRegBell } from "react-icons/fa";
 import { IoSearch } from "react-icons/io5";
 // Types
-import { TaskResponse } from "../../types";
 import { FormState } from "./types";
 // Constants
 import {
@@ -16,7 +15,6 @@ import {
 } from "../../constants/tasks";
 // Util
 import { axios } from "../../config";
-import { TasksPageContext } from "../../pages/Tasks";
 // Context
 import { NotificationContext } from "../../hooks/useNotification";
 
@@ -28,7 +26,6 @@ const defaultState: FormState = {
 };
 
 const CreateInput = () => {
-  const { tasks, setTasks } = useContext(TasksPageContext)!;
   const { open, setOpen, containerRef } = usePopup();
   const [formState, setFormState] = useState<FormState>(defaultState);
   const addNotification = useContext(NotificationContext);
@@ -85,26 +82,12 @@ const CreateInput = () => {
       );
 
       if (res.status === 201) {
-        const data = res.data as TaskResponse;
         setFormState({ ...defaultState });
         setOpen(false);
         addNotification({
           type: "SUCCESS",
           message: "Created a new task",
         });
-        setTasks([
-          ...tasks,
-          {
-            id: data.id,
-            name: data.name,
-            content: data.content,
-            url: data.url,
-            discordUrl: data.discord_url,
-            interval: data.interval,
-            enabledNotificationOptions: data.enabled_notification_options,
-            enabled: data.enabled,
-          },
-        ]);
       }
     } catch {
       addNotification({
