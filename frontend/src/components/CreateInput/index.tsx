@@ -21,6 +21,7 @@ import { NotificationContext } from "../../hooks/useNotification";
 const defaultState: FormState = {
   url: "",
   name: "",
+  xpath: "",
   interval: NaN,
   errors: {},
 };
@@ -73,6 +74,7 @@ const CreateInput = () => {
           url: formState.url,
           name: formState.name,
           interval: formState.interval,
+          xpath: formState.xpath,
         },
         {
           headers: {

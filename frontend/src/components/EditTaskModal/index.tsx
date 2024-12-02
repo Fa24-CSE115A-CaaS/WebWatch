@@ -25,12 +25,20 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
     discordUrl: task.discordUrl || "",
     slackUrl: "",
     interval: task.interval,
+    xpath: task.xpath,
     errors: {},
   });
   const addNotification = useContext(NotificationContext);
 
-  const { name, url, notificationOptions, discordUrl, slackUrl, interval } =
-    formState;
+  const {
+    name,
+    url,
+    notificationOptions,
+    discordUrl,
+    slackUrl,
+    interval,
+    xpath,
+  } = formState;
 
   const handleFormSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
@@ -83,6 +91,7 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
           interval,
           discord_url: discordUrl,
           slack_url: slackUrl,
+          xpath: xpath || null,
         },
         {
           headers: {
@@ -160,6 +169,20 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
                 placeholder: "Enter an interval in seconds",
               }}
               error={formState.errors.interval}
+            />
+            <Input
+              label="XPath"
+              containerClass="mb-3"
+              inputAttrs={{
+                value: formState.xpath,
+                onChange: (e) =>
+                  setFormState({
+                    ...formState,
+                    xpath: e.target.value,
+                  }),
+                placeholder: "Enter an xpath",
+              }}
+              error={formState.errors.xpath}
             />
           </div>
           <div>

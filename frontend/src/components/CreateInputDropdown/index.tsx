@@ -37,6 +37,20 @@ const CreateInputDropdown = <T extends FormState>({
         }}
         error={formState.errors.interval}
       />
+      <Input
+        label="XPath"
+        inputAttrs={{
+          onChange: (e) => {
+            setFormState({
+              ...formState,
+              xpath: e.target.value,
+            });
+          },
+          value: formState.xpath,
+          placeholder: "Enter an xpath",
+        }}
+        error={formState.errors.xpath}
+      />
     </div>
   );
 };
