@@ -16,6 +16,7 @@ from dependencies.user import get_user, get_user_id
 from scheduler import Scheduler, get_scheduler
 from task_websocket_manager import get_task_manager
 import os
+import logging
 
 ### TASK ENDPOINTS ###
 
@@ -31,15 +32,22 @@ SchedulerDep = Annotated[Scheduler, Depends(get_scheduler)]
 UserData = Annotated[User, Depends(get_user)]
 TaskData = Annotated[Task, Depends(get_task)]
 
+logging.basicConfig(level=logging.INFO)
+
 
 # Create a new task
-@router.post("", response_model=TaskGet, status_code=201)
+@router.post("", response_model=TaskGet, status_code=status.HTTP_201_CREATED)
 async def tasks_create(
     task_create: TaskCreate,
     session: DbSession,
     scheduler: SchedulerDep,
     user_id: UserData,
 ):
+    """
+    Create a new task for the currently authenticated user.
+    """
+    logging.info(f"Creating task for user {user_id}")
+
     task = Task(**task_create.model_dump(), user_id=user_id)
     session.add(task)
     session.commit()
@@ -52,6 +60,11 @@ async def tasks_create(
 # List all tasks
 @router.get("", response_model=List[TaskGet])
 async def tasks_list(session: DbSession, user: UserData):
+    """
+    List all tasks for the currently authenticated user.
+    """
+
+    logging.info(f"Listing tasks for user {user}")
     tasks = session.exec(select(Task).where(Task.user_id == user)).all()
     return tasks
 
@@ -85,6 +98,11 @@ async def tasks_update(
     user_id: UserData,
     scheduler: SchedulerDep,
 ):
+    """
+    Update a task by ID which belongs to the currently authenticated user.
+    """
+    logging.info(f"Updating task {task_id}")
+
     task = session.get(Task, task_id)
 
     if not task:
@@ -114,6 +132,7 @@ async def tasks_update(
 async def tasks_delete(
     task_id: TaskData, session: DbSession, scheduler: SchedulerDep, user_id: UserData
 ):
+    # Delete a task by ID which belongs to the currently authenticated user.
     task = session.get(Task, task_id)
     session.delete(task)
     session.commit()
