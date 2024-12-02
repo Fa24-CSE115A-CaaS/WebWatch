@@ -17,8 +17,8 @@ const TaskList: TaskComponent = ({ tasks }) => {
 
   return (
     <section
-      className="mx-auto mb-10 overflow-x-auto rounded-md border-[1px] border-border text-text
-        xxl:border-2"
+      className="mx-auto mb-10 overflow-x-auto rounded-md border-[1px] border-border bg-primary
+        text-text xxl:border-2"
       ref={sectionRef}
     >
       <table className="w-full">
