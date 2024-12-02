@@ -6,6 +6,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
+from constants.scrape import ALLOWED_ATTRIBUTES
 import time
 import urllib.parse
 
@@ -124,6 +125,63 @@ class WebScraper:
             """
 
             return page_text
+
+        except Exception as e:
+            return f"An error occurred: {e}"
+
+    def scrape_by_xpath(self, url, xpath):
+        try:
+            start_time = time.time()
+
+            # Load the page
+            load_start_time = time.time()
+
+            self.load_page(url)
+
+            load_end_time = time.time()
+            load_time_log = (
+                f"Time to load page: {load_end_time - load_start_time:.5f} seconds\n"
+            )
+
+            # Get the page source and parse it with BeautifulSoup
+            parse_start_time = time.time()
+
+            el = self.driver.find_element(By.XPATH, xpath)
+            html_src = el.get_attribute("outerHTML")
+            soup = BeautifulSoup(html_src, "html.parser")
+
+            parse_end_time = time.time()
+            parse_time_log = (
+                f"Time to parse page: {parse_end_time - parse_start_time:.5f} seconds\n"
+            )
+
+            # Extract all visible text from the page
+            extract_start_time = time.time()
+
+            for tag in soup.find_all(True):
+                tag_attrs = {}
+                for attr in ALLOWED_ATTRIBUTES:
+                    if attr in tag.attrs:
+                        tag_attrs[attr] = tag.attrs[attr]
+                tag.attrs = tag_attrs
+
+            extract_end_time = time.time()
+            extract_time_log = f"Time to extract text: {extract_end_time - extract_start_time:.5f} seconds\n"
+            end_time = time.time()
+            total_time_log = (
+                f"Total time for scrape_all_text: {end_time - start_time:.5f} seconds\n"
+            )
+
+            # Append log messages to page_text
+            log_text = (
+                f"\n{load_time_log}{parse_time_log}{extract_time_log}{total_time_log}"
+            )
+
+            """ Write timing log
+            with open("timing_log.txt", "w", encoding="utf-8") as f:
+                f.write(log_text)
+            """
+            return str(soup)
 
         except Exception as e:
             return f"An error occurred: {e}"
