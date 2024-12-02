@@ -115,10 +115,12 @@ class Task(TaskBase, table=True):
             "body": f"An error occurred while scraping {self.url}. Please modify your task to include a valid URL.",
         }
         is_scraping_text = self.xpath == None
-        
+
         if is_scraping_text:
-            error_message["body"] = f"An error occurred while scraping {self.url}. Please ensure your URL and XPath are valid.",
-        
+            error_message["body"] = (
+                f"An error occurred while scraping {self.url}. Please ensure your URL and XPath are valid.",
+            )
+
         update_task_field(
             self.id,
             "next_run",
