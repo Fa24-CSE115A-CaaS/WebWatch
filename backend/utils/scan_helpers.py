@@ -13,7 +13,7 @@ def compare_texts(text1, text2):
             added.append(line[2:])
         elif line.startswith("-"):
             removed.append(line[2:])
-    
+
     output = [""]
     if added:
         output.append("**Added:**\n")

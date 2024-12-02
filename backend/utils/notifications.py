@@ -60,7 +60,9 @@ def send_discord_msg(webhook_url, message, retries=5):
     headers = {"Content-Type": "application/json"}
     for attempt in range(retries):
         try:
-            response = requests.post(webhook_url, data=json.dumps(payload), headers=headers)
+            response = requests.post(
+                webhook_url, data=json.dumps(payload), headers=headers
+            )
             response.raise_for_status()
             break
         except requests.exceptions.RequestException as e:

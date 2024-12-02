@@ -17,7 +17,9 @@ logging.basicConfig(
 
 
 class WebScraper:
-    def __init__(self, webdriver_path=None, chrome_exe_path=None):
+    def __init__(
+        self, webdriver_path=None, chrome_exe_path=None, ublock_origin_path=None
+    ):
         # Determine the base directory of the script
         base_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -30,9 +32,14 @@ class WebScraper:
             chrome_exe_path = os.path.join(
                 base_dir, "scraper-linux64/chrome/chrome-linux64/chrome"
             )
+        if ublock_origin_path is None:
+            ublock_origin_path = os.path.join(
+                base_dir, "scraper-linux64/chrome/uBlock0.chromium"
+            )
 
         self.webdriver_path = webdriver_path
         self.chrome_exe_path = chrome_exe_path
+        self.ublock_origin_path = ublock_origin_path
         self.driver = None
 
     def __enter__(self):
@@ -51,20 +58,27 @@ class WebScraper:
         # Use a natural Chrome user-agent string
         natural_user_agent = (
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/116.0.5845.110 Safari/537.36"
+            "Chrome/130.0.6723.58 Safari/537.36"
         )
         options.add_argument(f"user-agent={natural_user_agent}")
 
         # Add other necessary Chrome options
         options.add_argument("--no-sandbox")
-        options.add_argument("--headless")
+        options.add_argument("--headless=new")  # Enable headless mode
+        # options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
+        options.add_argument("--remote-debugging-pipe")  # Enable remote debugging
         options.add_argument("--single-process")  # Run Chrome in a single process
         # options.add_argument("--disable-gpu")  # Disable GPU hardware acceleration DO NOT DISABLE
-        options.add_argument("--disable-extensions")  # Disable extensions
+        # options.add_argument("--disable-extensions")  # Disable extensions
         options.add_argument("--disable-infobars")  # Disable infobars
         options.add_argument("--disable-popup-blocking")  # Disable popup blocking
         options.add_argument("--disable-plugins-discovery")  # Disable plugins discovery
         options.add_argument("--disable-notifications")  # Disable notifications
+
+        # Add uBlock Origin extension
+        if self.ublock_origin_path:
+            options.add_argument(f"--load-extension={self.ublock_origin_path}")
+            logging.info("uBlock Origin extension added.")
 
         # Disable images and videos
         prefs = {
@@ -91,6 +105,7 @@ class WebScraper:
                 WebDriverWait(self.driver, 4).until(
                     EC.presence_of_element_located((By.TAG_NAME, "body"))
                 )
+                time.sleep(0.1)  # Wait for any additional content to load
                 logging.info("Page content loaded.")
                 return
             except Exception as e:
@@ -191,7 +206,8 @@ if __name__ == "__main__":
         # If no URL is provided, prompt the user to enter a URL
         url = input("Please enter the URL: ")
 
-    with WebScraper() as scraper:
+    ublock_origin_path = os.path.join(base_dir, "path/to/ublock-origin")
+    with WebScraper(ublock_origin_path=ublock_origin_path) as scraper:
         try:
             scraper.scrape_to_file(url)
         except Exception as e:
