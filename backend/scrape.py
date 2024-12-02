@@ -74,17 +74,28 @@ class WebScraper:
         options.add_argument("--disable-popup-blocking")  # Disable popup blocking
         options.add_argument("--disable-plugins-discovery")  # Disable plugins discovery
         options.add_argument("--disable-notifications")  # Disable notifications
+        options.add_argument("--disable-remote-fonts")
+        options.add_argument("--disable-remote-playback")
+        options.add_argument("--disable-background-video-track")
+        options.add_argument("--disable-background-video-playback")
+        options.add_argument("--disable-background-video")
+        options.add_argument("--disable-video-playback")
+        options.add_argument("--disable-video")
+        options.add_argument("--disable-video-track")
 
         # Add uBlock Origin extension
         if self.ublock_origin_path:
             options.add_argument(f"--load-extension={self.ublock_origin_path}")
             logging.info("uBlock Origin extension added.")
 
-        # Disable images and videos
+        # Disable images and videos if specified
         prefs = {
             "profile.managed_default_content_settings.images": 2,
             "profile.managed_default_content_settings.video": 2,
+            "profile.default_content_setting_values.images": 2,
+            "profile.default_content_setting_values.video": 2,
         }
+
         options.add_experimental_option("prefs", prefs)
 
         # Initialize WebDriver
