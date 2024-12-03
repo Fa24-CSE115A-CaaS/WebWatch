@@ -34,14 +34,9 @@ class URLType(types.TypeDecorator):
 class TaskBase(SQLModel):
     name: str = Field(max_length=50)
     content: str | None = Field(default=None, sa_column=Column(String(length=10000)))
-<<<<<<< HEAD
-    url: str
-    discord_url: str | None = None
-    slack_url: str | None = None
-=======
     url: HttpUrl = Field(sa_column=Column(URLType))
     discord_url: HttpUrl | None = Field(sa_column=Column(URLType), default=None)
->>>>>>> origin/main
+    slack_url: HttpUrl | None = None
     interval: int = Field(ge=MIN_INTERVAL_SECONDS, le=MAX_INTERVAL_SECONDS)
     enabled_notification_options: NotificationOptions = Field(
         default=["EMAIL"], sa_column=Column(JSON())
