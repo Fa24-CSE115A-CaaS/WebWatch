@@ -21,7 +21,6 @@ logging.getLogger("sqlalchemy.engine").setLevel(
 manager = get_task_manager()
 
 
-
 class URLType(types.TypeDecorator):
     impl = types.String
 
@@ -225,7 +224,7 @@ class TaskUpdate(TaskBase):
         default=None, sa_column=Column(JSON())
     )
     enabled: bool | None = None
-    
+
     @validator("url", "discord_url", pre=True, always=True)
     def validate_url(cls, value):
         if value is None:
