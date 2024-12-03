@@ -36,7 +36,7 @@ class TaskBase(SQLModel):
     content: str | None = Field(default=None, sa_column=Column(String(length=10000)))
     url: HttpUrl = Field(sa_column=Column(URLType))
     discord_url: HttpUrl | None = Field(sa_column=Column(URLType), default=None)
-    slack_url: HttpUrl | None = None
+    slack_url: HttpUrl | None = Field(sa_column=Column(URLType), default=None)
     interval: int = Field(ge=MIN_INTERVAL_SECONDS, le=MAX_INTERVAL_SECONDS)
     enabled_notification_options: NotificationOptions = Field(
         default=["EMAIL"], sa_column=Column(JSON())
