@@ -26,6 +26,7 @@ class TaskBase(SQLModel):
     content: str | None = Field(default=None, sa_column=Column(String(length=10000)))
     url: str
     discord_url: str | None = None
+    slack_url: str | None = None
     interval: int = Field(ge=MIN_INTERVAL_SECONDS, le=MAX_INTERVAL_SECONDS)
     enabled_notification_options: NotificationOptions = Field(
         default=["EMAIL"], sa_column=Column(JSON())
@@ -77,7 +78,7 @@ class Task(TaskBase, table=True):
         return self.id
 
     def notify(self, message: dict):
-        from utils.notifications import send_mail, send_discord_msg
+        from utils.notifications import send_mail, send_discord_msg, send_slack_msg
 
         subject = message["subject"]
         body = message["body"]
@@ -104,6 +105,10 @@ class Task(TaskBase, table=True):
             pass
         if "SLACK" in self.enabled_notification_options:
             # send slack message
+            try: 
+                send_slack_msg(self.slack_url, body)
+            except Exception as e:
+                logging.error(f"Failed to send slack message: {e}")
             pass
 
     def scan(self):
@@ -187,6 +192,7 @@ class TaskUpdate(TaskBase):
     content: str | None = Field(default=None, sa_column=Column(String(length=10000)))
     url: str | None = None
     discord_url: str | None = None
+    slack_url: str | None = None
     interval: int | None = Field(
         default=None, ge=MIN_INTERVAL_SECONDS, le=MAX_INTERVAL_SECONDS
     )
