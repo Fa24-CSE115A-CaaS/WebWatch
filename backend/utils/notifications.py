@@ -70,7 +70,7 @@ def send_discord_msg(webhook_url, message, retries=5):
             except requests.exceptions.RequestException as e:
                 if attempt < retries - 1:
                     print(f"Attempt {attempt + 1} failed: {e}. Retrying...")
-                    time.sleep(1.1 ** attempt)  # Exponential backoff
+                    time.sleep(1.1**attempt)  # Exponential backoff
                 else:
                     print(f"All {retries} attempts failed: {e}")
                     raise

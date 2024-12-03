@@ -64,16 +64,39 @@ class WebScraper:
 
         # Add other necessary Chrome options
         options.add_argument("--no-sandbox")
-        options.add_argument("--headless=new")  # Enable headless mode
-        # options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
+        options.add_argument("--disable-gpu")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-browser-side-navigation")
+        options.add_argument("enable-automation")
+        options.add_argument("--headless")
+        options.add_argument("--window-size=1920,1080")
+        options.add_argument("start-maximized")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-extensions")
+        options.add_argument("--dns-prefetch-disable")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--single-process")
+        options.add_argument("--disk-cache-size=0")
+        options.add_argument("--disable-infobars")
+        options.add_argument("--disable-notifications")
+        """
+        #options.add_argument("--headless=new")  # Enable headless mode
+        #options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
         options.add_argument("--remote-debugging-pipe")  # Enable remote debugging
-        options.add_argument("--single-process")  # Run Chrome in a single process
-        # options.add_argument("--disable-gpu")  # Disable GPU hardware acceleration DO NOT DISABLE
-        # options.add_argument("--disable-extensions")  # Disable extensions
-        options.add_argument("--disable-infobars")  # Disable infobars
+        #options.add_argument("--single-process")  # Run Chrome in a single process
+        #options.add_argument("--disable-gpu")  # Disable GPU hardware acceleration DO NOT DISABLE
+        options.add_argument("--disable-extensions")  # Disable extensions
+        #options.add_argument("start-maximized")
+        #options.add_argument("--window-size=1920,1080")
+        #options.add_argument("--dns-prefetch-disable")
+        #options.add_argument("--disk-cache-size=0")
+        #options.add_argument("--incognito")
+        #options.add_argument("enable-automation")
+        #options.add_argument("--disable-browser-side-navigation")
+        #options.add_argument("--disable-infobars")  # Disable infobars
         options.add_argument("--disable-popup-blocking")  # Disable popup blocking
         options.add_argument("--disable-plugins-discovery")  # Disable plugins discovery
-        options.add_argument("--disable-notifications")  # Disable notifications
+        #options.add_argument("--disable-notifications")  # Disable notifications
         options.add_argument("--disable-remote-fonts")
         options.add_argument("--disable-remote-playback")
         options.add_argument("--disable-background-video-track")
@@ -82,7 +105,7 @@ class WebScraper:
         options.add_argument("--disable-video-playback")
         options.add_argument("--disable-video")
         options.add_argument("--disable-video-track")
-
+        """
         # Add uBlock Origin extension
         if self.ublock_origin_path:
             options.add_argument(f"--load-extension={self.ublock_origin_path}")
@@ -96,7 +119,7 @@ class WebScraper:
             "profile.default_content_setting_values.video": 2,
         }
 
-        options.add_experimental_option("prefs", prefs)
+        # options.add_experimental_option("prefs", prefs)
 
         # Initialize WebDriver
         service = Service(self.webdriver_path)
@@ -113,10 +136,12 @@ class WebScraper:
             try:
                 self.driver.get(url)
                 # Wait for the body element to be present
-                WebDriverWait(self.driver, 4).until(
+                WebDriverWait(
+                    self.driver, 10
+                ).until(  # Increased timeout duration from 4 to 10 seconds
                     EC.presence_of_element_located((By.TAG_NAME, "body"))
                 )
-                time.sleep(0.1)  # Wait for any additional content to load
+                time.sleep(0.25)  # Wait for any additional content to load
                 logging.info("Page content loaded.")
                 return
             except Exception as e:
