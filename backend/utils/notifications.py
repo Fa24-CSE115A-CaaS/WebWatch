@@ -1,4 +1,4 @@
-import os, smtplib, ssl, requests, json
+import os, smtplib, ssl, requests, json, time
 from dotenv import load_dotenv
 from email.utils import formataddr
 from email.mime.text import MIMEText
@@ -7,6 +7,7 @@ from datetime import datetime
 
 
 def send_mail(subject: str, message: str, recipients: list[str]):
+    message = str(message)
     load_dotenv()
 
     smtp_server = os.getenv("EMAIL_SERVER")
@@ -36,31 +37,47 @@ def send_mail(subject: str, message: str, recipients: list[str]):
         server.quit()
 
 
-def send_discord_msg(webhook_url, message):
-    payload = {
-        "username": "WebWatch",
-        "avatar_url": "https://cdn.discordapp.com/icons/1290530538226061385/5cc1bbbc655fa34f00b1d8c02bd1e9a4.webp?size=1024",
-        "embeds": [
-            {
-                "author": {
-                    "name": "WebWatch",
-                    "icon_url": "https://cdn.discordapp.com/icons/1290530538226061385/5cc1bbbc655fa34f00b1d8c02bd1e9a4.webp?size=1024",
-                    "url": "https://webwatch.live",
-                },
-                "description": message,
-                "color": 0x00B0F4,
-                "footer": {"text": "WebWatch.live"},
-                "timestamp": datetime.utcnow().isoformat(),
-            }
-        ],
-    }
-
+def send_discord_msg(webhook_url, message, retries=5):
     headers = {"Content-Type": "application/json"}
-    response = requests.post(webhook_url, data=json.dumps(payload), headers=headers)
-    response.raise_for_status()
+    while message:
+        chunk = message[:2048]
+        message = message[2048:]
+        payload = {
+            "username": "WebWatch",
+            "avatar_url": "https://cdn.discordapp.com/icons/1290530538226061385/5cc1bbbc655fa34f00b1d8c02bd1e9a4.webp?size=1024",
+            "embeds": [
+                {
+                    "author": {
+                        "name": "WebWatch",
+                        "icon_url": "https://cdn.discordapp.com/icons/1290530538226061385/5cc1bbbc655fa34f00b1d8c02bd1e9a4.webp?size=1024",
+                        "url": "https://webwatch.live",
+                    },
+                    "description": chunk,
+                    "color": 0x00B0F4,
+                    "footer": {"text": "WebWatch.live"},
+                    "timestamp": datetime.utcnow().isoformat(),
+                }
+            ],
+        }
+
+        for attempt in range(retries):
+            try:
+                response = requests.post(
+                    webhook_url, data=json.dumps(payload), headers=headers
+                )
+                response.raise_for_status()
+                break
+            except requests.exceptions.RequestException as e:
+                if attempt < retries - 1:
+                    print(f"Attempt {attempt + 1} failed: {e}. Retrying...")
+                    time.sleep(1.1**attempt)  # Exponential backoff
+                else:
+                    print(f"All {retries} attempts failed: {e}")
+                    raise
 
 
 def send_password_reset_email(recipient_email: str, reset_link: str):
+    reset_link = str(reset_link)
     load_dotenv()
 
     smtp_server = os.getenv("EMAIL_SERVER")

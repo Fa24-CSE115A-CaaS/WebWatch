@@ -1,32 +1,42 @@
 #!/bin/bash
 
-if [ -d "chrome" ]; then
-  echo "The 'chrome' directory already exists; no need to download."
-  exit 0
-fi
+# Change directory
+cd scraper-linux64
 
 # Create the chrome directory if it doesn't exist
 mkdir -p chrome
 
-# Download Chrome
-echo "Downloading Chrome..."
-wget -q https://storage.googleapis.com/chrome-for-testing-public/130.0.6723.58/linux64/chrome-linux64.zip -O chrome/chrome-linux64.zip
+# Check and download Chrome
+if [ ! -d "chrome/chrome-linux64" ]; then
+  echo "Downloading Chrome..."
+  wget -q https://storage.googleapis.com/chrome-for-testing-public/130.0.6723.58/linux64/chrome-linux64.zip -O chrome/chrome-linux64.zip
+  echo "Unpacking Chrome..."
+  unzip -q -o chrome/chrome-linux64.zip -d chrome
+  rm chrome/chrome-linux64.zip
+else
+  echo "Chrome is already downloaded and unpacked."
+fi
 
-# Download ChromeDriver
-echo "Downloading ChromeDriver..."
-wget -q https://storage.googleapis.com/chrome-for-testing-public/130.0.6723.58/linux64/chromedriver-linux64.zip -O chrome/chromedriver-linux64.zip
+# Check and download ChromeDriver
+if [ ! -f "chrome/chromedriver-linux64/chromedriver" ]; then
+  echo "Downloading ChromeDriver..."
+  wget -q https://storage.googleapis.com/chrome-for-testing-public/130.0.6723.58/linux64/chromedriver-linux64.zip -O chrome/chromedriver-linux64.zip
+  echo "Unpacking ChromeDriver..."
+  unzip -q -o chrome/chromedriver-linux64.zip -d chrome
+  rm chrome/chromedriver-linux64.zip
+else
+  echo "ChromeDriver is already downloaded and unpacked."
+fi
 
-# Unpack Chrome directly into the chrome directory
-echo "Unpacking Chrome..."
-unzip -q -o chrome/chrome-linux64.zip -d chrome
+# Check and download uBlock Origin
+if [ ! -d "chrome/uBlock0.chromium" ]; then
+  echo "Downloading uBlock Origin..."
+  wget -q https://github.com/gorhill/uBlock/releases/download/1.61.2/uBlock0_1.61.2.chromium.zip -O chrome/uBlock.zip
+  echo "Unpacking uBlock Origin..."
+  unzip -q -o chrome/uBlock.zip -d chrome
+  rm chrome/uBlock.zip
+else
+  echo "uBlock Origin is already downloaded and unpacked."
+fi
 
-# Unpack ChromeDriver directly into the chrome directory
-echo "Unpacking ChromeDriver..."
-unzip -q -o chrome/chromedriver-linux64.zip -d chrome
-
-# Clean up zip files
-echo "Cleaning up..."
-rm chrome/chrome-linux64.zip
-rm chrome/chromedriver-linux64.zip
-
-echo "Chrome and ChromeDriver have been downloaded and unpacked directly into the 'chrome' directory."
+echo "Chrome, ChromeDriver, and uBlock Origin have been checked, downloaded, and unpacked as needed."
