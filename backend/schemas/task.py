@@ -23,7 +23,6 @@ manager = get_task_manager()
 
 class TaskBase(SQLModel):
     name: str = Field(max_length=50)
-    content: str | None = Field(default=None, sa_column=Column(String(length=10000)))
     url: str
     discord_url: str | None = None
     interval: int = Field(ge=MIN_INTERVAL_SECONDS, le=MAX_INTERVAL_SECONDS)
@@ -68,6 +67,7 @@ class TaskBase(SQLModel):
 class Task(TaskBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="user.id")
+    content: str | None = Field(default=None, sa_column=Column(String(length=10000)))
     next_run: datetime | None = Field(
         sa_column=Column(DateTime(), nullable=True, default=None)
     )
@@ -184,7 +184,6 @@ class TaskCreate(TaskBase):
 
 class TaskUpdate(TaskBase):
     name: str | None = Field(default=None, max_length=50)
-    content: str | None = Field(default=None, sa_column=Column(String(length=10000)))
     url: str | None = None
     discord_url: str | None = None
     interval: int | None = Field(
