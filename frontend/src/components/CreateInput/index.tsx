@@ -94,7 +94,7 @@ const CreateInput = () => {
         const errorMsg = "Please enter a valid URL";
         addNotification({
           type: "ERROR",
-          message: `Validation error: ${errorMsg}`,
+          message: `${errorMsg}`,
         });
       } else {
         addNotification({

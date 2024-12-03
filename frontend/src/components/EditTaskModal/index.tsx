@@ -107,13 +107,13 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
         const errors: typeof formState.errors = {};
         errorDetails.forEach((err: any) => {
           if (err.loc.includes("url")) {
-            errors.url = err.msg;
+            errors.url = "Please enter a valid URL.";
           }
           if (err.loc.includes("discord_url")) {
-            errors.discordUrl = err.msg;
+            errors.discordUrl = "Please enter a valid Discord webhook URL.";
           }
           if (err.loc.includes("slack_url")) {
-            errors.slackUrl = err.msg;
+            errors.slackUrl = "Please enter a valid Slack webhook URL.";
           }
         });
         setFormState({ ...formState, errors });

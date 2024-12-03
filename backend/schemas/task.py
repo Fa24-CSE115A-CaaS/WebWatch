@@ -1,7 +1,7 @@
 from sqlalchemy import Column, types
 from typing import List, Literal
 from sqlalchemy.types import JSON, String, DateTime
-from pydantic import field_validator, HttpUrl, validator
+from pydantic import field_validator, HttpUrl, validator, ValidationError
 from sqlmodel import SQLModel, Field
 import logging
 import asyncio
@@ -21,21 +21,29 @@ logging.getLogger("sqlalchemy.engine").setLevel(
 manager = get_task_manager()
 
 
+
 class URLType(types.TypeDecorator):
     impl = types.String
 
     def process_bind_param(self, value, dialect):
-        return str(value) if value else None
+        if value:
+            try:
+                # Validate URL format by creating an instance of HttpUrl
+                HttpUrl(value)
+            except ValidationError as e:
+                raise ValueError(f"Invalid URL: {e}")
+            return str(value)
+        return None
 
     def process_result_value(self, value, dialect):
-        return HttpUrl(value) if value else None
+        return value
 
 
 class TaskBase(SQLModel):
     name: str = Field(max_length=50)
     content: str | None = Field(default=None, sa_column=Column(String(length=10000)))
-    url: HttpUrl = Field(sa_column=Column(URLType))
-    discord_url: HttpUrl | None = Field(sa_column=Column(URLType), default=None)
+    url: str = Field(sa_column=Column(URLType))
+    discord_url: str | None = Field(sa_column=Column(URLType), default=None)
     interval: int = Field(ge=MIN_INTERVAL_SECONDS, le=MAX_INTERVAL_SECONDS)
     enabled_notification_options: NotificationOptions = Field(
         default=["EMAIL"], sa_column=Column(JSON())
@@ -48,6 +56,10 @@ class TaskBase(SQLModel):
             return value
         if not value:
             raise ValueError("URL cannot be empty")
+        try:
+            HttpUrl(value)
+        except ValidationError as e:
+            raise ValueError(f"Invalid URL: {e}")
         return value
 
     @field_validator("enabled_notification_options")
@@ -204,8 +216,8 @@ class TaskCreate(TaskBase):
 class TaskUpdate(TaskBase):
     name: str | None = Field(default=None, max_length=50)
     content: str | None = Field(default=None, sa_column=Column(String(length=10000)))
-    url: HttpUrl | None = None
-    discord_url: HttpUrl | None = None
+    url: str | None = None
+    discord_url: str | None = None
     interval: int | None = Field(
         default=None, ge=MIN_INTERVAL_SECONDS, le=MAX_INTERVAL_SECONDS
     )
@@ -213,3 +225,15 @@ class TaskUpdate(TaskBase):
         default=None, sa_column=Column(JSON())
     )
     enabled: bool | None = None
+    
+    @validator("url", "discord_url", pre=True, always=True)
+    def validate_url(cls, value):
+        if value is None:
+            return value
+        if not value:
+            raise ValueError("URL cannot be empty")
+        try:
+            HttpUrl(value)
+        except ValidationError as e:
+            raise ValueError(f"Invalid URL: {e}")
+        return value
