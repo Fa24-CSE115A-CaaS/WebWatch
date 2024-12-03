@@ -37,7 +37,7 @@ def send_mail(subject: str, message: str, recipients: list[str]):
         server.quit()
 
 
-def send_discord_msg(webhook_url:str, message:str, retries: int = 5):
+def send_discord_msg(webhook_url: str, message: str, retries: int = 5):
     headers = {"Content-Type": "application/json"}
     while message:
         chunk = message[:2048]
@@ -70,32 +70,37 @@ def send_discord_msg(webhook_url:str, message:str, retries: int = 5):
             except requests.exceptions.RequestException as e:
                 if attempt < retries - 1:
                     print(f"Attempt {attempt + 1} failed: {e}. Retrying...")
-                    time.sleep(1.1 ** attempt)  # Exponential backoff
+                    time.sleep(1.1**attempt)  # Exponential backoff
                 else:
                     print(f"All {retries} attempts failed: {e}")
                     raise
 
+
 def send_slack_msg(webhook_url: str, message: str, retries: int = 5):
     headers = {"Content-Type": "application/json"}
     while message:
-        chunk = message[:3000]  # Slack's block text limit is higher than Discord's character limit
+        chunk = message[
+            :3000
+        ]  # Slack's block text limit is higher than Discord's character limit
         message = message[3000:]
         payload = {
             "text": chunk,
             "username": "WebWatch",
-            "icon_emoji": ":globe_with_meridians:", 
+            "icon_emoji": ":globe_with_meridians:",
         }
 
         for attempt in range(retries):
             try:
-                response = requests.post(webhook_url, data=json.dumps(payload), headers=headers)
+                response = requests.post(
+                    webhook_url, data=json.dumps(payload), headers=headers
+                )
                 response.raise_for_status()
                 print("Slack message sent successfully.")
                 break
             except requests.exceptions.RequestException as e:
                 if attempt < retries - 1:
                     print(f"Attempt {attempt + 1} failed: {e}. Retrying...")
-                    time.sleep(1.1 ** attempt)  # Exponential backoff
+                    time.sleep(1.1**attempt)  # Exponential backoff
                 else:
                     print(f"All {retries} attempts failed: {e}")
                     raise

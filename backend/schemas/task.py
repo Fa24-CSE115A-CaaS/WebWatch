@@ -105,7 +105,7 @@ class Task(TaskBase, table=True):
             pass
         if "SLACK" in self.enabled_notification_options:
             # send slack message
-            try: 
+            try:
                 send_slack_msg(self.slack_url, body)
             except Exception as e:
                 logging.error(f"Failed to send slack message: {e}")
