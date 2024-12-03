@@ -227,7 +227,7 @@ class TaskUpdate(TaskBase):
 
     @validator("url", "discord_url", pre=True, always=True)
     def validate_url(cls, value):
-        if value is None:
+        if value is None or value == "":
             return value
         if not value:
             raise ValueError("URL cannot be empty")
