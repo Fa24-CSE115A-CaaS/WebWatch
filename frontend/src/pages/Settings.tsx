@@ -197,7 +197,6 @@ const Settings = () => {
         lg:rounded-xl"
     >
       {/* Column 1 - Sidebar*/}
-      {/* 
       <nav className="flex w-full overflow-hidden bg-secondary text-left lg:block lg:w-max">
         <button
           type="button"
@@ -212,7 +211,6 @@ const Settings = () => {
         >
           Account
         </button>
-        
         <button
           type="button"
           className={`flex-1 flex-shrink-0 whitespace-nowrap p-4 text-center lg:w-full lg:text-left
@@ -239,9 +237,8 @@ const Settings = () => {
         >
           {isTabletOrMobile ? "Account Linking" : "Linking"}
         </button>
-        
       </nav>
-      */}
+
       {/* Column 2 */}
       <div className="flex-3 w-full bg-primary px-8 py-8 sm:px-16 sm:py-10">
         {/* Main account settings content */}
@@ -327,25 +324,20 @@ const Settings = () => {
             </button>
           </>
         )}
-
         {/* Global variable settings */}
-        {/*
         {activeTab === "vertical-tab-2" && (
           <>
             <h1 className="mb-4 text-3xl">Global Variables</h1>
             <p>Manage your global variables here.</p>
           </>
         )}
-        */}
         {/* Account linking settings */}
-        {/*
         {activeTab === "vertical-tab-3" && (
           <>
             <h1 className="mb-4 text-3xl">Account Linking</h1>
             <p>Link your account with other services.</p>
           </>
         )}
-        */}
       </div>
     </div>
   );
