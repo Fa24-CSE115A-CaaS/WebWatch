@@ -23,7 +23,7 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
     url: task.url,
     notificationOptions: task.enabledNotificationOptions,
     discordUrl: task.discordUrl || "",
-    slackUrl: "",
+    slackUrl: task.slackUrl || "",
     interval: task.interval,
     errors: {},
   });

@@ -38,6 +38,7 @@ const Tasks = () => {
           content: data.content,
           url: data.url,
           discordUrl: data.discord_url,
+          slackUrl: data.slack_url,
           interval: data.interval,
           enabledNotificationOptions: data.enabled_notification_options,
           enabled: data.enabled,

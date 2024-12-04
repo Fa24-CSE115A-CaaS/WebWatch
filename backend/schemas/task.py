@@ -230,7 +230,7 @@ class TaskUpdate(TaskBase):
     )
     enabled: bool | None = None
 
-    @validator("url", "discord_url", pre=True, always=True)
+    @validator("url", "discord_url", "slack_url", pre=True, always=True)
     def validate_url(cls, value):
         if value is None or value == "":
             return value
