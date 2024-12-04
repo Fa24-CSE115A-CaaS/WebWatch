@@ -10,6 +10,15 @@ import { Task, TaskResponse } from "../types";
 const Tasks = () => {
   const { user, isTokenValid } = useAuth({ redirectToAuth: true });
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     if (!isTokenValid) return;
@@ -71,6 +80,7 @@ const Tasks = () => {
         <TaskList tasks={tasks.filter((t) => !t.enabled)} />
       </div>
       {user && <p className="mt-4 text-center">Logged in as: {user.email}</p>}
+      {<p className="text-center">{currentTime.toLocaleString()}</p>}
     </main>
   );
 };
