@@ -40,7 +40,6 @@ class URLType(types.TypeDecorator):
 
 class TaskBase(SQLModel):
     name: str = Field(max_length=50)
-    content: str | None = Field(default=None, sa_column=Column(String(length=10000)))
     url: str = Field(sa_column=Column(URLType))
     discord_url: str | None = Field(sa_column=Column(URLType), default=None)
     slack_url: str | None = Field(sa_column=Column(URLType), default=None)
@@ -220,7 +219,6 @@ class TaskCreate(TaskBase):
 
 class TaskUpdate(TaskBase):
     name: str | None = Field(default=None, max_length=50)
-    content: str | None = Field(default=None, sa_column=Column(String(length=10000)))
     url: str | None = None
     discord_url: str | None = None
     slack_url: str | None = None
@@ -232,7 +230,7 @@ class TaskUpdate(TaskBase):
     )
     enabled: bool | None = None
 
-    @validator("url", "discord_url", "slack_url", pre=True, always=True)
+    @validator("url", "discord_url", pre=True, always=True)
     def validate_url(cls, value):
         if value is None or value == "":
             return value

@@ -1,18 +1,18 @@
 import useAuth from "../hooks/useAuth";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 // import { FaUserCircle } from "react-icons/fa";
 
 import { axios } from "../config";
-import { useMediaQuery } from "react-responsive";
+//import { useMediaQuery } from "react-responsive";
 
 const Settings = () => {
   const { isTokenValid } = useAuth({ redirectToAuth: true });
-  const [activeTab, setActiveTab] = useState("vertical-tab-1");
+  //const [activeTab, setActiveTab] = useState("vertical-tab-1");
   const navigate = useNavigate();
-  const isTabletOrMobile = useMediaQuery({
+  /*const isTabletOrMobile = useMediaQuery({
     query: "(min-width: 640px)",
-  });
+  }); */
 
   useEffect(() => {
     if (!isTokenValid) {
@@ -20,9 +20,9 @@ const Settings = () => {
     }
   }, [isTokenValid, navigate]);
 
-  const handleTabClick = (tabId: string) => {
+  /*const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);
-  };
+  }; */
 
   let canSubmitEmail = false;
   let canSubmitPassword = false;
@@ -128,7 +128,9 @@ const Settings = () => {
       canSubmitEmail = false;
     };
 
-    if (!email.value.match(/^[A-Za-z0-9]+@[A-Za-z0-9]+\.[A-Za-z0-9]+$/)) {
+    if (
+      !email.value.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
+    ) {
       status_changer_error("Invalid email address");
     } else {
       email.classList.remove("border-error");
@@ -197,6 +199,7 @@ const Settings = () => {
         lg:rounded-xl"
     >
       {/* Column 1 - Sidebar*/}
+      {/*
       <nav className="flex w-full overflow-hidden bg-secondary text-left lg:block lg:w-max">
         <button
           type="button"
@@ -237,12 +240,12 @@ const Settings = () => {
         >
           {isTabletOrMobile ? "Account Linking" : "Linking"}
         </button>
-      </nav>
+      </nav> */}
 
       {/* Column 2 */}
       <div className="flex-3 w-full bg-primary px-8 py-8 sm:px-16 sm:py-10">
         {/* Main account settings content */}
-        {activeTab === "vertical-tab-1" && (
+        {
           <>
             <div className="mb-6">
               <h1 className="mb-3 text-2xl font-semibold sm:text-[1.75rem]">
@@ -268,7 +271,7 @@ const Settings = () => {
                 </div> */}
 
             <form className="pb-4">
-              <label className="mb-2 block xxl:text-lg">Email</label>
+              <label className="mb-2 block xxl:text-lg">New Email</label>
               <input
                 type="email"
                 className="mb-4 w-full rounded-lg border border-border bg-secondary p-2 outline-none"
@@ -288,14 +291,14 @@ const Settings = () => {
               <h2 className="mb-6 mt-8 text-2xl font-semibold sm:text-[1.75rem]">
                 Reset Password
               </h2>
-              <label className="mb-2 block xxl:text-lg">Password</label>
+              <label className="mb-2 block xxl:text-lg">New Password</label>
               <input
                 name="password-reset-password"
                 type="password"
                 className="mb-4 w-full rounded-lg border border-border bg-secondary p-2 outline-none"
                 onChange={handlePasswordInputEvents}
               />
-              <label className="mb-2 block xxl:text-lg">Confirm Password</label>
+              <label className="mb-2 block xxl:text-lg">Confirm New Password</label>
               <input
                 name="password-reset-confirm-password"
                 type="password"
@@ -323,21 +326,24 @@ const Settings = () => {
               Delete my account
             </button>
           </>
-        )}
+        }
         {/* Global variable settings */}
+        {/*}
         {activeTab === "vertical-tab-2" && (
           <>
             <h1 className="mb-4 text-3xl">Global Variables</h1>
             <p>Manage your global variables here.</p>
           </>
         )}
+          */}
         {/* Account linking settings */}
+        {/*
         {activeTab === "vertical-tab-3" && (
           <>
             <h1 className="mb-4 text-3xl">Account Linking</h1>
             <p>Link your account with other services.</p>
           </>
-        )}
+        )} */}
       </div>
     </div>
   );

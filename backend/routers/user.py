@@ -240,7 +240,7 @@ async def delete_user(
     # Query and delete all tasks associated with the user
     tasks = session.exec(select(Task).where(Task.user_id == user.id)).all()
     for task in tasks:
-        await tasks_delete(task.id, session, scheduler)
+        await tasks_delete(task.id, session, scheduler, user.id)
 
     try:
         session.delete(user)
