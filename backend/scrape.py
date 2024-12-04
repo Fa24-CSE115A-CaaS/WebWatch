@@ -201,7 +201,24 @@ class WebScraper:
             parse_time_log = (
                 f"Time to parse page: {parse_end_time - parse_start_time:.5f} seconds\n"
             )
-            return str(soup)
+            # Extract all visible text from the element
+            extract_start_time = time.time()
+            element_text = soup.get_text(separator="\n", strip=True)
+            extract_end_time = time.time()
+            extract_time_log = f"Time to extract text: {extract_end_time - extract_start_time:.5f} seconds\n"
+            end_time = time.time()
+            total_time_log = (
+                f"Total time for scrape_by_xpath: {end_time - start_time:.5f} seconds\n"
+            )
+            # Append log messages to element_text
+            log_text = (
+                f"\n{load_time_log}{parse_time_log}{extract_time_log}{total_time_log}"
+            )
+            """ Write timing log
+            with open("timing_log.txt", "w", encoding="utf-8") as f:
+                f.write(log_text)
+            """
+            return element_text
 
         except Exception as e:
             raise Exception(f"An error occurred: {e}")
