@@ -204,7 +204,7 @@ class WebScraper:
             return str(soup)
 
         except Exception as e:
-            raise f"An error occurred: {e}"
+            raise Exception(f"An error occurred: {e}")
 
     def scrape_to_file(self, url):
         try:
