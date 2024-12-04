@@ -1,7 +1,7 @@
-from sqlalchemy import Column
+from sqlalchemy import Column, types
 from typing import List, Literal
 from sqlalchemy.types import JSON, String, DateTime
-from pydantic import field_validator
+from pydantic import field_validator, HttpUrl, validator
 from sqlmodel import SQLModel, Field
 import logging
 import asyncio
@@ -21,17 +21,35 @@ logging.getLogger("sqlalchemy.engine").setLevel(
 manager = get_task_manager()
 
 
+class URLType(types.TypeDecorator):
+    impl = types.String
+
+    def process_bind_param(self, value, dialect):
+        return str(value) if value else None
+
+    def process_result_value(self, value, dialect):
+        return HttpUrl(value) if value else None
+
+
 class TaskBase(SQLModel):
     name: str = Field(max_length=50)
     content: str | None = Field(default=None, sa_column=Column(String(length=10000)))
-    url: str
     xpath: str | None = None
-    discord_url: str | None = None
+    url: HttpUrl = Field(sa_column=Column(URLType))
+    discord_url: HttpUrl | None = Field(sa_column=Column(URLType), default=None)
     interval: int = Field(ge=MIN_INTERVAL_SECONDS, le=MAX_INTERVAL_SECONDS)
     enabled_notification_options: NotificationOptions = Field(
         default=["EMAIL"], sa_column=Column(JSON())
     )
     enabled: bool = True  # If the task is enabled then it should be running
+
+    @validator("url", "discord_url")
+    def validate_url(cls, value):
+        if value is None:
+            return value
+        if not value:
+            raise ValueError("URL cannot be empty")
+        return value
 
     @field_validator("enabled_notification_options")
     @classmethod
@@ -96,6 +114,7 @@ class Task(TaskBase, table=True):
                 logging.error(f"Failed to send email: {e}")
             """
             pass
+
         if "DISCORD" in self.enabled_notification_options:
             # send discord message
             try:
@@ -197,8 +216,8 @@ class TaskCreate(TaskBase):
 class TaskUpdate(TaskBase):
     name: str | None = Field(default=None, max_length=50)
     content: str | None = Field(default=None, sa_column=Column(String(length=10000)))
-    url: str | None = None
-    discord_url: str | None = None
+    url: HttpUrl | None = None
+    discord_url: HttpUrl | None = None
     interval: int | None = Field(
         default=None, ge=MIN_INTERVAL_SECONDS, le=MAX_INTERVAL_SECONDS
     )

@@ -10,6 +10,7 @@ from schemas.user import (
     UserOutput,
     User,
     Token,
+    EmailResetRequest,
     PasswordReset,
     PasswordResetRequest,
     DeleteAccountRequest,
@@ -181,6 +182,29 @@ async def email_auth(user_email: PasswordReset, session: DbSession):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred while sending the password reset email",
+        )
+
+
+@router.post("/reset_email", status_code=status.HTTP_200_OK)
+async def reset_email(
+    reset_request: EmailResetRequest,
+    session: DbSession,
+    current_user_id: UserData,
+):
+    try:
+        user = session.get(User, current_user_id)
+
+        user.email = reset_request.new_email
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+        return {"detail": "Email reset successful"}
+    except Exception as e:
+        logging.error(e)
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred",
         )
 
 
