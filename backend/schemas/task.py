@@ -42,13 +42,14 @@ class TaskBase(SQLModel):
     name: str = Field(max_length=50)
     url: str = Field(sa_column=Column(URLType))
     discord_url: str | None = Field(sa_column=Column(URLType), default=None)
+    slack_url: str | None = Field(sa_column=Column(URLType), default=None)
     interval: int = Field(ge=MIN_INTERVAL_SECONDS, le=MAX_INTERVAL_SECONDS)
     enabled_notification_options: NotificationOptions = Field(
         default=["EMAIL"], sa_column=Column(JSON())
     )
     enabled: bool = True  # If the task is enabled then it should be running
 
-    @validator("url", "discord_url")
+    @validator("url", "discord_url", "slack_url")
     def validate_url(cls, value):
         if value is None:
             return value
@@ -106,7 +107,7 @@ class Task(TaskBase, table=True):
         return self.id
 
     def notify(self, message: dict):
-        from utils.notifications import send_mail, send_discord_msg
+        from utils.notifications import send_mail, send_discord_msg, send_slack_msg
 
         subject = message["subject"]
         body = message["body"]
@@ -134,6 +135,10 @@ class Task(TaskBase, table=True):
             pass
         if "SLACK" in self.enabled_notification_options:
             # send slack message
+            try:
+                send_slack_msg(self.slack_url, body)
+            except Exception as e:
+                logging.error(f"Failed to send slack message: {e}")
             pass
 
     def scan(self):
@@ -216,6 +221,7 @@ class TaskUpdate(TaskBase):
     name: str | None = Field(default=None, max_length=50)
     url: str | None = None
     discord_url: str | None = None
+    slack_url: str | None = None
     interval: int | None = Field(
         default=None, ge=MIN_INTERVAL_SECONDS, le=MAX_INTERVAL_SECONDS
     )
@@ -224,7 +230,7 @@ class TaskUpdate(TaskBase):
     )
     enabled: bool | None = None
 
-    @validator("url", "discord_url", pre=True, always=True)
+    @validator("url", "discord_url", "slack_url", pre=True, always=True)
     def validate_url(cls, value):
         if value is None or value == "":
             return value

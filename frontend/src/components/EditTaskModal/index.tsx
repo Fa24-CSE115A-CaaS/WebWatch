@@ -23,7 +23,7 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
     url: task.url,
     notificationOptions: task.enabledNotificationOptions,
     discordUrl: task.discordUrl || "",
-    slackUrl: "",
+    slackUrl: task.slackUrl || "",
     interval: task.interval,
     errors: {},
   });
@@ -133,7 +133,7 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
       onClick={closeModal}
     >
       <form
-        className="relative mx-3 max-h-[90%] w-[1000px] overflow-scroll rounded-lg bg-primary p-8
+        className="relative mx-3 max-h-[90%] w-[1000px] overflow-auto rounded-lg bg-primary p-8
           xxl:w-[1200px] xxl:p-10"
         onSubmit={handleFormSubmit}
         onClick={(e) => e.stopPropagation()}

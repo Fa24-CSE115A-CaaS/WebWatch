@@ -298,7 +298,9 @@ const Settings = () => {
                 className="mb-4 w-full rounded-lg border border-border bg-secondary p-2 outline-none"
                 onChange={handlePasswordInputEvents}
               />
-              <label className="mb-2 block xxl:text-lg">Confirm New Password</label>
+              <label className="mb-2 block xxl:text-lg">
+                Confirm New Password
+              </label>
               <input
                 name="password-reset-confirm-password"
                 type="password"
