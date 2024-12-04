@@ -23,7 +23,7 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
     url: task.url,
     notificationOptions: task.enabledNotificationOptions,
     discordUrl: task.discordUrl || "",
-    slackUrl: "",
+    slackUrl: task.slackUrl || "",
     interval: task.interval,
     xpath: task.xpath,
     errors: {},
@@ -116,13 +116,13 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
         const errors: typeof formState.errors = {};
         errorDetails.forEach((err: any) => {
           if (err.loc.includes("url")) {
-            errors.url = err.msg;
+            errors.url = "Please enter a valid URL.";
           }
           if (err.loc.includes("discord_url")) {
-            errors.discordUrl = err.msg;
+            errors.discordUrl = "Please enter a valid Discord webhook URL.";
           }
           if (err.loc.includes("slack_url")) {
-            errors.slackUrl = err.msg;
+            errors.slackUrl = "Please enter a valid Slack webhook URL.";
           }
         });
         setFormState({ ...formState, errors });
@@ -142,7 +142,8 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
       onClick={closeModal}
     >
       <form
-        className="relative w-[1000px] rounded-lg bg-primary p-8 xxl:w-[1200px] xxl:p-10"
+        className="relative mx-3 max-h-[90%] w-[1000px] overflow-auto rounded-lg bg-primary p-8
+          xxl:w-[1200px] xxl:p-10"
         onSubmit={handleFormSubmit}
         onClick={(e) => e.stopPropagation()}
       >
@@ -153,7 +154,7 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
         >
           <RxCross2 size={20} />
         </button>
-        <div className="grid grid-cols-2 gap-10 xxl:gap-14">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 xxl:gap-14">
           <div>
             <h3 className="mb-5 text-xl xxl:text-2xl">General Info</h3>
             <Input
