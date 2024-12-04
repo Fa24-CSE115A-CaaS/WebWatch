@@ -4,11 +4,15 @@ import { useNavigate } from "react-router-dom";
 // import { FaUserCircle } from "react-icons/fa";
 
 import { axios } from "../config";
+import { useMediaQuery } from "react-responsive";
 
 const Settings = () => {
   const { isTokenValid } = useAuth({ redirectToAuth: true });
   const [activeTab, setActiveTab] = useState("vertical-tab-1");
   const navigate = useNavigate();
+  const isTabletOrMobile = useMediaQuery({
+    query: "(min-width: 640px)",
+  });
 
   useEffect(() => {
     if (!isTokenValid) {
@@ -187,70 +191,67 @@ const Settings = () => {
   };
 
   return (
-    <div className="mx-auto mt-8 min-h-screen w-1/2 rounded text-text">
-      <div className="flex">
-        {/* Column 1 - Sidebar*/}
-        <nav
-          className="min-h-screen w-max overflow-hidden rounded-l-xl border-2 border-solid
-            border-border bg-secondary text-left"
+    <div
+      className="mx-3 mb-4 mt-8 flex flex-col overflow-hidden rounded-[4px] border-2
+        border-border text-text md:mx-auto md:w-[600px] lg:w-[800px] lg:flex-row
+        lg:rounded-xl"
+    >
+      {/* Column 1 - Sidebar*/}
+      <nav className="flex w-full overflow-hidden bg-secondary text-left lg:block lg:w-max">
+        <button
+          type="button"
+          className={`flex-1 flex-shrink-0 whitespace-nowrap p-4 text-center lg:w-full lg:text-left
+            ${activeTab === "vertical-tab-1" ? "bg-primary" : ""}`}
+          id="vertical-tab-1"
+          aria-selected={activeTab === "vertical-tab-1"}
+          data-hs-tab="#vertical-tab-1"
+          aria-controls="vertical-tab-1"
+          role="tab"
+          onClick={() => handleTabClick("vertical-tab-1")}
         >
-          <div
-            className="rounded-tl-xl"
-            aria-label="Tabs"
-            role="tablist"
-            aria-orientation="vertical"
-          >
-            <button
-              type="button"
-              className={`w-full whitespace-nowrap p-4 text-left
-                ${activeTab === "vertical-tab-1" ? "bg-primary" : ""}`}
-              id="vertical-tab-1"
-              aria-selected={activeTab === "vertical-tab-1"}
-              data-hs-tab="#vertical-tab-1"
-              aria-controls="vertical-tab-1"
-              role="tab"
-              onClick={() => handleTabClick("vertical-tab-1")}
-            >
-              Account
-            </button>
-            <button
-              type="button"
-              className={`w-full whitespace-nowrap p-4 text-left
-                ${activeTab === "vertical-tab-2" ? "bg-primary" : ""}`}
-              id="vertical-tab-2"
-              aria-selected={activeTab === "vertical-tab-2"}
-              data-hs-tab="#vertical-tab-2"
-              aria-controls="vertical-tab-2"
-              role="tab"
-              onClick={() => handleTabClick("vertical-tab-2")}
-            >
-              Global Variables
-            </button>
-            <button
-              type="button"
-              className={`w-full whitespace-nowrap p-4 text-left
-                ${activeTab === "vertical-tab-3" ? "bg-primary" : ""}`}
-              id="vertical-tab-3"
-              aria-selected={activeTab === "vertical-tab-3"}
-              data-hs-tab="#vertical-tab-3"
-              aria-controls="vertical-tab-3"
-              role="tab"
-              onClick={() => handleTabClick("vertical-tab-3")}
-            >
-              Account Linking
-            </button>
-          </div>
-        </nav>
+          Account
+        </button>
+        <button
+          type="button"
+          className={`flex-1 flex-shrink-0 whitespace-nowrap p-4 text-center lg:w-full lg:text-left
+            ${activeTab === "vertical-tab-2" ? "bg-primary" : ""}`}
+          id="vertical-tab-2"
+          aria-selected={activeTab === "vertical-tab-2"}
+          data-hs-tab="#vertical-tab-2"
+          aria-controls="vertical-tab-2"
+          role="tab"
+          onClick={() => handleTabClick("vertical-tab-2")}
+        >
+          {isTabletOrMobile ? "Global Variables" : "Globals"}
+        </button>
+        <button
+          type="button"
+          className={`flex-1 flex-shrink-0 whitespace-nowrap p-4 text-center lg:w-full lg:text-left
+            ${activeTab === "vertical-tab-3" ? "bg-primary" : ""}`}
+          id="vertical-tab-3"
+          aria-selected={activeTab === "vertical-tab-3"}
+          data-hs-tab="#vertical-tab-3"
+          aria-controls="vertical-tab-3"
+          role="tab"
+          onClick={() => handleTabClick("vertical-tab-3")}
+        >
+          {isTabletOrMobile ? "Account Linking" : "Linking"}
+        </button>
+      </nav>
 
-        {/* Column 2 */}
-        <div className="w-full rounded-r-xl border-y-2 border-r-2 border-solid border-border bg-primary">
-          <div className="m-5 px-10 py-6">
-            {/* Main account settings content */}
-            {activeTab === "vertical-tab-1" && (
-              <>
-                <h1 className="mb-4 text-3xl">Account</h1>
-                <p className="mb-4">Change your account information</p>
-                {/* <div className="mt-4 flex pb-4">
+      {/* Column 2 */}
+      <div className="flex-3 w-full bg-primary px-8 py-8 sm:px-16 sm:py-10">
+        {/* Main account settings content */}
+        {activeTab === "vertical-tab-1" && (
+          <>
+            <div className="mb-6">
+              <h1 className="mb-3 text-2xl font-semibold sm:text-[1.75rem]">
+                Account
+              </h1>
+              <p>Change your account information</p>
+            </div>
+
+            {/* <div className="mt-4 flex pb-4">
                   <FaUserCircle className="max-h-40 w-auto flex-shrink-0 rounded-full text-9xl" />
                   <div className="my-auto ml-4">
                     <h2 className="mb-2 text-xl">Profile Picture</h2>
@@ -265,76 +266,78 @@ const Settings = () => {
                     </button>
                   </div>
                 </div> */}
-                <form className="pb-4">
-                  <label className="mb-2 block text-lg">Email</label>
-                  <input
-                    type="email"
-                    className="mb-4 w-full rounded-lg border border-border bg-secondary p-2 outline-none"
-                    onChange={handleEmailChangeEvents}
-                  />
-                  <button
-                    className="rounded-lg bg-accent p-2 px-16 text-text-contrast hover:bg-accent-hover"
-                    type="button"
-                    onClick={handleEmailChangeSubmission}
-                  >
-                    Change Email
-                  </button>
-                  <p id="email-error-message" className="text-error"></p>
-                </form>
-                <form className="pb-4">
-                  <h2 className="my-8 mb-4 text-2xl">Reset Password</h2>
-                  <label className="mb-2 block text-lg">Password</label>
-                  <input
-                    name="password-reset-password"
-                    type="password"
-                    className="mb-4 w-full rounded-lg border border-border bg-secondary p-2 outline-none"
-                    onChange={handlePasswordInputEvents}
-                  />
-                  <label className="mb-2 block text-lg">Confirm Password</label>
-                  <input
-                    name="password-reset-confirm-password"
-                    type="password"
-                    className="mb-4 w-full rounded-lg border border-border bg-secondary p-2 outline-none"
-                    onChange={handlePasswordInputEvents}
-                  />
-                  <p
-                    id="password-reset-error-message"
-                    className="text-error"
-                  ></p>
-                  <button
-                    className="mt-4 rounded-lg bg-accent p-2 px-16 text-text-contrast hover:bg-accent-hover"
-                    type="button"
-                    onClick={handlePasswordResetSubmission}
-                  >
-                    Reset Password
-                  </button>
-                </form>
-                <h2 className="my-8 mb-4 text-2xl">Danger Zone</h2>
-                <button
-                  className="rounded-lg bg-error px-3 py-2"
-                  type="button"
-                  onClick={handleAccountDeletionSubmission}
-                >
-                  Delete my account
-                </button>
-              </>
-            )}
-            {/* Global variable settings */}
-            {activeTab === "vertical-tab-2" && (
-              <>
-                <h1 className="mb-4 text-3xl">Global Variables</h1>
-                <p>Manage your global variables here.</p>
-              </>
-            )}
-            {/* Account linking settings */}
-            {activeTab === "vertical-tab-3" && (
-              <>
-                <h1 className="mb-4 text-3xl">Account Linking</h1>
-                <p>Link your account with other services.</p>
-              </>
-            )}
-          </div>
-        </div>
+
+            <form className="pb-4">
+              <label className="mb-2 block xxl:text-lg">Email</label>
+              <input
+                type="email"
+                className="mb-4 w-full rounded-lg border border-border bg-secondary p-2 outline-none"
+                onChange={handleEmailChangeEvents}
+              />
+              <button
+                className="rounded-lg bg-accent p-2 px-16 text-text-contrast hover:bg-accent-hover"
+                type="button"
+                onClick={handleEmailChangeSubmission}
+              >
+                Change Email
+              </button>
+              <p id="email-error-message" className="text-error"></p>
+            </form>
+
+            <form className="pb-4">
+              <h2 className="mb-6 mt-8 text-2xl font-semibold sm:text-[1.75rem]">
+                Reset Password
+              </h2>
+              <label className="mb-2 block xxl:text-lg">Password</label>
+              <input
+                name="password-reset-password"
+                type="password"
+                className="mb-4 w-full rounded-lg border border-border bg-secondary p-2 outline-none"
+                onChange={handlePasswordInputEvents}
+              />
+              <label className="mb-2 block xxl:text-lg">Confirm Password</label>
+              <input
+                name="password-reset-confirm-password"
+                type="password"
+                className="mb-4 w-full rounded-lg border border-border bg-secondary p-2 outline-none"
+                onChange={handlePasswordInputEvents}
+              />
+              <p id="password-reset-error-message" className="text-error"></p>
+              <button
+                className="mt-4 rounded-[4px] bg-accent p-2 px-16 text-text-contrast hover:bg-accent-hover"
+                type="button"
+                onClick={handlePasswordResetSubmission}
+              >
+                Reset Password
+              </button>
+            </form>
+            <h2 className="mb-6 mt-8 text-2xl font-semibold sm:text-[1.75rem]">
+              Danger Zone
+            </h2>
+
+            <button
+              className="rounded-[4px] bg-error px-5 py-2"
+              type="button"
+              onClick={handleAccountDeletionSubmission}
+            >
+              Delete my account
+            </button>
+          </>
+        )}
+        {/* Global variable settings */}
+        {activeTab === "vertical-tab-2" && (
+          <>
+            <h1 className="mb-4 text-3xl">Global Variables</h1>
+            <p>Manage your global variables here.</p>
+          </>
+        )}
+        {/* Account linking settings */}
+        {activeTab === "vertical-tab-3" && (
+          <>
+            <h1 className="mb-4 text-3xl">Account Linking</h1>
+            <p>Link your account with other services.</p>
+          </>
+        )}
       </div>
     </div>
   );

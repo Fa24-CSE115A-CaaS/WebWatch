@@ -98,6 +98,7 @@ class TaskBase(SQLModel):
 class Task(TaskBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="user.id")
+    content: str | None = Field(default=None, sa_column=Column(String(length=10000)))
     next_run: datetime | None = Field(
         sa_column=Column(DateTime(), nullable=True, default=None)
     )
