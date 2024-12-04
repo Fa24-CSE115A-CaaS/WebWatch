@@ -26,16 +26,16 @@ class URLType(types.TypeDecorator):
 
     def process_bind_param(self, value, dialect):
         if value:
-             try:
-                 # Validate URL format by creating an instance of HttpUrl
-                 HttpUrl(value)
-             except ValidationError as e:
-                 raise ValueError(f"Invalid URL: {e}")
-             return str(value)
-         return None
+            try:
+                # Validate URL format by creating an instance of HttpUrl
+                HttpUrl(value)
+            except ValidationError as e:
+                raise ValueError(f"Invalid URL: {e}")
+            return str(value)
+        return None
 
-     def process_result_value(self, value, dialect):
-         return value
+    def process_result_value(self, value, dialect):
+        return value
 
 
 class TaskBase(SQLModel):
@@ -50,16 +50,17 @@ class TaskBase(SQLModel):
     )
     enabled: bool = True  # If the task is enabled then it should be running
 
+    @validator("url", "discord_url", "slack_url")
     def validate_url(cls, value):
         if value is None:
-             return value
-         if not value:
-             raise ValueError("URL cannot be empty")
-         try:
-             HttpUrl(value)
-         except ValidationError as e:
-             raise ValueError(f"Invalid URL: {e}")
-         return value
+            return value
+        if not value:
+            raise ValueError("URL cannot be empty")
+        try:
+            HttpUrl(value)
+        except ValidationError as e:
+            raise ValueError(f"Invalid URL: {e}")
+        return value
 
     @field_validator("enabled_notification_options")
     @classmethod
@@ -230,14 +231,14 @@ class TaskUpdate(TaskBase):
     )
     enabled: bool | None = None
 
-    @validator("url", "discord_url", pre=True, always=True)
-     def validate_url(cls, value):
-         if value is None or value == "":
-             return value
-         if not value:
-             raise ValueError("URL cannot be empty")
-         try:
-             HttpUrl(value)
-         except ValidationError as e:
-             raise ValueError(f"Invalid URL: {e}")
-         return value
+    @validator("url", "discord_url", "slack_url", pre=True, always=True)
+    def validate_url(cls, value):
+        if value is None or value == "":
+            return value
+        if not value:
+            raise ValueError("URL cannot be empty")
+        try:
+            HttpUrl(value)
+        except ValidationError as e:
+            raise ValueError(f"Invalid URL: {e}")
+        return value
