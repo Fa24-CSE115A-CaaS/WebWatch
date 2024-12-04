@@ -4,13 +4,14 @@ import argon2
 
 client = TestClient(app)
 
-"""
-# Removed until user delete is implemented?
+
 def test_user_register_success():
     # Test user registration
-    response = client.post("/users/register", json={"email": "test@webwatch.live", "password": "Password1233!"})
+    response = client.post(
+        "/users/register",
+        json={"email": "test@webwatch.live", "password": "Password1233!"},
+    )
     assert response.status_code == 201
-"""
 
 
 def test_user_register_fail_duplicate():
@@ -145,3 +146,36 @@ def test_user_reset_password_mismatch():
     )
 
     assert response.status_code == 422
+
+
+def test_user_delete_success():
+    # Test user deletion
+    response = client.post(
+        "/users/login",
+        data={
+            "grant_type": "password",
+            "username": "test@webwatch.live",
+            "password": "NewPassword1233!!",
+        },
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+    )
+    assert response.status_code == 200
+    access_token = response.json()["access_token"]
+
+    response = client.delete(
+        "/users/delete",
+        headers={"Authorization": "Bearer " + access_token},
+    )
+    assert response.status_code == 200
+
+    # Verify user is deleted
+    response = client.post(
+        "/users/login",
+        data={
+            "grant_type": "password",
+            "username": "test@webwatch.live",
+            "password": "NewPassword1233!!",
+        },
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+    )
+    assert response.status_code == 400

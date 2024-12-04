@@ -145,3 +145,24 @@ def test_task_retrieve_empty():
     response = client.get("/tasks", headers={"Authorization": "Bearer " + access_token})
     assert response.status_code == 200
     assert response.json() == []
+
+
+def test_user_delete_success():
+    # Test user deletion
+    response = client.delete(
+        "/users/delete",
+        headers={"Authorization": "Bearer " + access_token},
+    )
+    assert response.status_code == 200
+
+    # Verify user is deleted
+    response = client.post(
+        "/users/login",
+        data={
+            "grant_type": "password",
+            "username": "test@webwatch.live",
+            "password": "Password1233!",
+        },
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+    )
+    assert response.status_code == 400
