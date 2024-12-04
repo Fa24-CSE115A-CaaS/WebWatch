@@ -74,7 +74,7 @@ const CreateInput = () => {
           url: formState.url,
           name: formState.name,
           interval: formState.interval,
-          xpath: formState.xpath,
+          xpath: formState.xpath || null,
         },
         {
           headers: {
