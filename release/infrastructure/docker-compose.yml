@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    restart: always
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.https.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.email=jrnguy@ucsc.edu"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--serverstransport.insecureskipverify=true"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./letsencrypt:/letsencrypt"
+      - "./traefik:/etc/traefik/"
+    networks:
+      - webwatch
+    labels:
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+    environment:
+      CF_DNS_API_TOKEN: CF_DNS_EDIT_TOKEN
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    labels:
+      - "traefik.http.routers.nginx.rule=Host(`webwatch.live`)"
+      - "traefik.http.routers.nginx.entrypoints=https"
+      - "traefik.http.routers.nginx.tls=true"
+      - "traefik.http.routers.nginx.tls.certresolver=letsencrypt"
+      - "traefik.http.services.nginx.loadbalancer.server.port=443"
+      - "traefik.http.services.nginx.loadbalancer.server.scheme=https"
+      - "traefik.enable=true"
+    networks:
+      - webwatch
+    volumes:
+      - "./nginx/html:/usr/share/nginx/html"
+      - "./nginx/conf.d:/etc/nginx/conf.d"
+      - "./nginx/ssl:/etc/nginx/ssl"
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-server
+    restart: always
+    volumes:
+      - "mysql_data:/var/lib/mysql"
+    networks:
+      - webwatch
+
+  webwatch_backend:
+    build:
+      context: .
+      dockerfile: /home/webwatch/app/WebWatch/backend/.devcontainer/Dockerfile
+    container_name: webwatch_backend
+    restart: always
+    working_dir: /home/webwatch/app/WebWatch/backend
+    command: bash -c "/workspaces/WebWatch/backend/.devcontainer/post-create-commands.sh && tail -f /dev/null"
+    environment:
+      - NODE_ENV=development
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "8000:8000"
+    volumes:
+      - "/home/webwatch/app/WebWatch:/workspaces/WebWatch"
+    networks:
+      - webwatch
+
+networks:
+  webwatch:
+    external: true
+
+volumes:
+  mysql_data:
