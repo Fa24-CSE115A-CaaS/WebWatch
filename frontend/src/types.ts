@@ -9,6 +9,7 @@ export interface TaskResponse {
   enabled_notification_options: string[];
   enabled: boolean;
   next_run: string;
+  xpath: string | null;
 }
 
 export interface Task {
@@ -22,4 +23,5 @@ export interface Task {
   enabledNotificationOptions: string[];
   enabled: boolean;
   nextRun: Date;
+  xpath: string;
 }

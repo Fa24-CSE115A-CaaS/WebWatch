@@ -40,6 +40,7 @@ class URLType(types.TypeDecorator):
 
 class TaskBase(SQLModel):
     name: str = Field(max_length=50)
+    xpath: str | None = None
     url: str = Field(sa_column=Column(URLType))
     discord_url: str | None = Field(sa_column=Column(URLType), default=None)
     slack_url: str | None = Field(sa_column=Column(URLType), default=None)
@@ -148,6 +149,13 @@ class Task(TaskBase, table=True):
             "subject": f"An error occurred while scraping {self.url}",
             "body": f"An error occurred while scraping {self.url}. Please modify your task to include a valid URL.",
         }
+        is_scraping_text = self.xpath == None
+
+        if not is_scraping_text:
+            error_message["body"] = (
+                f"An error occurred while scraping {self.url}. Please ensure your URL and XPath are valid."
+            )
+
         update_task_field(
             self.id,
             "next_run",
@@ -156,7 +164,11 @@ class Task(TaskBase, table=True):
         manager.notify_conections(self.user_id)
         try:
             with WebScraper() as scraper:
-                new_content = scraper.scrape_all_text(self.url)
+                if is_scraping_text:
+                    new_content = scraper.scrape_all_text(self.url)
+                else:
+                    print("Scraping with XPATH")
+                    new_content = scraper.scrape_by_xpath(self.url, self.xpath)
         except Exception as e:
             logging.error(
                 f"Task {self.id} encountered an error while scraping {self.url}: {e}"

@@ -43,6 +43,7 @@ const Tasks = () => {
           enabledNotificationOptions: data.enabled_notification_options,
           enabled: data.enabled,
           nextRun,
+          xpath: data.xpath || "",
         } as Task;
       });
       setTasks(tasks);

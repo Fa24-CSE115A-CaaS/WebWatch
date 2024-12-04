@@ -3,6 +3,7 @@ import { Dispatch, SetStateAction } from "react";
 export interface FormState {
   name: string;
   interval: number;
+  xpath: string;
 }
 
 export interface FormState {

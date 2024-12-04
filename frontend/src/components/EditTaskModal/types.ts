@@ -9,6 +9,7 @@ export interface FormState {
   discordUrl: string;
   slackUrl: string;
   interval: number;
+  xpath: string;
 }
 
 export interface FormState {

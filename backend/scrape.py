@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
+from constants.scrape import ALLOWED_ATTRIBUTES
 import time
 import urllib.parse
 
@@ -68,7 +69,7 @@ class WebScraper:
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-browser-side-navigation")
         options.add_argument("enable-automation")
-        options.add_argument("--headless")
+        options.add_argument("--headless=new")
         options.add_argument("--window-size=1920,1080")
         options.add_argument("start-maximized")
         options.add_argument("--no-sandbox")
@@ -93,7 +94,7 @@ class WebScraper:
             "profile.default_content_setting_values.video": 2,
         }
 
-        # options.add_experimental_option("prefs", prefs)
+        options.add_experimental_option("prefs", prefs)
 
         # Initialize WebDriver
         service = Service(self.webdriver_path)
@@ -113,7 +114,7 @@ class WebScraper:
                 WebDriverWait(self.driver, 10).until(
                     EC.presence_of_element_located((By.TAG_NAME, "body"))
                 )
-                time.sleep(0.25)  # Wait for any additional content to load
+                time.sleep(0.1)  # Wait for any additional content to load
                 logging.info("Page content loaded.")
                 return
             except Exception as e:
@@ -149,9 +150,7 @@ class WebScraper:
 
             # Extract all visible text from the page
             extract_start_time = time.time()
-            page_text = soup.get_text(
-                separator="\n", strip=True
-            )  # Separate text by new lines
+            page_text = soup.get_text(separator="\n", strip=True)
             extract_end_time = time.time()
             extract_time_log = f"Time to extract text: {extract_end_time - extract_start_time:.5f} seconds\n"
 
@@ -180,6 +179,32 @@ class WebScraper:
         except Exception as e:
             logging.error(f"An error occurred: {e}")
             return f"An error occurred: {e}"
+
+    def scrape_by_xpath(self, url, xpath):
+        try:
+            start_time = time.time()
+
+            # Load the page
+            load_start_time = time.time()
+            self.load_page(url)
+            load_end_time = time.time()
+            load_time_log = (
+                f"Time to load page: {load_end_time - load_start_time:.5f} seconds\n"
+            )
+
+            # Get the element by XPath
+            parse_start_time = time.time()
+            el = self.driver.find_element(By.XPATH, xpath)
+            html_src = el.get_attribute("outerHTML")
+            soup = BeautifulSoup(html_src, "html.parser")
+            parse_end_time = time.time()
+            parse_time_log = (
+                f"Time to parse page: {parse_end_time - parse_start_time:.5f} seconds\n"
+            )
+            return str(soup)
+
+        except Exception as e:
+            raise Exception(f"An error occurred: {e}")
 
     def scrape_to_file(self, url):
         try:
