@@ -271,7 +271,7 @@ const Settings = () => {
                 </div> */}
 
             <form className="pb-4">
-              <label className="mb-2 block xxl:text-lg">Email</label>
+              <label className="mb-2 block xxl:text-lg">New Email</label>
               <input
                 type="email"
                 className="mb-4 w-full rounded-lg border border-border bg-secondary p-2 outline-none"
@@ -291,14 +291,14 @@ const Settings = () => {
               <h2 className="mb-6 mt-8 text-2xl font-semibold sm:text-[1.75rem]">
                 Reset Password
               </h2>
-              <label className="mb-2 block xxl:text-lg">Password</label>
+              <label className="mb-2 block xxl:text-lg">New Password</label>
               <input
                 name="password-reset-password"
                 type="password"
                 className="mb-4 w-full rounded-lg border border-border bg-secondary p-2 outline-none"
                 onChange={handlePasswordInputEvents}
               />
-              <label className="mb-2 block xxl:text-lg">Confirm Password</label>
+              <label className="mb-2 block xxl:text-lg">Confirm New Password</label>
               <input
                 name="password-reset-confirm-password"
                 type="password"
