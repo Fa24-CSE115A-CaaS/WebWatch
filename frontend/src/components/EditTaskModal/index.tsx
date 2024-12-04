@@ -133,7 +133,8 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
       onClick={closeModal}
     >
       <form
-        className="relative w-[1000px] rounded-lg bg-primary p-8 xxl:w-[1200px] xxl:p-10"
+        className="relative mx-3 max-h-[90%] w-[1000px] overflow-scroll rounded-lg bg-primary p-8
+          xxl:w-[1200px] xxl:p-10"
         onSubmit={handleFormSubmit}
         onClick={(e) => e.stopPropagation()}
       >
@@ -144,7 +145,7 @@ const EditTaskModal: EditTaskModalComponent = ({ task, closeModal }) => {
         >
           <RxCross2 size={20} />
         </button>
-        <div className="grid grid-cols-2 gap-10 xxl:gap-14">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 xxl:gap-14">
           <div>
             <h3 className="mb-5 text-xl xxl:text-2xl">General Info</h3>
             <Input

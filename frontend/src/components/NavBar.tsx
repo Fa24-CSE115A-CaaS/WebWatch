@@ -15,8 +15,8 @@ const NavBar = () => {
 
   return (
     <>
-      <nav className="bg-secondary px-2 text-text sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between gap-20">
+      <nav className="bg-secondary px-6 text-text lg:px-8">
+        <div className="flex h-16 items-center justify-between gap-8 md:gap-20">
           <div className="flex items-center gap-4">
             <a href="/">
               <h1 className="flex items-center gap-2">
@@ -34,13 +34,13 @@ const NavBar = () => {
               </a>
               <a
                 href="/settings"
-                className={`${location.pathname == "/settings" && "text-accent"}`}
+                className={`hidden xs:block ${location.pathname == "/settings" && "text-accent"}`}
               >
                 Account
               </a>
               <a
                 href="/test"
-                className={`${location.pathname == "/test" && "text-accent"}`}
+                className={`hidden sm:block ${location.pathname == "/test" && "text-accent"}`}
               >
                 Test
               </a>
