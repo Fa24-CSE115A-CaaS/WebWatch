@@ -146,107 +146,107 @@ const AuthForm = ({ isLogin: initialIsLogin }: AuthFormProps) => {
   };
 
   return (
-    <div className="mx-auto mt-8 min-h-screen w-1/3 rounded text-text">
-      <div className="mb-4 flex justify-center">
-        <div className="w-full rounded-xl border-2 border-solid border-border bg-primary">
-          <div className="m-5">
-            <div className="m-4 flex justify-center">
-              <button
-                className={`relative mx-4 px-4 py-2 text-lg font-bold ${isLogin ? "decoration-accent" : ""}`}
-                onClick={() => handleTabSwitch(true)}
-                disabled={loading}
-              >
-                Login
-                {isLogin && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 -translate-y-1/2 transform bg-accent"></span>
-                )}
-              </button>
-              <button
-                className={`relative mx-4 px-4 py-2 text-lg font-bold ${!isLogin ? "decoration-accent" : ""}`}
-                onClick={() => handleTabSwitch(false)}
-                disabled={loading}
-              >
-                Register
-                {!isLogin && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 -translate-y-1/2 transform bg-accent"></span>
-                )}
-              </button>
-            </div>
-            <form onSubmit={handleSubmit}>
-              {error && <div className="mb-4 text-red-500">{error}</div>}
-              <div className="mb-4">
-                <label htmlFor="email" className="mb-2 block">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  className="w-full rounded-lg border border-border bg-secondary p-2"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={loading}
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="password" className="mb-2 block">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  className="w-full rounded-lg border border-border bg-secondary p-2"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={loading}
-                />
-              </div>
-              {!isLogin && (
-                <div className="mb-4">
-                  <label htmlFor="confirm-password" className="mb-2 block">
-                    Confirm Password
-                  </label>
-                  <input
-                    type="password"
-                    id="confirm-password"
-                    className="w-full rounded-lg border border-border bg-secondary p-2"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    disabled={loading}
-                  />
-                </div>
-              )}
-              <button
-                type="submit"
-                className="mt-4 w-full rounded-lg bg-accent p-2 text-text-contrast hover:bg-accent-hover"
-                disabled={loading}
-              >
-                {loading
-                  ? "Processing..."
-                  : isLogin
-                    ? "Login"
-                    : "Create Account"}
-              </button>
-              {isLogin && (
-                <>
-                  <div className="my-4 flex items-center">
-                    <hr className="flex-grow border-t border-border" />
-                    <span className="mx-4 text-gray-500">or</span>
-                    <hr className="flex-grow border-t border-border" />
-                  </div>
-                  <button
-                    type="button"
-                    className="hover:bg-secondary-hover w-full rounded-lg bg-accent p-2 text-text-contrast"
-                    onClick={() => handleLoginLink(email)}
-                    disabled={loading}
-                  >
-                    Send login link to email
-                  </button>
-                </>
-              )}
-            </form>
-          </div>
-        </div>
+    <div
+      className="mx-3 mb-4 mt-10 rounded-[4px] border-2 border-solid border-border bg-primary
+        px-8 py-6 text-text sm:mx-auto sm:max-w-[500px] sm:rounded-xl sm:px-12 sm:py-8
+        xxl:max-w-[600px] xxl:px-14 xxl:py-10"
+    >
+      <div className="mb-10 flex justify-center font-semibold">
+        <button
+          className={`relative px-8 py-2 text-lg xxl:text-2xl ${isLogin ? "decoration-accent" : ""}`}
+          onClick={() => handleTabSwitch(true)}
+          disabled={loading}
+        >
+          Login
+          {isLogin && (
+            <span
+              className="absolute bottom-0 left-0 right-0 h-0.5 -translate-y-1/2 transform bg-accent
+                xxl:h-1"
+            ></span>
+          )}
+        </button>
+        <button
+          className={`relative px-8 py-2 text-lg xxl:text-2xl ${!isLogin ? "decoration-accent" : ""}`}
+          onClick={() => handleTabSwitch(false)}
+          disabled={loading}
+        >
+          Register
+          {!isLogin && (
+            <span
+              className="absolute bottom-0 left-0 right-0 h-0.5 -translate-y-1/2 transform bg-accent
+                xxl:h-1"
+            ></span>
+          )}
+        </button>
       </div>
+      <form onSubmit={handleSubmit} className="xxl:text-xl">
+        {error && <div className="mb-4 text-red-500">{error}</div>}
+        <div className="mb-4">
+          <label htmlFor="email" className="mb-2 block">
+            Email
+          </label>
+          <input
+            type="email"
+            id="email"
+            className="w-full rounded-[4px] border border-border bg-secondary p-2 outline-none"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="password" className="mb-2 block">
+            Password
+          </label>
+          <input
+            type="password"
+            id="password"
+            className="w-full rounded-[4px] border border-border bg-secondary p-2 outline-none"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
+          />
+        </div>
+        {!isLogin && (
+          <div className="mb-4">
+            <label htmlFor="confirm-password" className="mb-2 block">
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              id="confirm-password"
+              className="w-full rounded-[4px] border border-border bg-secondary p-2 outline-none"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              disabled={loading}
+            />
+          </div>
+        )}
+        <button
+          type="submit"
+          className="mt-4 w-full rounded-[4px] bg-accent p-2 text-text-contrast hover:bg-accent-hover"
+          disabled={loading}
+        >
+          {loading ? "Processing..." : isLogin ? "Login" : "Create Account"}
+        </button>
+        {isLogin && (
+          <>
+            <div className="my-8 flex items-center">
+              <hr className="flex-grow border-t border-border" />
+              <span className="mx-4 text-text">OR</span>
+              <hr className="flex-grow border-t border-border" />
+            </div>
+            <button
+              type="button"
+              className="hover:bg-secondary-hover w-full rounded-[4px] bg-accent p-2 text-text-contrast"
+              onClick={() => handleLoginLink(email)}
+              disabled={loading}
+            >
+              Send login link to email
+            </button>
+          </>
+        )}
+      </form>
     </div>
   );
 };

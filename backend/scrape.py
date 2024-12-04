@@ -108,7 +108,7 @@ class WebScraper:
     def load_page(self, url, retries=5):
         for attempt in range(retries):
             try:
-                self.driver.get(url)
+                self.driver.get(str(url))
                 # Wait for the body element to be present
                 WebDriverWait(self.driver, 10).until(
                     EC.presence_of_element_located((By.TAG_NAME, "body"))

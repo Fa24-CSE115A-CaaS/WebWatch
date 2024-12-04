@@ -108,12 +108,15 @@ const CreateInput = () => {
   return (
     <div
       ref={containerRef}
-      className="mx-auto my-10 flex h-12 w-[800px] items-center rounded-full border-[1px]
-        border-border bg-primary pl-5 text-text xxl:h-16 xxl:border-2 xxl:text-xl"
+      className="mx-3 my-10 flex h-12 items-center rounded-full border-[1px] border-border
+        bg-primary text-text sm:mx-8 lg:mx-auto lg:w-[800px] xxl:h-16 xxl:border-2
+        xxl:text-xl"
     >
-      <IoSearch className="h-5 w-5 xxl:h-6 xxl:w-6" />
+      <div className="pl-5">
+        <IoSearch className="block h-5 w-5 flex-shrink-0 xxl:h-6 xxl:w-6" />
+      </div>
       <input
-        className="h-full flex-1 border-0 bg-transparent pl-5 text-text outline-none"
+        className="h-full flex-1 border-0 bg-transparent pl-3 text-text outline-none sm:pl-5"
         placeholder="Enter a website..."
         value={formState.url}
         onChange={(e) => setFormState({ ...formState, url: e.target.value })}
@@ -121,7 +124,7 @@ const CreateInput = () => {
       />
       <div className="relative flex items-center justify-center px-5 xxl:px-6">
         {open && (
-          <div className="absolute right-0 top-8 w-80 xxl:top-16 xxl:w-96">
+          <div className="absolute right-0 top-8 w-72 sm:w-80 xxl:top-16 xxl:w-96">
             <CreateInputDropdown
               formState={formState}
               setFormState={setFormState}
