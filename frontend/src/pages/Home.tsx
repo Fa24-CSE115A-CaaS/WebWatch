@@ -6,7 +6,7 @@ const Home = () => {
       className="flex min-h-screen flex-col items-center justify-start bg-primary p-4 text-center
         text-text"
     >
-      <header className="mb-8 mt-16">
+      <header className="mb-8 mt-4">
         <h1 className="mb-4 text-5xl font-bold text-accent">WebWatch</h1>
         <p className="text-xl text-text">
           Keep track of your favorite websites effortlessly
@@ -43,7 +43,7 @@ const Home = () => {
           <div className="flex justify-center space-x-4">
             <Link to="/auth/login">
               <button
-                className="mt-4 w-40 rounded-lg bg-accent px-10 py-2 text-text-contrast
+                className="mt-2 w-40 rounded-lg bg-accent px-10 py-2 text-text-contrast
                   hover:bg-accent-hover"
               >
                 Login
@@ -51,7 +51,7 @@ const Home = () => {
             </Link>
             <Link to="/auth/register">
               <button
-                className="mt-4 w-40 rounded-lg bg-accent px-10 py-2 text-text-contrast
+                className="mt-2 w-40 rounded-lg bg-accent px-10 py-2 text-text-contrast
                   hover:bg-accent-hover"
               >
                 Register

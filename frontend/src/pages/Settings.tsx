@@ -24,10 +24,11 @@ const Settings = () => {
     setActiveTab(tabId);
   };
 
-  let canSubmit = false;
+  let canSubmitEmail = false;
+  let canSubmitPassword = false;
 
   const handlePasswordResetSubmission = () => {
-    if (!canSubmit) {
+    if (!canSubmitPassword) {
       handlePasswordInputEvents();
       return;
     }
@@ -82,7 +83,7 @@ const Settings = () => {
         password_reset_password.classList.add("border-error");
         password_reset_confirm_password.classList.add("border-error");
         password_reset_error_message.innerText = message;
-        canSubmit = false;
+        canSubmitPassword = false;
       };
 
       if (
@@ -109,9 +110,65 @@ const Settings = () => {
         password_reset_password.classList.remove("border-error");
         password_reset_confirm_password.classList.remove("border-error");
         password_reset_error_message.innerText = "";
-        canSubmit = true;
+        canSubmitPassword = true;
       }
     }
+  };
+
+  const handleEmailChangeEvents = () => {
+    const email = document.querySelector(
+      'input[type="email"]',
+    ) as HTMLInputElement;
+    const email_error_message = document.getElementById(
+      "email-error-message",
+    ) as HTMLParagraphElement;
+    const status_changer_error = (message: string) => {
+      email.classList.add("border-error");
+      email_error_message.innerText = message;
+      canSubmitEmail = false;
+    };
+
+    if (!email.value.match(/^[A-Za-z0-9]+@[A-Za-z0-9]+\.[A-Za-z0-9]+$/)) {
+      status_changer_error("Invalid email address");
+    } else {
+      email.classList.remove("border-error");
+      email_error_message.innerText = "";
+      canSubmitEmail = true;
+    }
+  };
+
+  const handleEmailChangeSubmission = () => {
+    if (!canSubmitEmail) {
+      handleEmailChangeEvents();
+      return;
+    }
+    const email_error_message = document.getElementById(
+      "email-error-message",
+    ) as HTMLParagraphElement;
+    const new_email = (
+      document.querySelector('input[type="email"]') as HTMLInputElement
+    ).value;
+    axios
+      .post(
+        "/users/reset_email",
+        {
+          new_email: new_email,
+        },
+        {
+          headers: {
+            accept: "application/json",
+            Authorization: "Bearer " + localStorage.getItem("access_token"),
+          },
+        },
+      )
+      .then((response) => {
+        if (response.status === 200) {
+          email_error_message.innerText = "Email changed successfully";
+        }
+      })
+      .catch(() => {
+        email_error_message.innerText = "Email change failed";
+      });
   };
 
   const handleAccountDeletionSubmission = () => {
@@ -209,12 +266,25 @@ const Settings = () => {
                     </button>
                   </div>
                 </div> */}
+
             <form className="pb-4">
               <label className="mb-2 block xxl:text-lg">Email</label>
               <input
                 type="email"
                 className="mb-4 w-full rounded-lg border border-border bg-secondary p-2 outline-none"
+                onChange={handleEmailChangeEvents}
               />
+              <button
+                className="rounded-lg bg-accent p-2 px-16 text-text-contrast hover:bg-accent-hover"
+                type="button"
+                onClick={handleEmailChangeSubmission}
+              >
+                Change Email
+              </button>
+              <p id="email-error-message" className="text-error"></p>
+            </form>
+
+            <form className="pb-4">
               <h2 className="mb-6 mt-8 text-2xl font-semibold sm:text-[1.75rem]">
                 Reset Password
               </h2>
@@ -238,7 +308,7 @@ const Settings = () => {
                 type="button"
                 onClick={handlePasswordResetSubmission}
               >
-                Save
+                Reset Password
               </button>
             </form>
             <h2 className="mb-6 mt-8 text-2xl font-semibold sm:text-[1.75rem]">
