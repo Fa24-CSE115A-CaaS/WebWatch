@@ -124,7 +124,7 @@ const CreateInput = () => {
       />
       <div className="relative flex items-center justify-center px-5 xxl:px-6">
         {open && (
-          <div className="w-72 absolute right-0 top-8 sm:w-80 xxl:top-16 xxl:w-96">
+          <div className="absolute right-0 top-8 w-72 sm:w-80 xxl:top-16 xxl:w-96">
             <CreateInputDropdown
               formState={formState}
               setFormState={setFormState}

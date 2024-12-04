@@ -34,7 +34,7 @@ const NavBar = () => {
               </a>
               <a
                 href="/settings"
-                className={`xs:block hidden ${location.pathname == "/settings" && "text-accent"}`}
+                className={`hidden xs:block ${location.pathname == "/settings" && "text-accent"}`}
               >
                 Account
               </a>
