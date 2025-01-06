@@ -20,6 +20,8 @@ Our core functionality included four primary features, all of which we achieved 
 - User-friendly Interface: The task dashboard has an intuitive interface for basic task operations (creating, viewing, updating, and deleting tasks).
 ![WebWatch task_dropdown](https://github.com/user-attachments/assets/8a5aabcf-fab7-48d6-8ce0-fa69050773bb)
 
+![WebWatch discord_webhooks](https://github.com/user-attachments/assets/ca48aedf-e18d-473c-8644-da4b4ef83351)
+
 **It is best suited for publicly acessible websites that don't implement anti-botting mechanisms. For instance, [course offerings and registration status](https://pisa.ucsc.edu/class_search/), [parking permit availabilities](https://ucsc.aimsparking.com/permits/?cmd=new), portfolios, and job boards.**
 
 ## How We Built It
