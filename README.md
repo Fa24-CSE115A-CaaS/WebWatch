@@ -2,7 +2,7 @@
 ## Project Motivation and Team
 WebWatch was a project built for CSE115A: Introduction to Software Engineering at UC Santa Cruz in Fall 2024.
 
-Our team consists of Cameron Candau (Product Owner), Alex Kekchidis, Isaac To, Jordan Nguy, Leonardo Gallego, and Simon Zhao. 
+Our team consists of [Cameron Candau](https://github.com/Cam-Can-Do) (Product Owner), [Alex Kekchidis](https://github.com/akekchid), [Isaac To](https://github.com/Isaac-To), [Jordan Nguy](https://github.com/Jordan-Nguy), [Leonardo Gallego](https://github.com/leonardogs1), and [Simon Zhao](https://github.com/SimonZhao7). 
 
 The concept arose from our personal experiences in [obtaining parking permits at UCSC](https://ucsc.aimsparking.com/permits/?cmd=new).
 
@@ -11,22 +11,19 @@ The web often used for sharing time-sensitive opportunities which lack built-in 
 
 ## Our Solution
 WebWatch is a web application that enables users to monitor other webpages for changes.
+![WebWatch home](https://github.com/user-attachments/assets/972baa44-8798-428e-8855-ee3f200c329c)
 
 Our core functionality included four primary features, all of which we achieved by the end of the quarter:
 - A monitoring and notification system: Discord webhooks, Slack webhooks, and email (email notifications were implemented but archived due to budget constraints and the cost of SMTP services)
 - User account management: User registration, login, password reset, passwordless authentication via email, and account deletion
 - Site-Agnostic Web Scraping: Our web scraping and difference detection works with most web pages without requiring additional programming for each website
 - User-friendly Interface: The task dashboard has an intuitive interface for basic task operations (creating, viewing, updating, and deleting tasks).
+![WebWatch task_dropdown](https://github.com/user-attachments/assets/8a5aabcf-fab7-48d6-8ce0-fa69050773bb)
 
 **It is best suited for publicly acessible websites that don't implement anti-botting mechanisms. For instance, [course offerings and registration status](https://pisa.ucsc.edu/class_search/), [parking permit availabilities](https://ucsc.aimsparking.com/permits/?cmd=new), portfolios, and job boards.**
 
-## Demo
-**_Note: this demo uses [the realtime price of Bitcoin](https://www.coinbase.com/price/bitcoin) to demonstrate WebWatch's ability to detect and report on changes in the context of a predictable change. This is merely for technical demonstration purposes; in reality, it is more useful to monitor a page which changes at arbitrary times._**
-Video showing user authentication, task creation (including XPath selection for monitoring only a specific element on a page), and recieving notification via Discord webhooks:
-![Demo Video](https://drive.google.com/file/d/1bZ3CmmkJSJ5Da76m4LpAfaJwoiR2DGOv/view?usp=drive_link)
-
 ## How We Built It
-![Diagram showing WebWatch architecture](https://drive.google.com/file/d/1s9W94Jj1ixv6dbfXI_0fG3ZCMUasEcj5/view?usp=drive_link)
+![Diagram showing WebWatch architecture](https://github.com/user-attachments/assets/14b81beb-2126-43d7-ab46-1bd5ba049709)
 
 ### Backend
 We used Python with [FastAPI](https://fastapi.tiangolo.com/) to build our backend REST API, [SQLite](https://www.sqlite.org/index.html) as our temporary database, and [SQLModel](https://sqlmodel.tiangolo.com/) as our ORM to interact with the database. 
